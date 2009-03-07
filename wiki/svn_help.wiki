@@ -11,7 +11,7 @@ Quelques commandes en vrac svn
 
    * {{{svn status}}} : regarde si les fichiers sont sur le serveur 
 
-   * {{{svn rm --force LIF7}}} : supprime le répertoire LIF7 
+   * {{{svn rm --force LIF12}}} : supprime le répertoire LIF12 
 
    * {{{svn commit -m "commentaire"}}} : met à jour le serveur 
 
@@ -19,9 +19,9 @@ Quelques commandes en vrac svn
 
    * {{{svn update}}} : met à jours les fichiers locaux 
 
-   * {{{svn add Table.h}}} : ajoute Table.h sur le net
+   * {{{svn add socket.h}}} : ajoute socket.h sur le net
 
-   * {{{bg}}} : si on a oublié de mettre & (par ex 'scite Table.h' ctrl-Z puis bg)
+   * {{{bg}}} : si on a oublié de mettre & (par ex 'scite socket.h' ctrl-Z puis bg)
 
    * {{{history}}}
 
@@ -33,11 +33,11 @@ tous ce qui est en _italique_ est a remplacer
 ===pour se connecter===
 ----
 
-   * {{{svn checkout https://lifesevenpoker.googlecode.com/svn/trunk/ lifesevenpoker --username }}}_tonidgoogle_
+   * {{{svn checkout https://lif12p2p.googlecode.com/svn/trunk/ lif12p2p --username }}}_tonidgoogle_
 
    * tu tape ton mot de passe (si demandé)
 
-   * {{{cd lifesevenpoker}}}
+   * {{{cd lif12p2p}}}
 
 ===envoyer fichiers===
 ----
@@ -49,6 +49,10 @@ tous ce qui est en _italique_ est a remplacer
 ===récupèrez fichiers===
 ----
 
-   * {{{svn update }}}  : récupère les fichiers qui sont sur le serveur (ca met dans ~/lifesevenpoker/ )
+   * {{{svn update }}}  : récupère les fichiers qui sont sur le serveur (ça met dans ~/lif12p2p/ )
 
 ----
+----
+===Crédits===
+
+Adapté du Wiki du projet lif7 [http://code.google.com/p/lifesevenpoker/ "Life Seven Poker"] par bengrunt.
