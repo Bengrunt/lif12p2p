@@ -12,6 +12,9 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
+					<Add option="-pedantic" />
+					<Add option="-Wall" />
+					<Add option="-ansi" />
 					<Add option="-g" />
 				</Compiler>
 			</Target>
@@ -22,6 +25,10 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-O2" />
+					<Add option="-pedantic" />
+					<Add option="-Wall" />
+					<Add option="-ansi" />
+					<Add option="-g" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -29,12 +36,19 @@
 			</Target>
 		</Build>
 		<Compiler>
+			<Add option="-pedantic" />
 			<Add option="-Wall" />
+			<Add option="-ansi" />
+			<Add option="-g" />
 		</Compiler>
 		<Unit filename="socket.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="socket.h" />
+		<Unit filename="socket_trial.c">
+			<Option compilerVar="CC" />
+			<Option target="Debug" />
+		</Unit>
 		<Extensions>
 			<code_completion />
 			<debugger />
