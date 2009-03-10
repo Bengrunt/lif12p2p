@@ -1,5 +1,5 @@
 /**
- * @file: socket_trial.c
+ * @file: socket_trial_client.c
  * @project: lif12p2p
  * @author: Benjamin GUILLON, base sur le travail de Jim FROST (http://world.std.com/~jimf/papers/sockets/sockets.html).
  * @since: 9/03/2009
@@ -44,7 +44,7 @@ int write_data(int s, char *buf, int n);
 /* Programme principal */
 int main()
 {
-    int s, t;
+    int s;
 
     if ((s= establish(PORTNUM)) < 0)
     {
@@ -55,37 +55,7 @@ int main()
 
     signal(SIGCHLD, fireman); /* this eliminates zombies */
 
-    for (;;)
-    {
-        /* loop for phone calls */
-        if ((t= get_connection(s)) < 0)
-        {
-            /* get a connection */
-            if (errno == EINTR) /* EINTR might happen on accept(), */
-                continue; /* try again */
-            perror("accept"); /* bad */
-            exit(1);
-        }
-
-        switch(fork())
-        {
-            /* try to handle connection */
-            case -1 :           /* bad news. scream and die */
-                perror("fork");
-                close(s);
-                close(t);
-                exit(1);
-
-            case 0 :            /* we're the child, do something */
-                close(s);
-                do_something(t);
-                exit(0);
-
-            default :           /* we're the parent so look for another connection */
-                close(t);
-                continue;
-        }
-    }
+    do_something_as_sender(s);
 
     return 0;
 }
@@ -96,29 +66,6 @@ void fireman(int i)
 {
     while (waitpid(-1, NULL, WNOHANG) > 0) ;
 
-}
-
-
-void do_something(int s)
-{
-    int choix;
-    printf("Tapez 1 pour recevoir ou 2 pour envoyer. 0 pour quitter.\n");
-    scanf("%d",&choix);
-
-    switch(choix)
-    {
-        case 1 :
-            do_something_as_receiver(s);
-            break;
-
-        case 2 :
-            do_something_as_sender(s);
-            break;
-
-        default :
-            printf("Bye bye!\n");
-            exit(1);
-    }
 }
 
 
@@ -280,4 +227,5 @@ int write_data(int s, /* connected socket */ char *buf, /* pointer to the buffer
 /**
  * Fin du fichier
  */
+
 
