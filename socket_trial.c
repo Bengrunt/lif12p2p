@@ -26,7 +26,7 @@
 
 
 /* Definition des constantes */
-#define PORTNUM 50000 /* random port number, we need something */
+#define PORTNUM 50001 /* random port number, we need something */
 #define MAXHOSTNAME 25 /* max length for hostnames */
 
 /* Declaration des fonctions */
@@ -67,24 +67,25 @@ int main()
             exit(1);
         }
 
-        switch(fork())
+        do_something_as_receiver(t);
+/*        switch(fork())
         {
-            /* try to handle connection */
-            case -1 :           /* bad news. scream and die */
+            /* try to handle connection
+            case -1 :           /* bad news. scream and die
                 perror("fork");
                 close(s);
                 close(t);
                 exit(1);
 
-            case 0 :            /* we're the child, do something */
+            case 0 :            /* we're the child, do something
                 close(s);
                 do_something(t);
                 exit(0);
 
-            default :           /* we're the parent so look for another connection */
+            default :           /* we're the parent so look for another connection
                 close(t);
                 continue;
-        }
+        } */
     }
 
     return 0;
@@ -205,6 +206,7 @@ int get_connection(int s)
     if ((t = accept(s,NULL,NULL)) < 0) /* accept connection if there is one */
         return(-1);
 
+    fprintf(stderr, "conexion \n");
     return(t);
 }
 
@@ -248,19 +250,38 @@ int read_data(int s, /* connected socket */ char *buf, /* pointer to the buffer 
 
     bcount= 0;
     br= 0;
+    char buff[100];
+    int res;
 
-    while (bcount < n)
-    {
-        /* loop until full buffer */
-        if ((br= read(s,buf,n-bcount)) > 0)
-        {
-            bcount += br; /* increment byte counter */
-            buf += br; /* move buffer ptr for next read */
+    fprintf(stderr, "ja passe par ici\n");
+    while(1) {
+        res = recv(s, buff, 100, 0);
+        if (res < 0) {
+            perror("prob de recep.");
         }
-        else if (br < 0) /* signal an error to the caller */
-            return(-1);
+        fprintf(stdin, "reçut : %s \n", buff);
     }
 
+/*
+    fprintf(stderr, "ja passe par ici\n");
+    while (bcount < n)
+
+    {
+        /* loop until full buffer
+        fprintf(stderr, "ja passe par ici1\n");
+        if ((br= read(s,buf,n-bcount)) > 0)
+        {
+            bcount += br; /* increment byte counter
+            buf += br; /* move buffer ptr for next read
+            printf(stderr, "recu %s\n", buf);
+        }
+        else if (br < 0) /* signal an error to the caller
+        {
+            perror("probleme de reception");
+            return(-1);
+        }
+    }
+*/
     return(bcount);
 }
 
