@@ -14,7 +14,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-// Une partie nécessaire pour utiliser les sockets sous linux et windows
+/* Une partie nécessaire pour utiliser les sockets sous linux et windows */
 #if defined (WIN32)
     #include <winsock2.h>
 #elif defined (linux)
@@ -113,7 +113,7 @@ typedef struct BddServeurs
 */
 typedef struct BddClients
 {
-	
+
 }BddClients;
 /**
 * @note: gère la liste des clients en contact avec l'annuaire.
@@ -127,7 +127,7 @@ typedef struct BddClients
 ***********************************/
 
 void initialisationAnnuaire();
-/** 
+/**
 * @note: procédure d'initialisation de l'annuaire :  les listes de clients, de serveurs, de fichiers.
 * @param:
 * @param:

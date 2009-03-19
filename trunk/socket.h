@@ -1,10 +1,20 @@
+/**
+ * @file: socket.h
+ * @project: lif12p2p
+ * @author: Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
+ * @since: 19/03/2009
+ * @version: 19/03/2009
+ */
+
+#ifndef SOCKET_H
+#define SOCKET_H
 
 #include <error.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-// Une partie nécessaire pour utiliser les sockets sous linux et windows
+/* Une partie nécessaire pour utiliser les sockets sous linux et windows */
 
 #if defined (WIN32)
     #include <winsock2.h>
@@ -82,3 +92,7 @@ void clotureSocket(Socket s);
 *
 */
 
+#endif
+/*******************
+* Fin de fichier
+*******************/
