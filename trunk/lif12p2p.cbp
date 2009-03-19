@@ -41,14 +41,8 @@
 			<Add option="-ansi" />
 			<Add option="-g" />
 		</Compiler>
-		<Unit filename="socket.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="socket.h" />
-		<Unit filename="socket_trial.c">
-			<Option compilerVar="CC" />
-			<Option target="Debug" />
-		</Unit>
+		<Unit filename="annuaire.h" />
+		<Unit filename="client_serveur.h" />
 		<Extensions>
 			<code_completion />
 			<debugger />
