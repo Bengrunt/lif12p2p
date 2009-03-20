@@ -1,7 +1,7 @@
 /**
  * @file: socket.h
  * @project: lif12p2p
- * @author: Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
+ * @author: RÃ©mi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
  * @since: 19/03/2009
  * @version: 20/03/2009
  */
@@ -14,7 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-/* Une partie nécessaire pour utiliser les sockets sous linux et windows */
+/* Une partie nÃ©cessaire pour utiliser les sockets sous linux et windows */
 
 /*#if defined (WIN32)*/
 /*    #include <winsock2.h>*/
@@ -31,63 +31,62 @@ typedef struct sockaddr_in SOCKADDR_IN;
 typedef struct sockaddr SOCKADDR;
 
 /**
-* @note: un "serveur" doit exécuter creationSocket, definitionSocket puis acceptationSocket
-* @note: un "client" doit exécuter creationSocket puis demande de connexion
+* @note: un "serveur" doit exÃ©cuter creationSocket, definitionSocket puis acceptationSocket
+* @note: un "client" doit exÃ©cuter creationSocket puis demande de connexion
 * @note: pour communiquer, les deux utilisent ecouteSocket et ecritureSocket
-* @note: enfin, toute socket doit etre fermée avec fermetureSocket
+* @note: enfin, toute socket doit etre fermÃ©e avec fermetureSocket
 */
 
 Socket creationSocket();
 /**
-* @note: procédure de création d'une socket
-* @param: la socket créée est retournée comme valeur de retour
+* @note: procÃ©dure de crÃ©ation d'une socket
+* @param: la socket crÃ©Ã©e est retournÃ©e comme valeur de retour
 * @param:
 *
 */
 
-void definitionNomSocket(Socket s); /* on pourra rajouter le port en parametre */
+void definitionNomSocket(Socket s, int port);
 /**
-* @note: procédure de définition de nom d'une socket
-* @param: la socket passée en parametre est affectée à un port
-* @param: et mise en mode écoute
-*
+* @note: procÃ©dure de dÃ©finition de nom d'une socket.
+* @param: s : socket que l'on va lier Ã  un numÃ©ro de port.
+* @param: port : numÃ©ro de port auquel on va lier la socket s.
 */
 
 Socket acceptationConnexion(Socket s);
 /**
-* @note: procédure d'acceptation d'une connexion
-* @param: la socket créée lors de l'acceptation de la connexion est
-* @param: renvoyée comme valeur de retour
+* @note: procÃ©dure d'acceptation d'une connexion
+* @param: la socket crÃ©Ã©e lors de l'acceptation de la connexion est
+* @param: renvoyÃ©e comme valeur de retour
 *
 */
 
 void demandeConnexionSocket(Socket s); /* On pourra passer le nom et le port du serveur en parametre */
 /**
-* @note: procédure de demande de connexion
-* @param: la socket passée en parametre essai de se connecter à
-* @param: une socket distante (nom d'hote et numéro de port en variable globale)
+* @note: procÃ©dure de demande de connexion
+* @param: la socket passÃ©e en parametre essai de se connecter Ã 
+* @param: une socket distante (nom d'hote et numÃ©ro de port en variable globale)
 *
 */
 
 void ecouteSocket(Socket s);
 /**
-* @note: procédure qui écoute une socket
-* @param: tout message arrivant sur la socket passée en parametre est
-* @param: affiché à l'écran
+* @note: procÃ©dure qui Ã©coute une socket
+* @param: tout message arrivant sur la socket passÃ©e en parametre est
+* @param: affichÃ© Ã  l'Ã©cran
 *
 */
 
 void ecritureSocket(Socket s); /* ici, le message est lu au clavier, on pourra le passer en parametre */
 /**
-* @note: procédure d'envoi de message
-* @param: tout message tapé au clavier (suivi de la touche "entrée" est
-* @param: envoyé à travers la socket passée en parametre
+* @note: procÃ©dure d'envoi de message
+* @param: tout message tapÃ© au clavier (suivi de la touche "entrÃ©e" est
+* @param: envoyÃ© Ã  travers la socket passÃ©e en parametre
 *
 */
 
 void clotureSocket(Socket s);
 /**
-* @note: procédure de fermeture d'une socket
+* @note: procÃ©dure de fermeture d'une socket
 * @param:
 *
 */

@@ -1,7 +1,7 @@
 /**
  * @file: annuaire.h
  * @project: lif12p2p
- * @author: Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
+ * @author: RÃ©mi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
  * @since: 16/03/2009
  * @version: 20/03/2009
  */
@@ -16,7 +16,7 @@
 #include <stdlib.h>
 #include <unistd.h>*/
 
-/* Une partie nécessaire pour utiliser les sockets sous linux et windows */
+/* Une partie nÃ©cessaire pour utiliser les sockets sous linux et windows */
 /*#if defined (WIN32)
     #include <winsock2.h>
 #elif defined (linux)
@@ -28,11 +28,11 @@
 #endif
 */
 /******************************************
-* Structures de données
+* Structures de donnÃ©es
 ******************************************/
 
 /**
-* Gestion de la base de données des fichiers.
+* Gestion de la base de donnÃ©es des fichiers.
 */
 
 typedef struct Serveur
@@ -41,8 +41,8 @@ typedef struct Serveur
 	struct Serveur* serveurSuivant;
 }Serveur;
 /**
-* @note: Structure "cellule" stockant le numéro du serveur possédant un bloc.
-* @param: numServeur : numéro du serveur dans BddServeur.
+* @note: Structure "cellule" stockant le numÃ©ro du serveur possÃ©dant un bloc.
+* @param: numServeur : numÃ©ro du serveur dans BddServeur.
 * @param: serveurSuivant : pointeur sur le serveur suivant dans la liste des serveurs.
 */
 
@@ -51,8 +51,8 @@ typedef struct Bloc
 	struct Serveur* listeServeurs;
 }Bloc;
 /**
-* @note: structure stockant la liste des serveurs possédant le bloc.
-* @param: listeServeurs : liste chainée de structures Serveur.
+* @note: structure stockant la liste des serveurs possÃ©dant le bloc.
+* @param: listeServeurs : liste chainÃ©e de structures Serveur.
 */
 
 typedef struct Fichier
@@ -76,15 +76,15 @@ typedef struct BddFichiers
 	Fichier* listeFichiers;
 }BddFichiers;
 /**
-* @note: gère la liste des fichiers référencés par l'annuaire.
-* @param: nbFichiers : nombre de fichiers  référencés.
-* @param: listeFichiers : liste chainée de structures Fichier.
+* @note: gÃ¨re la liste des fichiers rÃ©fÃ©rencÃ©s par l'annuaire.
+* @param: nbFichiers : nombre de fichiers  rÃ©fÃ©rencÃ©s.
+* @param: listeFichiers : liste chainÃ©e de structures Fichier.
 */
 
 
 
 /**
-* Gestion de la base de donnée des serveurs.
+* Gestion de la base de donnÃ©e des serveurs.
 */
 typedef struct InfoServeurs
 {
@@ -93,7 +93,7 @@ typedef struct InfoServeurs
 }InfoServeurs;
 /**
 * @note: structure stockant les informations sur les serveurs.
-* @param: numPort : numéro de port du serveur.
+* @param: numPort : numÃ©ro de port du serveur.
 * @param: adresseServeur : adresse du serveur (IP ou hostname)
 */
 
@@ -104,42 +104,40 @@ typedef struct BddServeurs
 	InfoServeurs** tabServeurs;
 }BddServeurs;
 /**
-* @note: gère la liste des serveurs en contact avec l'annuaire.
-* @param: nbServeurs : nombre de serveurs référencés dans la liste.
-* @param: tabServeurs : tableau de pointeurs sur des structures de type InfoServeurs stockant les informations des serveurs référencés.
+* @note: gÃ¨re la liste des serveurs en contact avec l'annuaire.
+* @param: nbServeurs : nombre de serveurs rÃ©fÃ©rencÃ©s dans la liste.
+* @param: tabServeurs : tableau de pointeurs sur des structures de type InfoServeurs stockant les informations des serveurs rÃ©fÃ©rencÃ©s.
 */
 
 
 
 /**
-* Gestion de la base de donnée des clients. (FACULTATIF POUR L'INSTANT)
+* Gestion de la base de donnÃ©e des clients. (FACULTATIF POUR L'INSTANT)
 */
 typedef struct BddClients
 {
+    int none;
     /* PAS ENCORE UTILISE */
 }BddClients;
 /**
-* @note: gère la liste des clients en contact avec l'annuaire.
+* @note: gÃ¨re la liste des clients en contact avec l'annuaire.
 */
 
 
 
 
 /***********************************
-* Fonctions et procédures
+* Fonctions et procÃ©dures
 ***********************************/
 
 void initialisationAnnuaire();
 /**
-* @note: procédure d'initialisation de l'annuaire :  les listes de clients, de serveurs, de fichiers.
-* @param:
-* @param:
-*
+* @note: procÃ©dure d'initialisation de l'annuaire :  les listes de clients, de serveurs, de fichiers.
 */
 
 Socket initialiseSocketEcouteAnnuaire();
 /**
-* @note: fonction d'initialisation de la socket d'écoute de l'annuaire.
+* @note: fonction d'initialisation de la socket d'Ã©coute de l'annuaire.
 * @param:
 * @param:
 *
@@ -168,21 +166,20 @@ void traiteBlocDisponibleServeur();
 
 void traiteArretServeur();
 /**
-* @note: traitement d'un message de type arrêt de serveur.
+* @note: traitement d'un message de type arrÃªt de serveur.
 * @param:
 */
 
 
 void analyseMessage();
 /**
-* @note: analyse un message reçu par l'annuaire et lance le traitement adéquat.
+* @note: analyse un message reÃ§u par l'annuaire et lance le traitement adÃ©quat.
 * @param:
 */
 
 void fermetureAnnuaire();
 /**
-* @note: procédure de fermeture de l'annuaire de façon propre.
-* @param:
+* @note: procÃ©dure de fermeture de l'annuaire de faÃ§on propre.
 */
 
 
