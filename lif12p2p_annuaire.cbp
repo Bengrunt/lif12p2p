@@ -40,6 +40,9 @@
 			<Add option="-ansi" />
 			<Add option="-g" />
 		</Compiler>
+		<Unit filename="annuaire.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="annuaire.h" />
 		<Unit filename="socket.c">
 			<Option compilerVar="CC" />

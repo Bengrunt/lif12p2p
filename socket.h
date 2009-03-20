@@ -3,7 +3,7 @@
  * @project: lif12p2p
  * @author: Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
  * @since: 19/03/2009
- * @version: 19/03/2009
+ * @version: 20/03/2009
  */
 
 #ifndef SOCKET_H
@@ -16,15 +16,15 @@
 #include <unistd.h>
 /* Une partie nécessaire pour utiliser les sockets sous linux et windows */
 
-#if defined (WIN32)
-    #include <winsock2.h>
-#elif defined (linux)
+/*#if defined (WIN32)*/
+/*    #include <winsock2.h>*/
+/*#elif defined (linux)*/
     #include <sys/types.h>
     #include <sys/socket.h>
     #include <netinet/in.h>
     #include <arpa/inet.h>
     #include <netdb.h>
-#endif
+/*#endif*/
 
 typedef int Socket;
 typedef struct sockaddr_in SOCKADDR_IN;
@@ -91,6 +91,7 @@ void clotureSocket(Socket s);
 * @param:
 *
 */
+
 
 #endif
 /*******************

@@ -3,20 +3,22 @@
  * @project: lif12p2p
  * @author: Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
  * @since: 16/03/2009
- * @version: 18/03/2009
+ * @version: 20/03/2009
  */
 
 #ifndef CLIENT_SERVEUR_H
 #define CLIENT_SERVEUR_H
 
-#include <error.h>
+#include "socket.h"
+
+/*#include <error.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
+#include <unistd.h>*/
 
-// Une partie nécessaire pour utiliser les sockets sous linux et windows
-#if defined (WIN32)
+/* Une partie nécessaire pour utiliser les sockets sous linux et windows*/
+/*#if defined (WIN32)
     #include <winsock2.h>
 #elif defined (linux)
     #include <sys/types.h>
@@ -25,11 +27,11 @@
     #include <arpa/inet.h>
     #include <netdb.h>
 #endif
+*/
 
 /******************************************
 * Structures de données
 ******************************************/
-typedef int Socket;
 
 /**
 * Gestion de la file d'attente des clients côté serveur.
@@ -76,8 +78,8 @@ typedef struct Telechargement
 }Telechargement;
 /**
 * @note: structure stockant les informations nécéssaires pour le téléchargement d'un bloc.
-* @param: 
-* @param: 
+* @param:
+* @param:
 */
 
 typedef struct FileAttenteTelechargements
@@ -93,7 +95,7 @@ typedef struct FileAttenteTelechargements
 * @param: dernierTelechargement : pointeur sur structure Telechargement correspondant au dernier téléchargement de la file.
 */
 
-typedef struct Fichier;
+typedef struct Fichier
 {
 	int nbBlocs;
 	char* nomFichier;
@@ -110,14 +112,14 @@ typedef struct Fichier;
 * @param: fichierSuivant : pointeur sur le fichier suivant dans la liste.
 */
 
-typedef ListeFichiers
+typedef struct ListeFichiers
 {
 	int nbFichiers;
 	Fichier* listeFichiers;
 }ListeFichiers;
 /**
 * @note: liste des fichiers en cours de téléchargement.
-* @param: nbFichiers : nombre de fichiers. 
+* @param: nbFichiers : nombre de fichiers.
 * @param: listeFichiers : liste chainée de fichiers.
 */
 

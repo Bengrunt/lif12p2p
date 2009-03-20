@@ -3,19 +3,21 @@
  * @project: lif12p2p
  * @author: Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
  * @since: 16/03/2009
- * @version: 18/03/2009
+ * @version: 20/03/2009
  */
 
 #ifndef ANNUAIRE_H
 #define ANNUAIRE_H
-#include <error.h>
+#include "socket.h"
+
+/*#include <error.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
+#include <unistd.h>*/
 
 /* Une partie nécessaire pour utiliser les sockets sous linux et windows */
-#if defined (WIN32)
+/*#if defined (WIN32)
     #include <winsock2.h>
 #elif defined (linux)
     #include <sys/types.h>
@@ -24,11 +26,10 @@
     #include <arpa/inet.h>
     #include <netdb.h>
 #endif
-
+*/
 /******************************************
 * Structures de données
 ******************************************/
-typedef int Socket;
 
 /**
 * Gestion de la base de données des fichiers.
@@ -89,7 +90,7 @@ typedef struct InfoServeurs
 {
 	int numPort;
 	char* adresseServeur;
-}Fichier;
+}InfoServeurs;
 /**
 * @note: structure stockant les informations sur les serveurs.
 * @param: numPort : numéro de port du serveur.
@@ -100,10 +101,12 @@ typedef struct InfoServeurs
 typedef struct BddServeurs
 {
 	int nbServeurs;
-	InfoServeur** tabServeurs;
+	InfoServeurs** tabServeurs;
 }BddServeurs;
 /**
 * @note: gère la liste des serveurs en contact avec l'annuaire.
+* @param: nbServeurs : nombre de serveurs référencés dans la liste.
+* @param: tabServeurs : tableau de pointeurs sur des structures de type InfoServeurs stockant les informations des serveurs référencés.
 */
 
 
@@ -113,7 +116,7 @@ typedef struct BddServeurs
 */
 typedef struct BddClients
 {
-
+    /* PAS ENCORE UTILISE */
 }BddClients;
 /**
 * @note: gère la liste des clients en contact avec l'annuaire.

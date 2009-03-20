@@ -129,7 +129,7 @@ void demandeConnexionSocket(Socket s) /* On pourra passer le nom et le port du s
     /* Definition de l'adresse du serveur */
     sin.sin_family = AF_INET;
     sin.sin_port = htons(PORT_SERVEUR); /* htons sert à transformer l'entier en entier 16bits */
-    memcpy(&sin.sin_addr, hp->h_addr, hp->h_length); /* On copie le résultat de gethostbyname */
+    memcpy(&sin.sin_addr, hp->h_addr_list[0], hp->h_length); /* On copie le résultat de gethostbyname */
                                                    /* au bon endroit */
     /* Si on connait l'addresse IP On peut aussi utiliser */
     /* sin.sin_addr.s_addr = inet_addr("127.0.0.1"); */
