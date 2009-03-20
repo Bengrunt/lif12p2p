@@ -1,7 +1,7 @@
 /**
  * @file: socket.c
  * @project: lif12p2p
- * @author: Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
+ * @author: RÃ©mi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
  * @since: 19/03/2009
  * @version: 19/03/2009
  */
@@ -18,7 +18,7 @@
 Socket creationSocket()
 {
     #if defined (WIN32)
-    /* Ceci est du code spécifique à windows */
+    /* Ceci est du code spÃ©cifique Ã  windows */
         WSADATA WSAData;
         int erreur = WSAStartup(MAKEWORD(2,0), &WSAData);
         if (erreur)
@@ -28,18 +28,18 @@ Socket creationSocket()
         }
     #endif
 
-    Socket s; /* La socket à créer */
+    Socket s; /* La socket Ã  crÃ©er */
 
     /* ######################################################
     // (1) Creation du socket (1)
-    // celui-ci commence par créer un socket de connexion (que nous appellerons s)
+    // celui-ci commence par crÃ©er un socket de connexion (que nous appellerons s)
     // #####################################################*/
     s = socket(AF_INET, SOCK_STREAM, 0); /* AF_INET pour IPv4 */
                                        /* SOCK_STREAM signifie TCP,*/
-                                       /* 0 il n'y a pas de protocole à choisir */
+                                       /* 0 il n'y a pas de protocole Ã  choisir */
     if (s == INVALID_SOCKET)
     {
-        perror("Erreur à la creation du socket");
+        perror("Erreur Ã  la creation du socket");
         exit(1);
     }
     printf ("Le socket %d est maintenant ouverte en mode TCP/IP\n", s);
@@ -47,23 +47,23 @@ Socket creationSocket()
     return s;
 }
 
-void definitionNomSocket(Socket s) /* on pourra rajouter le port en parametre */
+void definitionNomSocket(Socket s, int port) /* on pourra rajouter le port en parametre */
 {
     int sock_err; /* Une variable pour stocker les erreurs */
     SOCKADDR_IN sin; /* La structure de description d'adresse */
-                   /* Elle dépend du réseau que nous allons utilisé */
+                   /* Elle dÃ©pend du rÃ©seau que nous allons utilisÃ© */
                    /* SOCKADDR_IN = Internet IPV4 */
                    /* SOCKADDR_IN6 = Internet IPV6 */
                    /* SOCKADDR_atalk = apple talk */
 
     /* ######################################################
-    // (2.1) Définition d'un nom externe
-    // Pour être atteind, le socket doit avoir un nom (couple adresse/port)
+    // (2.1) DÃ©finition d'un nom externe
+    // Pour Ãªtre atteind, le socket doit avoir un nom (couple adresse/port)
     // #####################################################*/
     sin.sin_family         = AF_INET;              /* IPv4 */
-    sin.sin_port           = htons (PORT_SERVEUR);       /* Le port d'écoute */
+    sin.sin_port           = htons (port);       /* Le port d'Ã©coute */
     sin.sin_addr.s_addr    = htonl (INADDR_ANY);   /* Si la machine a plusieurs adresses */
-                                                 /* on les écoute toutes */
+                                                 /* on les Ã©coute toutes */
                                                  /* Voir le code du client pour d'autre forme */
     sock_err = bind (s, (SOCKADDR *) &sin, sizeof(sin));
     if (sock_err < 0)
@@ -73,7 +73,7 @@ void definitionNomSocket(Socket s) /* on pourra rajouter le port en parametre */
         exit(1);
     }
 
-    printf ("Le socket %d est maintenant en attente sur le port %u\n", s, PORT_SERVEUR);
+    printf ("Le socket %d est maintenant en attente sur le port %u\n", s, port);
 
     /* ######################################################
     // (2.2) Attente de connexion
@@ -86,7 +86,7 @@ void definitionNomSocket(Socket s) /* on pourra rajouter le port en parametre */
         close(s);
         exit(1);
     }
-    /* listen ne bloque pas, à partir de la 5 demande de conexion peuvent arriver */
+    /* listen ne bloque pas, Ã  partir de la 5 demande de conexion peuvent arriver */
     /* sans que le serveur les accepte ou les rejette */
 }
 
@@ -94,7 +94,7 @@ Socket acceptationConnexion(Socket s)
 {
     /* ######################################################
     // (4) Acceptation d'une connexion
-    // Le serveur accepte l'une des demande arrivée depuis le listen ou
+    // Le serveur accepte l'une des demande arrivÃ©e depuis le listen ou
     // attend s'il n'y en a pas
     // #####################################################*/
     Socket t;
@@ -103,8 +103,8 @@ Socket acceptationConnexion(Socket s)
 
     t = accept (s, (SOCKADDR *) &tadr, &recsize); /*s : la socket d'attente */
                                                 /*tadr : la structure ou on va stocker les info sur le client */
-                                                /*recsize : donnée = la taille de tadr (pour éviter le dépassement) */
-                                                /*          resultat = la taille de ce qui est réellement mis dans tadr */
+                                                /*recsize : donnÃ©e = la taille de tadr (pour Ã©viter le dÃ©passement) */
+                                                /*          resultat = la taille de ce qui est rÃ©ellement mis dans tadr */
 
     printf("Connection de %s sur le port %d\n", inet_ntoa (tadr.sin_addr), htons(tadr.sin_port));
     return t;
@@ -112,31 +112,31 @@ Socket acceptationConnexion(Socket s)
 
 void demandeConnexionSocket(Socket s) /* On pourra passer le nom et le port du serveur en parametre */
 {
-    struct hostent *hp; /* Pour obtenir l'adresse du serveur à partir de son nom */
+    struct hostent *hp; /* Pour obtenir l'adresse du serveur Ã  partir de son nom */
     SOCKADDR_IN sin; /* La structure de description d'adresse */
-                   /* Elle dépend du réseau que nous allons utilisé */
+                   /* Elle dÃ©pend du rÃ©seau que nous allons utilisÃ© */
                    /* SOCKADDR_IN = Internet IPV4 */
                    /* SOCKADDR_IN6 = Internet IPV6 */
                    /* SOCKADDR_atalk = apple talk */
 
     /* ######################################################
-    // (3) Préparation de la connexion
-    // ensuite il faut retrouver l'adresse IP de l'hôte (ordinateur) hébergeant
-    // le serveur à l'aide de la fonction gethostbyname()
+    // (3) PrÃ©paration de la connexion
+    // ensuite il faut retrouver l'adresse IP de l'hÃ´te (ordinateur) hÃ©bergeant
+    // le serveur Ã  l'aide de la fonction gethostbyname()
     // #####################################################*/
     hp = gethostbyname(NOM_SERVEUR); /* Pour le test c'est "localhost" */
 
     /* Definition de l'adresse du serveur */
     sin.sin_family = AF_INET;
-    sin.sin_port = htons(PORT_SERVEUR); /* htons sert à transformer l'entier en entier 16bits */
-    memcpy(&sin.sin_addr, hp->h_addr_list[0], hp->h_length); /* On copie le résultat de gethostbyname */
+    sin.sin_port = htons(PORT_SERVEUR); /* htons sert Ã  transformer l'entier en entier 16bits */
+    memcpy(&sin.sin_addr, hp->h_addr_list[0], hp->h_length); /* On copie le rÃ©sultat de gethostbyname */
                                                    /* au bon endroit */
     /* Si on connait l'addresse IP On peut aussi utiliser */
     /* sin.sin_addr.s_addr = inet_addr("127.0.0.1"); */
 
     /* ######################################################
     // (4) Demande de connexion
-    //  enfin, établir la connexion par la fonction connect()
+    //  enfin, Ã©tablir la connexion par la fonction connect()
     // #####################################################*/
 
     if(connect(s, (SOCKADDR *)&sin, sizeof(sin)) <0)
@@ -144,8 +144,8 @@ void demandeConnexionSocket(Socket s) /* On pourra passer le nom et le port du s
         perror("connect");
         exit(1);
     }
-    printf("Connection à %s sur le port %d\n", inet_ntoa (sin.sin_addr), htons(sin.sin_port));
-    printf("envoie de données sur le socket %d\n ",s);
+    printf("Connection Ã  %s sur le port %d\n", inet_ntoa (sin.sin_addr), htons(sin.sin_port));
+    printf("envoie de donnÃ©es sur le socket %d\n ",s);
 }
 
 void ecouteSocket(Socket s)
@@ -158,7 +158,7 @@ void ecouteSocket(Socket s)
         nbo = recv(s, buff, TAILLE_BUFF, 0);
         if (nbo < 0)
         {
-            perror("erreur à la réception");
+            perror("erreur Ã  la rÃ©ception");
         }
         if (nbo == 0)
         {
@@ -177,7 +177,7 @@ void ecritureSocket(Socket s) /* ici, le message est lu au clavier, on pourra le
     {
         char buff[TAILLE_BUFF];
         fgets(buff, TAILLE_BUFF, stdin);
-            /* Le dernier carractère est un retour chariot */
+            /* Le dernier carractÃ¨re est un retour chariot */
         buff[strlen(buff)-1] = '\0';
 
         if (strcmp(buff, "fin")==0)
@@ -187,10 +187,10 @@ void ecritureSocket(Socket s) /* ici, le message est lu au clavier, on pourra le
         }
         sock_err = send(s, (char*)buff, (strlen(buff)+1)*sizeof(char), MSG_NOSIGNAL);
             /* s le socket sur laquel on ecrit */
-            /* buff le message écrit */
+            /* buff le message Ã©crit */
             /* (strlen(buff)+1)*sizeof(char) la longueur du mesage */
-            /* MSG_NOSIGNAL lorsque la connexion est brisée, send renvoie une erreur et */
-            /*              ne génère pas de signaux (que je n'ai pas envie de traiter) */
+            /* MSG_NOSIGNAL lorsque la connexion est brisÃ©e, send renvoie une erreur et */
+            /*              ne gÃ©nÃ¨re pas de signaux (que je n'ai pas envie de traiter) */
         if (sock_err < 0)
         {
             perror("erreur dans le send");
@@ -206,10 +206,10 @@ void clotureSocket(Socket s)
     // #####################################################*/
     if (close(s)< 0)
     {
-        perror("Problème à la fermeture du socket d'attente");
+        perror("ProblÃ¨me Ã  la fermeture du socket d'attente");
     }
     #if defined (WIN32)
-        /* Ceci est du code spécifique à windows */
+        /* Ceci est du code spÃ©cifique Ã  windows */
         WSACleanup();
     #endif
 }
