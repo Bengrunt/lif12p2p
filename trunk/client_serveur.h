@@ -10,24 +10,7 @@
 #define CLIENT_SERVEUR_H
 
 #include "socket.h"
-
-/*#include <error.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>*/
-
-/* Une partie nécessaire pour utiliser les sockets sous linux et windows*/
-/*#if defined (WIN32)
-    #include <winsock2.h>
-#elif defined (linux)
-    #include <sys/types.h>
-    #include <sys/socket.h>
-    #include <netinet/in.h>
-    #include <arpa/inet.h>
-    #include <netdb.h>
-#endif
-*/
+#include "pthread.h"
 
 /******************************************
 * Structures de données
@@ -129,6 +112,95 @@ typedef struct ListeFichiers
 * Fonctions et procédures
 ***********************************/
 
+
+/**
+* Application coté serveur
+*/
+
+
+void applicationServeur();
+/**
+* @note: Application coté serveur gérant l'emmission des fichiers.
+* @param:
+*/
+
+void threadDialogueClient(FileAttenteClients listeAttente);
+/**
+* @note: procédure à exécuter dans un thread pour écouter les requètes clientes
+* @param:
+*/
+
+void initialisationListeAttenteClient(FileAttenteClients listeAttente);
+/**
+* @note: procédure d'initialisation de la liste d'attente des clients
+* @param: listeAttente : liste d'attente à initialiser
+*/
+
+
+void dialogueClient();
+/**
+* @note: procédure dialoguant avec le client
+* @param:
+*/
+
+void traitementMessage();
+/**
+* @note: procédure qui analyse le message reçu du client
+* @note: rempli la liste d'attente si besoin
+* @param:
+*/
+
+void threadEnvoiMessage();
+/**
+* @note: Fonction à exécuter dans un thread pour envoyer des blocs
+* @note: la fonction boucle tant qu'il y a des blocs en liste d'attente
+* @param:
+*/
+
+void envoiMessage(Socket s);
+/**
+* @note: cherche et envoie les données à transmettre
+* @param: les données sont écrites sur la socket passée en parametre
+*/
+
+
+
+/**
+* Application coté client
+*/
+
+
+void applicationClient();
+/**
+* @note: Application coté serveur gérant le téléchargement des fichiers.
+* @param:
+*/
+
+void demandeFichier();
+/**
+* @note: demande à l'utilisateur un fichier à télécharger
+* @note: le met dans la liste des fichiers, et demande à l'annuaire
+* @param:
+*/
+
+void threadTelechargement();
+/**
+* @note: procédure à exécuter dans un thread pour télécharger un bloc
+* @note: la focntion boucle tant qu'il y a des blocs à télécharger
+* @param:
+*/
+
+Telechargement* rechercheBloc();
+/**
+* @note: fonction qui retourne le bloc suivant à télécharger
+* @param:
+*/
+
+void telechargementBloc(Telechargement* );
+/**
+* @note: procédure qui demande et télécharge le bloc aupres du serveur
+* @param: Telechargement* : pointeur sur le bloc à télécharger
+*/
 
 
 #endif
