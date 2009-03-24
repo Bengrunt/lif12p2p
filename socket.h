@@ -9,23 +9,23 @@
 #ifndef SOCKET_H
 #define SOCKET_H
 
-#include <error.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
+#include "error.h"
+#include "string.h"
+#include "stdio.h"
+#include "stdlib.h"
+#include "unistd.h"
 /* Une partie nécessaire pour utiliser les sockets sous linux et windows */
 
-/*#if defined (WIN32)*/
-/*    #include <winsock2.h>*/
-/*#elif defined (linux)*/
-    #include <sys/types.h>
-    #include <sys/socket.h>
-    #include <netinet/in.h>
-    #include <arpa/inet.h>
-    #include <netdb.h>
-/*#endif*/
-
+/*#if defined (WIN32)
+    #include "winsock2.h"
+#elif defined (linux)*/
+    #include "sys/types.h"
+    #include "sys/socket.h"
+    #include "netinet/in.h"
+    #include "arpa/inet.h"
+    #include "netdb.h"
+/*#endif
+*/
 typedef int Socket;
 typedef struct sockaddr_in SOCKADDR_IN;
 typedef struct sockaddr SOCKADDR;
