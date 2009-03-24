@@ -112,11 +112,9 @@ typedef struct ListeFichiers
 * Fonctions et procédures
 ***********************************/
 
-
 /**
 * Application coté serveur
 */
-
 
 void applicationServeur();
 /**
@@ -124,7 +122,13 @@ void applicationServeur();
 * @param:
 */
 
-void threadDialogueClient(FileAttenteClients listeAttente);
+void signalisationFichierAnnuaire();
+/**
+* @note: fonction qui signale les fichiers disponibles à l'annuaire
+* @param:
+*/
+
+void threadDialogueClient(FileAttenteClients* listeAttente);
 /**
 * @note: procédure à exécuter dans un thread pour écouter les requètes clientes
 * @param:
@@ -150,7 +154,7 @@ void traitementMessage();
 * @param:
 */
 
-void threadEnvoiMessage();
+void threadEnvoiMessage(FileAttenteClients* listeAttente);
 /**
 * @note: Fonction à exécuter dans un thread pour envoyer des blocs
 * @note: la fonction boucle tant qu'il y a des blocs en liste d'attente
@@ -163,7 +167,11 @@ void envoiMessage(Socket s);
 * @param: les données sont écrites sur la socket passée en parametre
 */
 
-
+void arretServeur();
+/**
+* @note: procédure qui stoppe toutes les actions en cours du serveur, et l'arrete
+* @param:
+*/
 
 /**
 * Application coté client
