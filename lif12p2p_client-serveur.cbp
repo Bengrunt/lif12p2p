@@ -41,6 +41,9 @@
 			<Add option="-ansi" />
 			<Add option="-g" />
 		</Compiler>
+		<Linker>
+			<Add option="-lpthread" />
+		</Linker>
 		<Unit filename="client_serveur.c">
 			<Option compilerVar="CC" />
 		</Unit>
