@@ -3,7 +3,7 @@
  * @project: lif12p2p
  * @author: Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
  * @since: 16/03/2009
- * @version: 20/03/2009
+ * @version: 24/03/2009
  */
 
 #ifndef ANNUAIRE_H
@@ -130,17 +130,17 @@ typedef struct BddClients
 * Fonctions et procédures
 ***********************************/
 
-void initialisationAnnuaire();
+int initialisationAnnuaire(BddServeurs * serveurs, BddFichiers * fichiers);
 /**
 * @note: procédure d'initialisation de l'annuaire :  les listes de clients, de serveurs, de fichiers.
+* @param: serveurs : pointeur sur la base de données des serveurs.
+* @param: fichiers : pointeur sur la base de données des fichiers.
 */
 
-Socket initialiseSocketEcouteAnnuaire();
+Socket initialiseSocketEcouteAnnuaire(int portAnnuaire);
 /**
 * @note: fonction d'initialisation de la socket d'écoute de l'annuaire.
-* @param:
-* @param:
-*
+* @param: portAnnuaire : numéro de port sur lequel on crée la socket d'écoute.
 */
 
 void traiteDemandeFichierClient();
@@ -177,9 +177,11 @@ void analyseMessage();
 * @param:
 */
 
-void fermetureAnnuaire();
+void fermetureAnnuaire(BddServeurs * serveurs, BddFichiers * fichiers);
 /**
 * @note: procédure de fermeture de l'annuaire de façon propre.
+* @param: serveurs : pointeur sur la base de données des serveurs.
+* @param: fichiers : pointeur sur la base de données des fichiers.
 */
 
 
