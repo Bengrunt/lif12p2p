@@ -17,6 +17,9 @@
 					<Add option="-ansi" />
 					<Add option="-g" />
 				</Compiler>
+				<Linker>
+					<Add option="-lpthread" />
+				</Linker>
 			</Target>
 			<Target title="Release">
 				<Option output="bin/Release/lif12p2p annuaire" prefix_auto="1" extension_auto="1" />
