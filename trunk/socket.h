@@ -3,7 +3,7 @@
  * @project: lif12p2p
  * @author: Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
  * @since: 19/03/2009
- * @version: 20/03/2009
+ * @version: 25/03/2009
  */
 
 #ifndef SOCKET_H
@@ -14,6 +14,7 @@
 #include "stdio.h"
 #include "stdlib.h"
 #include "unistd.h"
+#include "pthread.h"
 /* Une partie nécessaire pour utiliser les sockets sous linux et windows */
 
 /*#if defined (WIN32)
@@ -68,12 +69,11 @@ int demandeConnexionSocket(Socket s); /* On pourra passer le nom et le port du s
 *
 */
 
-void ecouteSocket(Socket s);
+char* ecouteSocket(Socket s);
 /**
-* @note: procédure qui écoute une socket
-* @param: tout message arrivant sur la socket passée en parametre est
-* @param: affiché à l'écran
-*
+* @note: fonction qui capture un message sur la socket s.
+* @param: tout message arrivant sur la socket passée en parametre est capturé.
+* @return: renvoie le message sous forme de chaine de caractere.
 */
 
 int ecritureSocket(Socket s, char* message); /* ici, le message est lu au clavier, on pourra le passer en parametre */

@@ -45,21 +45,22 @@ b) Client / serveur
 2] Structure de programmation
 a) Format des messages qui transitent sur le réseau
 	-> de l'annuaire vers le client
-		* Réponse favorable (pour chaque bloc) : 	bloc nomDeFichier nombreTotalDeBloc numeroDeBloc adresseServeur portServeur
-		* Réponse défavorable : 					erreur nomDeFichier
+		* Réponse favorable (pour chaque bloc) : 	01 bloc nomDeFichier nombreTotalDeBloc numeroDeBloc adresseServeur portServeur
+		* Réponse défavorable : 					02 erreur nomDeFichier
 	-> de l'annuaire vers le serveur
 		* aucun message
 	-> du client vers l'annuaire
-		* Demande d'un fichier : 					fichier nomDeFichier
-		* Demande d'un bloc : 					bloc nomDeFichier numeroDeBloc
+		* Demande d'un fichier : 					03 fichier nomDeFichier
+		* Demande d'un bloc : 					04 bloc nomDeFichier numeroDeBloc
+		* Indication de fin de requête client :		05 arret adresseClient portClient 
 	-> du client vers le serveur
-		* Demande d'un bloc : 					bloc nomDeFichier numeroDeBloc
+		* Demande d'un bloc : 					06 bloc nomDeFichier numeroDeBloc
 	-> du serveur vers l'annuaire
-		* Disponibilité pour chaque bloc :			bloc nomDeFichier nombreTotalDeBloc numeroDeBloc adresseServeur portServeur
-		* Indication d'arrêt du serveur :			arret adresseServeur portServeur
+		* Disponibilité pour chaque bloc :			07 bloc nomDeFichier nombreTotalDeBloc numeroDeBloc adresseServeur portServeur
+		* Indication d'arrêt du serveur :			08 arret adresseServeur portServeur
 	-> du serveur vers le client
-		* Envoi d'un bloc :						bloc nomDeFichier numeroDeBloc contenuDuBloc
-		* Bloc introuvable :						erreur nomDeFichier numeroDeBloc
+		* Envoi d'un bloc :						09 bloc nomDeFichier numeroDeBloc contenuDuBloc
+		* Bloc introuvable :						10 erreur nomDeFichier numeroDeBloc
 
 b) Annuaire
 	_ Structure des données utilisées :

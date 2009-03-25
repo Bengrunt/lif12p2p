@@ -3,7 +3,7 @@
  * @project: lif12p2p
  * @author: Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
  * @since: 16/03/2009
- * @version: 24/03/2009
+ * @version: 25/03/2009
  */
 
 #ifndef ANNUAIRE_H
@@ -135,12 +135,21 @@ int initialisationAnnuaire(BddServeurs * serveurs, BddFichiers * fichiers);
 * @note: procédure d'initialisation de l'annuaire :  les listes de clients, de serveurs, de fichiers.
 * @param: serveurs : pointeur sur la base de données des serveurs.
 * @param: fichiers : pointeur sur la base de données des fichiers.
+* @return: renvoie 0 si tout se passe bien, -1 sinon.
 */
 
 Socket initialiseSocketEcouteAnnuaire(int portAnnuaire);
 /**
 * @note: fonction d'initialisation de la socket d'écoute de l'annuaire.
 * @param: portAnnuaire : numéro de port sur lequel on crée la socket d'écoute.
+* @return: renvoie la socket créée.
+*/
+
+int traiteMessage(Socket arg);
+/**
+* @note: fonction globale de traitement d'un message reçu.
+* @param: arg : socket sur laquelle le message est arrivé.
+* @return: renvoir 0 si tout se passe bien, -1 sinon.
 */
 
 void traiteDemandeFichierClient();
@@ -171,7 +180,13 @@ void traiteArretServeur();
 */
 
 
-void analyseMessage();
+void traiteMessageErr();
+/**
+* @note: traitement d'un message non géré par traiteMessage().
+*/
+
+
+void analyseMessage(); /* OBSOLETE */
 /**
 * @note: analyse un message reçu par l'annuaire et lance le traitement adéquat.
 * @param:

@@ -3,7 +3,7 @@
  * @project: lif12p2p
  * @author: Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
  * @since: 19/03/2009
- * @version: 19/03/2009
+ * @version: 25/03/2009
  */
 
 #include "socket.h"
@@ -149,25 +149,16 @@ int demandeConnexionSocket(Socket s) /* On pourra passer le nom et le port du se
     return 0;
 }
 
-void ecouteSocket(Socket s)
+char* ecouteSocket(Socket s)
 {
-    while(1)
-    {
         char buff[TAILLE_BUFF];
-        size_t nbo;
 
-        nbo = recv(s, buff, TAILLE_BUFF, 0);
-        if (nbo < 0)
+        if( recv(s, buff, TAILLE_BUFF, 0) < 0)
         {
             perror("erreur à la réception");
         }
-        if (nbo == 0)
-        {
-            /* C'est fini */
-            break;
-        }
-        printf("recu : %s\n", buff);
-    }
+
+        return buff;
 }
 
 int ecritureSocket(Socket s, char* buff) /** ici, le message est lu au clavier, on pourra le passer en parametre */
