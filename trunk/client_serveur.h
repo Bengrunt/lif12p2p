@@ -128,7 +128,7 @@ void signalisationFichierAnnuaire();
 * @param:
 */
 
-void threadDialogueClient(FileAttenteClients* listeAttente);
+void threadDialogueClient();
 /**
 * @note: procédure à exécuter dans un thread pour écouter les requètes clientes
 * @param:
@@ -154,22 +154,28 @@ void traitementMessage();
 * @param:
 */
 
-void threadEnvoiMessage(FileAttenteClients* listeAttente);
+void threadEnvoiMessage();
 /**
 * @note: Fonction à exécuter dans un thread pour envoyer des blocs
 * @note: la fonction boucle tant qu'il y a des blocs en liste d'attente
 * @param:
 */
 
-void envoiMessage(Socket s);
+void signalisationChargeServeur(int valeur);
 /**
 * @note: cherche et envoie les données à transmettre
 * @param: les données sont écrites sur la socket passée en parametre
 */
 
+void envoiMessage(Client* client);
+/**
+* @note: cherche et envoie les données à transmettre
+* @param: les données sont écrites sur la socket passée en parametre (dans la structure client)
+*/
+
 void arretServeur();
 /**
-* @note: procédure qui stoppe toutes les actions en cours du serveur, et l'arrete
+* @note: procédure qui signale l'arret du serveur a l'annuaire, et l'arrete
 * @param:
 */
 

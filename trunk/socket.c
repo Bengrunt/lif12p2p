@@ -110,7 +110,7 @@ Socket acceptationConnexion(Socket s)
     return t;
 }
 
-void demandeConnexionSocket(Socket s) /* On pourra passer le nom et le port du serveur en parametre */
+int demandeConnexionSocket(Socket s) /* On pourra passer le nom et le port du serveur en parametre */
 {
     struct hostent *hp; /* Pour obtenir l'adresse du serveur à partir de son nom */
     SOCKADDR_IN sin; /* La structure de description d'adresse */
@@ -142,10 +142,11 @@ void demandeConnexionSocket(Socket s) /* On pourra passer le nom et le port du s
     if(connect(s, (SOCKADDR *)&sin, sizeof(sin)) <0)
     {
         perror("connect");
-        exit(1);
+        return 1;
     }
     printf("Connection à %s sur le port %d\n", inet_ntoa (sin.sin_addr), htons(sin.sin_port));
     printf("envoie de données sur le socket %d\n ",s);
+    return 0;
 }
 
 void ecouteSocket(Socket s)
@@ -169,22 +170,18 @@ void ecouteSocket(Socket s)
     }
 }
 
-void ecritureSocket(Socket s) /* ici, le message est lu au clavier, on pourra le passer en parametre */
+int ecritureSocket(Socket s, char* buff) /** ici, le message est lu au clavier, on pourra le passer en parametre */
 {
     int sock_err; /* Une variable pour stocker les erreurs */
 
-    while (1)
-    {
-        char buff[TAILLE_BUFF];
-        fgets(buff, TAILLE_BUFF, stdin);
+  /*  while (1)
+    {*/
+/*        char buff[TAILLE_BUFF];
+        fgets(buff, TAILLE_BUFF, stdin); */
             /* Le dernier carractère est un retour chariot */
-        buff[strlen(buff)-1] = '\0';
+/*        buff[strlen(buff)-1] = '\0'; */
 
-        if (strcmp(buff, "fin")==0)
-        {
-            /* Quand l'utilisateur tape fin on sort */
-            break;
-        }
+
         sock_err = send(s, (char*)buff, (strlen(buff)+1)*sizeof(char), MSG_NOSIGNAL);
             /* s le socket sur laquel on ecrit */
             /* buff le message écrit */
@@ -194,9 +191,10 @@ void ecritureSocket(Socket s) /* ici, le message est lu au clavier, on pourra le
         if (sock_err < 0)
         {
             perror("erreur dans le send");
-            break;
+            return 1;
         }
-    }
+        return 0;
+   /*}*/
 }
 
 void clotureSocket(Socket s)
