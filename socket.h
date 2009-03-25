@@ -60,7 +60,7 @@ Socket acceptationConnexion(Socket s);
 *
 */
 
-void demandeConnexionSocket(Socket s); /* On pourra passer le nom et le port du serveur en parametre */
+int demandeConnexionSocket(Socket s); /* On pourra passer le nom et le port du serveur en parametre */
 /**
 * @note: procédure de demande de connexion
 * @param: la socket passée en parametre essai de se connecter à
@@ -76,11 +76,11 @@ void ecouteSocket(Socket s);
 *
 */
 
-void ecritureSocket(Socket s); /* ici, le message est lu au clavier, on pourra le passer en parametre */
+int ecritureSocket(Socket s, char* message); /* ici, le message est lu au clavier, on pourra le passer en parametre */
 /**
 * @note: procédure d'envoi de message
-* @param: tout message tapé au clavier (suivi de la touche "entrée" est
-* @param: envoyé à travers la socket passée en parametre
+* @param: le message passé en parametre est envoyé sur la socket (en parametre)
+* @param: retourne 0 si tout se passe bien, 1 sinon
 *
 */
 
