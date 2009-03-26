@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
-	<File name="annuaire.c" open="1" top="0" tabpos="4">
-		<Cursor position="154" topLine="0" />
+	<File name="annuaire.c" open="1" top="1" tabpos="4">
+		<Cursor position="5375" topLine="163" />
 	</File>
 	<File name="annuaire.h" open="1" top="0" tabpos="3">
-		<Cursor position="154" topLine="0" />
+		<Cursor position="1880" topLine="108" />
 	</File>
-	<File name="socket.c" open="1" top="1" tabpos="1">
-		<Cursor position="152" topLine="0" />
+	<File name="socket.c" open="1" top="0" tabpos="1">
+		<Cursor position="6077" topLine="138" />
 	</File>
 	<File name="socket.h" open="1" top="0" tabpos="2">
-		<Cursor position="152" topLine="0" />
+		<Cursor position="2206" topLine="66" />
 	</File>
 </CodeBlocks_layout_file>
