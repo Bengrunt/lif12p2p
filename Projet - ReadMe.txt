@@ -55,12 +55,17 @@ a) Format des messages qui transitent sur le réseau
 		* Indication de fin de requête client :		05 arret adresseClient portClient 
 	-> du client vers le serveur
 		* Demande d'un bloc : 					06 bloc nomDeFichier numeroDeBloc
+		* Déconnexion du client :					07 arret adresseClient portClient
 	-> du serveur vers l'annuaire
-		* Disponibilité pour chaque bloc :			07 bloc nomDeFichier nombreTotalDeBloc numeroDeBloc adresseServeur portServeur
-		* Indication d'arrêt du serveur :			08 arret adresseServeur portServeur
+		* Disponibilité pour chaque bloc :			08 bloc nomDeFichier nombreTotalDeBloc numeroDeBloc adresseServeur portServeur
+		* Indication d'arrêt du serveur :			09 arret adresseServeur portServeur
 	-> du serveur vers le client
-		* Envoi d'un bloc :						09 bloc nomDeFichier numeroDeBloc contenuDuBloc
-		* Bloc introuvable :						10 erreur nomDeFichier numeroDeBloc
+		* Envoi d'un bloc :						10 bloc nomDeFichier numeroDeBloc contenuDuBloc
+		* Bloc introuvable :						11 erreur nomDeFichier numeroDeBloc
+		* Déconnexion du serveur :				12 arret adresseServeur portServeur
+	-> entre n'importe quelle source et destinataire
+		* Réponse à un message inconnu :			13 erreur mauvais destinataire
+
 
 b) Annuaire
 	_ Structure des données utilisées :

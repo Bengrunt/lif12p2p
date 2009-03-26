@@ -3,7 +3,7 @@
  * @project: lif12p2p
  * @author: Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
  * @since: 16/03/2009
- * @version: 20/03/2009
+ * @version: 26/03/2009
  */
 
 #ifndef CLIENT_SERVEUR_H
@@ -38,6 +38,7 @@ typedef struct Client
 typedef struct FileAttenteClients
 {
 	int nbClients;
+	pthread_mutex_t mutexListeAttenteServeur;
 	struct Client* premierClient;
 	struct Client* dernierClient;
 }FileAttenteClients;
@@ -141,16 +142,29 @@ void initialisationListeAttenteClient(FileAttenteClients listeAttente);
 */
 
 
-void dialogueClient();
+void dialogueClient(Socket socketDialogue);
 /**
 * @note: procédure dialoguant avec le client
 * @param:
 */
 
-void traitementMessage();
+void traitementMessageBloc(Socket socketDialogue, char* buff);
 /**
 * @note: procédure qui analyse le message reçu du client
 * @note: rempli la liste d'attente si besoin
+* @param:
+*/
+
+void traitementMessageArret(Socket socketDialogue, char* buff);
+/**
+* @note: procédure qui analyse le message reçu du client
+* @note: demandant une déconnexion du client
+* @param:
+*/
+
+void traitementMessageErreur(Socket socketDialogue);
+/**
+* @note: procédure qui
 * @param:
 */
 
