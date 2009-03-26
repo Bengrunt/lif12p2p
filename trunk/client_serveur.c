@@ -3,7 +3,7 @@
  * @project: lif12p2p
  * @author: Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
  * @since: 20/03/2009
- * @version: 20/03/2009
+ * @version: 26/03/2009
  */
 
 #include "client_serveur.h"
@@ -11,9 +11,9 @@
 #define TAILLE_BUFF 100
 
 FileAttenteClients listeAttenteClient;
-int finThread;
+int finThreadServeur;
+int finThreadClient;
 Socket socketAnnuaire;
-pthread_mutex_t mutexListeAttente;
 int portServeur;
 
 int main()
@@ -80,7 +80,7 @@ void applicationServeur()
     pthread_t tabThread[NBTHREAD];
     int i;
 
-    finThread = 0;
+    finThreadServeur = 0;
     /* initialisation de la liste d'attente */
     initialisationListeAttenteClient(listeAttenteClient);
 
@@ -113,7 +113,8 @@ void applicationServeur()
 
     /* arrêt du serveur */
     /* arrêt de tous les threads lancés */
-    finThread = 1;
+    finThreadServeur = 1;
+    pthread_join(variableThread,NULL);
     for (i = 0; i<NBTHREAD; i++)
     {
         pthread_join(tabThread[i],NULL);
@@ -140,10 +141,7 @@ void threadDialogueClient()
 {
     Socket socketEcouteServeur;
     Socket socketDemandeConnexion;
-    int quitter;
-    int i;
-    pthread_t* tabThread;
-    tabThread = malloc(20*sizeof(pthread_t));
+    pthread_t variableThread;
 
     /* demande du port du serveur */
     printf("Sur quel port voulez-vous lancer le serveur ?\n");
@@ -152,42 +150,111 @@ void threadDialogueClient()
     /* crée une socket et affectation de la socket */
     socketEcouteServeur = creationSocket();
     definitionNomSocket(socketEcouteServeur, portServeur);
+
     /* écoute les demandes de connexion */
-    quitter = 1;
-    i = 0;
-    while (quitter)
+    while (!finThreadServeur)
     {
         /* récupération des sockets de dialogue */
-    	socketDemandeConnexion = acceptationConnexion(socketEcouteServeur);
+        socketDemandeConnexion = acceptationConnexion(socketEcouteServeur);
 
-    	/* création d'un thread pour dialoguer avec chaque client */
-    	pthread_create(&tabThread[i], NULL, dialogueClient, (void*)socketDemandeConnexion);
-    	i++;
+        /* création d'un thread pour dialoguer avec chaque client */
+        pthread_create(&variableThread, NULL, dialogueClient, (void*)socketDemandeConnexion);
+    }
+    /* On sort de la boucle quand on recoit le signal "fin thread" */
+}
 
-    	/* aggrandissement du tableau des threads */
+void dialogueClient(Socket socketDialogue)
+{
+    char* buff;
+    int code;
+    int finDialogue;        /* variable indiquant  si on doit sortir de la boucle de discution
+                                0- on continue a écouter
+                                1- on srot de la boucle */
 
+    buff = malloc(100 * sizeof(char));
+    finDialogue = 0;
+
+    while (!finThreadServeur && !finDialogue)
+    {
+        /* récupération du prochain message sur la socket */
+        ecouteSocket(socketDialogue, buff);
+
+        /* récupération du code en début de message */
+        if (sscanf(buff, "%d", &code) == 1)
+        {
+            /* analyse du code :
+               6 - message d'un client demandant un bloc
+               autre - message non destiné au serveur */
+            switch (code)
+            {
+            case 6:
+            /* message de demande de bloc d'un client */
+                traitementMessageBloc(socketDialogue, buff);
+                break;
+            case 7:
+            /* message d'arret du client */
+                traitementMessageArret(socketDialogue, buff);
+                finDialogue = 1;
+                break;
+            case 13:
+            /* le message que l'on vient d'envoyer est inconnu : fermeture du thread  */
+                finDialogue = 1;
+                break;
+            default:
+            /* code inconnu */
+                traitementMessageErreur(socketDialogue);
+                finDialogue = 1;
+                break;
+            }
+        }
+        else
+        {
+            /* le code au début du message reçu n'a pas été reconnu */
+            /* message ignoré */
+            perror("Le message suivant non reconnu a été reçu : ");
+            perror(buff);
+        }
     }
 
-    /*  */
+    /* fermeture de la socket */
+    /* soit par ce que le serveur va s'arreter */
+    if (finThreadServeur == 1)
+    {
+        ecritureSocket(socketDialogue, "");
+    }
+    /* soit parce que le client le demande */
+    clotureSocket(socketDialogue);
+}
+
+void traitementMessageBloc(Socket socketDialogue, char* buff)
+{
+    /* analyse du message et ajout en liste d'attente */
+}
+
+void traitementMessageArret(Socket socketDialogue, char* buff)
+{
+    /* suppression du client de la liste d'attente */
+
 
 }
 
-void dialogueClient()
+void traitementMessageErreur(Socket socketDialogue)
 {
-
+    /* envoi du message d'erreur */
+    ecritureSocket(socketDialogue, "13 erreur mauvais destinataire");
 }
 
 void threadEnvoiMessage()
 {
-    /* il faut sortir de la fonction quand la variable globale "finThread" vaut 1 */
-    while (finThread == 0)
+    /* il faut sortir de la fonction quand la variable globale "finThreadServeur" vaut 1 */
+    while (finThreadServeur == 0)
     {
         Client* blocAEnvoyer;  /* pointeur de travail qui désignera le bloc à envoyer */
 
 
 
         /*******  bloqué le mutex pour éviter la lecture / écriture de la liste d'attente  *********/
-        pthread_mutex_lock(&mutexListeAttente);
+        pthread_mutex_lock(&(listeAttenteClient.mutexListeAttenteServeur));
         /* sélection du prochain client en liste d'attente */
         blocAEnvoyer = listeAttenteClient.premierClient;
 
@@ -198,7 +265,7 @@ void threadEnvoiMessage()
             listeAttenteClient.premierClient = listeAttenteClient.premierClient->clientSuivant;
 
             /*******  libéré le mutex  ********/
-            pthread_mutex_unlock(&mutexListeAttente);
+            pthread_mutex_unlock(&(listeAttenteClient.mutexListeAttenteServeur));
             /* signalisation de la charge du serveur à l'annuaire */
             signalisationChargeServeur(1);
             /* envoi du bloc */
@@ -210,7 +277,7 @@ void threadEnvoiMessage()
         else
         {
             /*******  libéré le mutex  ********/
-            pthread_mutex_unlock(&mutexListeAttente);
+            pthread_mutex_unlock(&(listeAttenteClient.mutexListeAttenteServeur));
         }
     }/* boucle tant que finThread vaut 0 */
 }

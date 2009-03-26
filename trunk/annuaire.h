@@ -3,7 +3,7 @@
  * @project: lif12p2p
  * @author: Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
  * @since: 16/03/2009
- * @version: 25/03/2009
+ * @version: 26/03/2009
  */
 
 #ifndef ANNUAIRE_H

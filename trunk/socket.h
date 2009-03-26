@@ -3,7 +3,7 @@
  * @project: lif12p2p
  * @author: Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
  * @since: 19/03/2009
- * @version: 25/03/2009
+ * @version: 26/03/2009
  */
 
 #ifndef SOCKET_H
@@ -76,7 +76,7 @@ void ecouteSocket(Socket s, char* buff);
 * @param: buff : chaine de caractere stockant un message capturé.
 */
 
-int ecritureSocket(Socket s, char* message); /* ici, le message est lu au clavier, on pourra le passer en parametre */
+int ecritureSocket(Socket s, char* buff); /* ici, le message est lu au clavier, on pourra le passer en parametre */
 /**
 * @note: procédure d'envoi de message
 * @param: le message passé en parametre est envoyé sur la socket (en parametre)
