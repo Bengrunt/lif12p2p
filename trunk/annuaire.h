@@ -74,6 +74,7 @@ typedef struct BddFichiers
 {
 	int nbFichiers;
 	Fichier* listeFichiers;
+	pthread_mutex_t verrou_bddfich; /* mutex de la BddFichiers */
 }BddFichiers;
 /**
 * @note: gère la liste des fichiers référencés par l'annuaire.
@@ -102,6 +103,7 @@ typedef struct BddServeurs
 {
 	int nbServeurs;
 	InfoServeurs** tabServeurs;
+	pthread_mutex_t verrou_bddserv; /* mutex de la BddServeurs */
 }BddServeurs;
 /**
 * @note: gère la liste des serveurs en contact avec l'annuaire.
@@ -152,45 +154,52 @@ int traiteMessage(Socket arg);
 * @return: renvoir 0 si tout se passe bien, -1 sinon.
 */
 
-void traiteDemandeFichierClient();
+void traiteDemandeFichierClient(Socket s, char* mess);
 /**
 * @note: traitement d'un message de type demande de fichier d'un client.
-* @param:
+* @param: s : la socket sur laquelle la demande de fichier client a été émise.
+* @param: mess : la demande de fichier client a traiter.
 */
 
 
-void traiteDemandeBlocClient();
+void traiteDemandeBlocClient(Socket s, char* mess);
 /**
 * @note: traitement d'un message de type demande de bloc d'un client.
-* @param:
+* @param: s : la socket sur laquelle la demande de bloc client a été émise.
+* @param: mess : la demande de bloc client a traiter.
 */
 
 
-void traiteBlocDisponibleServeur();
+void traiteArretClient(Socket s, char* mess);
 /**
-* @note: traitement d'un message de type nouveau bloc.
-* @param:
+* @note: traitement d'un message de type arret d'échange client.
+* @param: s : la socket sur laquelle le message d'arret client a été émis.
+* @param: mess : le message d'arret client a traiter.
+*/
+
+void traiteBlocDisponibleServeur(Socket s, char* mess);
+/**
+* @note: traitement d'un message de type nouveau bloc disponible sur serveur.
+* @param: s : la socket sur laquelle le message de nouveau bloc disponible sur serveur a été émis.
+* @param: mess : le message de nouveau bloc disponible a traiter.
 */
 
 
-void traiteArretServeur();
+void traiteArretServeur(Socket s, char* mess);
 /**
 * @note: traitement d'un message de type arrêt de serveur.
-* @param:
+* @param: s : la socket sur laquelle le message d'arret de serveur a été emis.
+* @param: mess : le message d'arret serveur a traiter.
 */
 
 
-void traiteMessageErr();
+void traiteMessageErr(Socket s, char* mess);
 /**
-* @note: traitement d'un message non géré par traiteMessage().
+* @note: traitement d'un message adressé au mauvais destinataire.
+* @param: s : la socket sur laquelle le message inattendu a été émis.
+* @param: mess : le message en question.
 */
 
-
-void analyseMessage(); /* OBSOLETE */
-/**
-* @note: analyse un message reçu par l'annuaire et lance le traitement adéquat.
-* @param:
-*/
 
 void fermetureAnnuaire(BddServeurs * serveurs, BddFichiers * fichiers);
 /**

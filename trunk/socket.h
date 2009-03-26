@@ -69,11 +69,11 @@ int demandeConnexionSocket(Socket s); /* On pourra passer le nom et le port du s
 *
 */
 
-char* ecouteSocket(Socket s);
+void ecouteSocket(Socket s, char* buff);
 /**
 * @note: fonction qui capture un message sur la socket s.
-* @param: tout message arrivant sur la socket passée en parametre est capturé.
-* @return: renvoie le message sous forme de chaine de caractere.
+* @param: s : socket d'écoute.
+* @param: buff : chaine de caractere stockant un message capturé.
 */
 
 int ecritureSocket(Socket s, char* message); /* ici, le message est lu au clavier, on pourra le passer en parametre */

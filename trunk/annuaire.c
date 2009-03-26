@@ -68,92 +68,127 @@ int traiteMessage(Socket arg)
 {
 /* variables */
     char* buff; /* Message lu sur la socket */
+    int type_message; /* type de message */
     int fin_thread; /* booléen qui détermine si le thread doit se finir ou pas */
 
 /* boucle de traitement des messages */
-    fin_thread=1;
+    buff=malloc(100*sizeof(char)); /* */
+
+    fin_thread=1; /* booleen qui décide de l'arret du thread */
+
     while (!fin_thread)
     {
 /* on ecoute sur la socket arg */
-        buff=ecouteSocket(arg);
+        ecouteSocket(arg, buff);
 
 /* on analyse le type du message reçu et on agit en conséquence */
-        switch (buff[0])
+        if(sscanf ( buff, "%d", &type_message) != 1 )
         {
-            case '0':
-                switch (buff[1])
-                {
-                    case '3': /* Demande d'un fichier */
-                        traiteDemandeFichierClient();
-                        break;
-                    case '4': /* Demande d'un bloc */
-                        traiteDemandeBlocClient();
-                        break;
-                    case '6': /* Disponibilité d'un bloc */
-                        traiteBlocDisponibleServeur();
-                        break;
-                    case '7': /* Arret d'un serveur */
-                        traiteArretServeur();
-                        break;
-                    default:
-                        traiteMessageErr();
-                }
-
-            default:
-                traiteMessageErr();
+            fprintf(stderr, "Message ignoré, impossible de l'analyser.\n Contenu du message: %s \n", buff);
+        }
+        else
+        {
+/* On lance l'action correspondant au type de message. */
+            switch (type_message)
+            {
+                case 3: /* Demande d'un fichier */
+                    traiteDemandeFichierClient(arg, buff);
+                    break;
+                case 4: /* Demande d'un bloc */
+                    traiteDemandeBlocClient(arg, buff);
+                    break;
+                case 5: /* Arret d'échange d'un client */
+                    traiteArretClient(arg, buff);
+                    fin_thread=0;
+                    break;
+                case 8: /* Disponibilité d'un bloc */
+                    traiteBlocDisponibleServeur(arg, buff);
+                    break;
+                case 9: /* Arret d'un serveur */
+                    traiteArretServeur(arg, buff);
+                    fin_thread=0;
+                    break;
+                case 13: /* Indiquation que l'on a envoyé des messages au mauvais destinataire sur la socket donc fermeture */
+                    fin_thread=0;
+                    break;
+                default: /* Un message géré par le réseau a bien été reçu mais inadapté donc la connexion
+                            doit être terminé car ce ne sont pas les bons interlocuteurs. */
+                    traiteMessageErr(arg, buff);
+                    fin_thread=0;
+            }
         }
     }
+
+    /* Fermeture de la socket arg */
+    clotureSocket(arg);
 
     return 0;
 
 }
 
 
-void traiteDemandeFichierClient()
+void traiteDemandeFichierClient(Socket s, char* mess)
 /**
 * @note: traitement d'un message de type demande de fichier d'un client.
-* @param:
+* @param: s : la socket sur laquelle la demande de fichier client a été émise.
+* @param: mess : la demande de fichier client a traiter.
 */
 {
 
 }
 
 
-void traiteDemandeBlocClient()
+void traiteDemandeBlocClient(Socket s, char* mess)
 /**
 * @note: traitement d'un message de type demande de bloc d'un client.
-* @param:
+* @param: s : la socket sur laquelle la demande de bloc client a été émise.
+* @param: mess : la demande de bloc client a traiter.
 */
 {
 
 }
 
 
-void traiteBlocDisponibleServeur()
+void traiteArretClient(Socket s, char* mess)
 /**
-* @note: traitement d'un message de type nouveau bloc.
-* @param:
+* @note: traitement d'un message de type arret d'échange client.
+* @param: s : la socket sur laquelle le message d'arret client a été émis.
+* @param: mess : le message d'arret client a traiter.
 */
 {
 
 }
 
-void traiteArretServeur()
+
+void traiteBlocDisponibleServeur(Socket s, char* mess)
+/**
+* @note: traitement d'un message de type nouveau bloc disponible sur serveur.
+* @param: s : la socket sur laquelle le message de nouveau bloc disponible sur serveur a été émis.
+* @param: mess : le message de nouveau bloc disponible a traiter.
+*/
+{
+
+}
+
+void traiteArretServeur(Socket s, char* mess)
 /**
 * @note: traitement d'un message de type arrêt de serveur.
-* @param:
+* @param: s : la socket sur laquelle le message d'arret de serveur a été emis.
+* @param: mess : le message d'arret serveur a traiter.
 */
 {
 
 }
 
 
-void traiteMessageErr()
+void traiteMessageErr(Socket s, char* mess)
 /**
-* @note: traitement d'un message non géré par traiteMessage().
+* @note: traitement d'un message adressé au mauvais destinataire.
+* @param: s : la socket sur laquelle le message inattendu a été émis.
+* @param: mess : le message en question.
 */
 {
-
+    ecritureSocket(s, "13 erreur mauvais destinataire");
 }
 
 

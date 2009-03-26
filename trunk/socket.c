@@ -149,16 +149,12 @@ int demandeConnexionSocket(Socket s) /* On pourra passer le nom et le port du se
     return 0;
 }
 
-char* ecouteSocket(Socket s)
+void ecouteSocket(Socket s, char* buff)
 {
-        char buff[TAILLE_BUFF];
-
         if( recv(s, buff, TAILLE_BUFF, 0) < 0)
         {
             perror("erreur à la réception");
         }
-
-        return buff;
 }
 
 int ecritureSocket(Socket s, char* buff) /** ici, le message est lu au clavier, on pourra le passer en parametre */
