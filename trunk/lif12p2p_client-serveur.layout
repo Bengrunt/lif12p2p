@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
-	<File name="client_serveur.c" open="1" top="0" tabpos="1">
-		<Cursor position="160" topLine="0" />
+	<File name="client_serveur.c" open="1" top="1" tabpos="1">
+		<Cursor position="172" topLine="0" />
 	</File>
 	<File name="client_serveur.h" open="1" top="0" tabpos="2">
-		<Cursor position="160" topLine="0" />
+		<Cursor position="3566" topLine="119" />
 	</File>
 	<File name="socket.c" open="1" top="0" tabpos="3">
-		<Cursor position="7401" topLine="165" />
+		<Cursor position="7401" topLine="0" />
 	</File>
 	<File name="socket.h" open="1" top="0" tabpos="4">
-		<Cursor position="2471" topLine="33" />
+		<Cursor position="202" topLine="0" />
 	</File>
 </CodeBlocks_layout_file>

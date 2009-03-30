@@ -3,7 +3,7 @@
  * @project: lif12p2p
  * @author: Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
  * @since: 20/03/2009
- * @version: 26/03/2009
+ * @version: 30/03/2009
  */
 
 #include "client_serveur.h"
@@ -124,6 +124,7 @@ void applicationServeur()
 
 }
 
+/** ********************* A faire ***************************** */
 void signalisationFichierAnnuaire()
 {
 
@@ -220,22 +221,139 @@ void dialogueClient(Socket socketDialogue)
     /* soit par ce que le serveur va s'arreter */
     if (finThreadServeur == 1)
     {
-        ecritureSocket(socketDialogue, "");
+        struct hostent *hp;
+        char* message;
+        char* numPortServeur;
+
+        message = malloc(100* sizeof(char));
+        numPortServeur = malloc (10* sizeof(char));
+
+        /* récupération du nom et du port du serveur */
+        hp = gethostbyname("localhost");
+        sprintf(numPortServeur, "%d", portServeur);
+
+        /* création du message à envoyer au client */
+        message = "12 arret ";
+        strcat(message, hp->h_addr_list[0]);
+        strcat(message, " ");
+        strcat(message, numPortServeur);
+
+        /* envoi du message */
+        ecritureSocket(socketDialogue, message);
+
+        /* libération de l'espace mémoire */
+        free(message);
+        free(numPortServeur);
+        free(hp);
     }
     /* soit parce que le client le demande */
     clotureSocket(socketDialogue);
+    free(buff);
 }
 
 void traitementMessageBloc(Socket socketDialogue, char* buff)
 {
     /* analyse du message et ajout en liste d'attente */
+    int code;
+    char* mot;
+    Client* clientAAjouter;
+
+    /* initialisation des variables */
+    mot = malloc(20 * sizeof(char));
+    clientAAjouter = malloc(sizeof(Client));
+    clientAAjouter->nomFichier = malloc(100 * sizeof(char));
+    /* récupération du nom du fichier, et du numéro de bloc */
+    if (sscanf(buff, "%d %s %s %d", &code, mot, clientAAjouter->nomFichier, &(clientAAjouter->numeroBloc)) == 4)
+    {
+        clientAAjouter->socketClient = socketDialogue;
+        clientAAjouter->clientSuivant = NULL;
+
+        /*******  bloquage du mutex pour éviter la lecture / écriture de la liste d'attente  *********/
+        pthread_mutex_lock(&(listeAttenteClient.mutexListeAttenteServeur));
+        /* ajout en liste d'attente */
+        if (listeAttenteClient.nbClients == 0)
+        {
+        	/* cas où il n'y a aucun client dans la liste d'attente */
+        	listeAttenteClient.premierClient = clientAAjouter;
+        	listeAttenteClient.dernierClient = clientAAjouter;
+        	listeAttenteClient.nbClients++;
+        }
+        else
+        {
+            /* ajout du client à la suite du dernier */
+            (listeAttenteClient.dernierClient)->clientSuivant = clientAAjouter;
+            listeAttenteClient.nbClients++;
+            listeAttenteClient.dernierClient = clientAAjouter;
+        }
+        /*******  libération du mutex  ********/
+        pthread_mutex_unlock(&(listeAttenteClient.mutexListeAttenteServeur));
+    }
+    else
+    {
+        /* problème de lecture dans le message reçu */
+        printf("Réception du message inconnu suivant : %s\n", buff);
+    }
+    free(mot);
 }
 
 void traitementMessageArret(Socket socketDialogue, char* buff)
 {
     /* suppression du client de la liste d'attente */
+    Client* tempClient;
 
+    /*******  bloquage du mutex pour éviter la lecture / écriture de la liste d'attente  *********/
+    pthread_mutex_lock(&(listeAttenteClient.mutexListeAttenteServeur));
+    tempClient = listeAttenteClient.premierCLient;
 
+    /* cas s'il faut supprimer le premier client de la liste d'attente */
+    while (tempClient != NULL && tempClient->socketClient == socketDialogue)
+    {
+        /* diminution du nombre de clients */
+        listeAttenteClient.nbClients--;
+        /* affectation du nouveau premier client */
+        listeAttenteClient.premierClient = (listeAttenteClient.premierClient)->clientSuivant;
+        /* cas où il n'y a plus de client */
+        if (listeAttenteClient.nbClients == 0)
+        {
+            listeAttenteClient.dernierClient = NULL;
+        }
+        /* libération du client */
+        free(tempClient->nomFichier);
+        free(tempClient);
+        tempClient = listeAttenteClient.premierClient;
+    }
+    /** le client pointé par "tempClient" n'est pas à supprimer, test sur son suivant */
+    /* parcours du reste de la liste d'attente s'il reste des clients en liste d'attente */
+    if (tempClient != NULL)
+    {
+        while (tempClient->clientSuivant != NULL)
+        {
+            /* test si le client est à supprimer */
+            if ((tempClient->clientSuivant)->socketClient == socketDialogue)
+            {
+                Client* tempClientSupprimer;
+                /* mise en mémoire du client à supprimer */
+                tempClientSupprimer = tempClient->clientSuivant;
+                /* diminution du nombre de clients */
+                listeAttenteClient.nbClients--;
+                /* affectation du nouveau client qui suit */
+                tempClient->clientSuivant = tempClientSupprimer->clientSuivant;
+                /* cas où il s'agit du dernier client */
+                if (tempClient->clientSuivant == listeAttenteClient.dernierClient)
+                {
+                    /* affectation du nouveau dernier client */
+                    listeAttenteClient.dernierClient = tempClient;
+                }
+                /* libération du client */
+                free(tempClientSupprimer->nomFichier);
+                free(tempClientSupprimer);
+            }
+            tempClient = tempClient->clientSuivant;
+        }
+    }
+    /* sortie de boucle car on est arrivé à la fin de la liste */
+    /*******  libération du mutex  ********/
+    pthread_mutex_unlock(&(listeAttenteClient.mutexListeAttenteServeur));
 }
 
 void traitementMessageErreur(Socket socketDialogue)
@@ -251,47 +369,89 @@ void threadEnvoiMessage()
     {
         Client* blocAEnvoyer;  /* pointeur de travail qui désignera le bloc à envoyer */
 
-
-
-        /*******  bloqué le mutex pour éviter la lecture / écriture de la liste d'attente  *********/
+        /*******  bloquage du mutex pour éviter la lecture / écriture de la liste d'attente  *********/
         pthread_mutex_lock(&(listeAttenteClient.mutexListeAttenteServeur));
         /* sélection du prochain client en liste d'attente */
         blocAEnvoyer = listeAttenteClient.premierClient;
 
-
         if (blocAEnvoyer != NULL)
         {
             /* suppression de l'élément sélectionné */
-            listeAttenteClient.premierClient = listeAttenteClient.premierClient->clientSuivant;
-
-            /*******  libéré le mutex  ********/
+            listeAttenteClient.premierClient = (listeAttenteClient.premierClient)->clientSuivant;
+            listeAttenteClient.nbClients--;
+            /* cas où il n'y a pas d'autre client en liste d'attente */
+            if (listeAttenteClient.nbClients == 0)
+            {
+                /* changement du pointeur sur le dernier client */
+                listeAttenteClient.dernierClient = NULL;
+            }
+            /*******  libération du mutex  ********/
             pthread_mutex_unlock(&(listeAttenteClient.mutexListeAttenteServeur));
+
             /* signalisation de la charge du serveur à l'annuaire */
             signalisationChargeServeur(1);
             /* envoi du bloc */
             envoiMessage(blocAEnvoyer);
-
             /* signalisation de la charge du serveur à l'annuaire */
             signalisationChargeServeur(-1);
+
+            /* libération de l'espace mémoire */
+            free(blocAEnvoyer->nomFichier);
+            free(blocAEnvoyer);
         }
         else
         {
-            /*******  libéré le mutex  ********/
+            /* le pointeur "blocAEnvoyer" vaut "NULL", il n'y a donc plus aucun client en liste d'attente */
+            /*******  libération du mutex  ********/
             pthread_mutex_unlock(&(listeAttenteClient.mutexListeAttenteServeur));
         }
-    }/* boucle tant que finThread vaut 0 */
+    }/* boucle tant que finThreadServeur vaut 0 */
+
 }
 
 void signalisationChargeServeur(int valeur)
 {
+    char* message;
+    char* messageValeur;
 
+    /* initialisation des variables */
+    message = malloc(50* sizeof(char));
+    messageValeur = malloc(5* sizeof(char));
+
+    /* création de la chaine à envoyer */
+    sprintf(messageValeur, "%d", valeur);
+    message = "xx charge ";
+    strcat(message, messageValeur);
+
+    /* envoi du message */
+    /** Ajouter un code de message pour la charge du serveur vesr l'annuaire */
+    ecritureSocket(socketAnnuaire, message)
+
+    /* libération de l'espace mémoire */
+    free(message);
+    free(messageValeur);
 }
 
 
 
 void envoiMessage(Client* client)
 {
+    char* buff;
+    FILE* fichierALire;
 
+    buff = malloc(65536 * sizeof(char));
+
+    /* ouverture du fichier */
+    fichierALire = fopen(client->nomFichier, "r");
+    /* récupération de la chaine appropriée */
+    lseek(fichierALire, client->numeroBloc * 65536, SEEK_SET);
+    fscanf(fichierALire, "%s", buff);
+    /* écriture des données sur la socket */
+    ecritureSocket(client->socketClient, buff);
+
+    /* fermeture du fichier */
+    fclose(fichierALire);
+    free(buff);
 }
 
 void arretServeur()
@@ -301,6 +461,7 @@ void arretServeur()
     char* numPortServeur;
 
     message = malloc(100* sizeof(char));
+    numPortServeur = malloc(10* sizeof(char));
 
     /* récupération du nom et du port du serveur */
     hp = gethostbyname("localhost");
@@ -313,6 +474,9 @@ void arretServeur()
 
     /* envoi du message à l'annuaire */
     ecritureSocket(socketAnnuaire, message);
+
+    free(message);
+    free(numPortServeur);
 }
 
 /**
