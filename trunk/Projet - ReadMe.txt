@@ -52,10 +52,10 @@ a) Format des messages qui transitent sur le réseau
 	-> du client vers l'annuaire
 		* Demande d'un fichier : 					03 fichier nomDeFichier
 		* Demande d'un bloc : 					04 bloc nomDeFichier numeroDeBloc
-		* Indication de fin de requête client :		05 arret adresseClient portClient 
+		* Indication de fin de requête client :		05 arret adresseClient 
 	-> du client vers le serveur
 		* Demande d'un bloc : 					06 bloc nomDeFichier numeroDeBloc
-		* Déconnexion du client :					07 arret adresseClient portClient
+		* Déconnexion du client :					07 arret adresseClient
 	-> du serveur vers l'annuaire
 		* Disponibilité pour chaque bloc :			08 bloc nomDeFichier nombreTotalDeBloc numeroDeBloc adresseServeur portServeur
 		* Indication d'arrêt du serveur :			09 arret adresseServeur portServeur

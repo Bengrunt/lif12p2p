@@ -13,6 +13,8 @@
 /**
 * Variables globales
 */
+
+FileAttenteTelechargements listeAttenteTelechargement;
 FileAttenteClients listeAttenteClient;
 int finThreadServeur;
 int finThreadClient;
@@ -27,10 +29,10 @@ int nbThreadClientLance;
 
 int main()
 {
-    int res;
     char adresseAnnuaire[100];
     int portAnnuaire;
     char resultat;
+    pthread_t variableThread;
 
     /* demande de la socket de l'annuaire */
     do
@@ -58,23 +60,16 @@ int main()
         {
             resultat = 'N';
         }
-    }
-    while (resultat == 'O' || resultat == 'o');
+    }while (resultat == 'O' || resultat == 'o');
 
-    /* La connexion à l'annuaire est établie : découpage de l'application en 2 processus : serveur et client*/
-    if ( (res = fork()) < 0)
-    {
-        printf("Erreur dans le fork !!!!! \n");
-        exit(1);
-    }
-    else if (res == 0)
-    {
-        applicationServeur();
-    }
-    else
-    {
-        applicationClient();
-    }
+    /* demande du port du serveur */
+    printf("Sur quel port voulez-vous lancer le serveur ?\n");
+    scanf("%d", &portServeur);
+
+    /* La connexion à l'annuaire est établie : lancement de 2 threads : serveur et client */
+    pthread_create(&variableThread, NULL, (void*(*)(void*))applicationServeur, NULL);
+    pthread_create(&variableThread, NULL, (void*(*)(void*))applicationClient, NULL);
+
     return 0;
 }
 
@@ -97,29 +92,22 @@ void applicationServeur()
     signalisationFichierAnnuaire(socketAnnuaire);
 
     /* création du thread pour écouter les demandes clients */
-    pthread_create(&variableThread, NULL, threadDialogueClient, NULL);
+    pthread_create(&variableThread, NULL, (void*(*)(void*))threadDialogueClient, NULL);
 
     /* création des threads pour envoyer des blocs */
-    pthread_create(&variableThread, NULL, threadEmmission, NULL);
+    pthread_create(&variableThread, NULL, (void*(*)(void*))threadEmmission, NULL);
 
-    /* surveillance du clavier pour détecter s'il y a une frappe */
+    /* Attente du changement de valeur de la variable "finThreadServeur" apres une lecture clavier */
     while (1)
     {
-        char buff[TAILLE_BUFF];
-        fgets(buff, TAILLE_BUFF, stdin);
-        /* Le dernier carractère est un retour chariot */
-        buff[strlen(buff)-1] = '\0';
-
-        if (strcmp(buff, "fin serveur") == 0)
+        if (finThreadServeur)
         {
-            /* si le texte "fin serveur" est entré : on arrete le serveur */
             break;
         }
     }
 
     /* arrêt du serveur */
     /* arrêt de tous les threads lancés */
-    finThreadServeur = 1;
     while(1)
     {
         /* on boucle tant qu'il y a au moins un thread lancé */
@@ -154,10 +142,6 @@ void threadDialogueClient()
     Socket socketDemandeConnexion;
     pthread_t variableThread;
 
-    /* demande du port du serveur */
-    printf("Sur quel port voulez-vous lancer le serveur ?\n");
-    scanf("%d", &portServeur);
-
     /* crée une socket et affectation de la socket */
     socketEcouteServeur = creationSocket();
     definitionNomSocket(socketEcouteServeur, portServeur);
@@ -169,7 +153,7 @@ void threadDialogueClient()
         socketDemandeConnexion = acceptationConnexion(socketEcouteServeur);
 
         /* création d'un thread pour dialoguer avec chaque client */
-        pthread_create(&variableThread, NULL, dialogueClient, (void*)socketDemandeConnexion);
+        pthread_create(&variableThread, NULL, (void*(*)(void*))dialogueClient, (void*)socketDemandeConnexion);
     }
     /* On sort de la boucle quand on recoit le signal "fin thread" : décrémentation du nombre de thread */
     nbThreadServeurLance--;
@@ -244,7 +228,7 @@ void dialogueClient(Socket socketDialogue)
         sprintf(numPortServeur, "%d", portServeur);
 
         /* création du message à envoyer au client */
-        message = "12 arret ";
+        message = "13 arret ";
         strcat(message, hp->h_addr_list[0]);
         strcat(message, " ");
         strcat(message, numPortServeur);
@@ -370,7 +354,7 @@ void traitementMessageArret(Socket socketDialogue, char* buff)
 void traitementMessageErreur(Socket socketDialogue)
 {
     /* envoi du message d'erreur */
-    ecritureSocket(socketDialogue, "13 erreur mauvais destinataire");
+    ecritureSocket(socketDialogue, "14 erreur mauvais destinataire");
 }
 
 void threadEmmission()
@@ -385,7 +369,7 @@ void threadEmmission()
         {
             /* incrémentation du nombre de thread et création du thread */
             nbThreadServeurLance++;
-            pthread_create(&variableThread, NULL, threadEnvoiMessage, NULL);
+            pthread_create(&variableThread, NULL, (void*(*)(void*))threadEnvoiMessage, NULL);
         }
     }
 }
@@ -483,10 +467,13 @@ void envoiMessage(Client* client)
 
 void arretServeur()
 {
+    /* variable temporaire */
     struct hostent *hp;
     char* message;
     char* numPortServeur;
+    Client* tempClient;
 
+    /* iniitalisation des variables */
     message = malloc(100* sizeof(char));
     numPortServeur = malloc(10* sizeof(char));
 
@@ -495,8 +482,9 @@ void arretServeur()
     sprintf(numPortServeur, "%d", portServeur);
 
     /* création du message à envoyer à l'annuaire */
-    message = "7 arret ";
+    message = "09 arret ";
     strcat(message, hp->h_addr_list[0]);
+    strcat(message, " ");
     strcat(message, numPortServeur);
 
     /* envoi du message à l'annuaire */
@@ -504,6 +492,19 @@ void arretServeur()
 
     free(message);
     free(numPortServeur);
+
+    /* vidage de la liste d'attente */
+    tempClient = listeAttenteClient.premierClient;
+    while (tempClient != NULL)
+    {
+        /* affectation du novueau premier élément de la liste */
+    	listeAttenteClient.premierClient = tempClient->clientSuivant;
+    	/* libération de l'espace mémoire occupé */
+    	free(tempClient->nomFichier);
+    	free(tempClient);
+        /* re-affectation du pointeur temporaire */
+    	tempClient = listeAttenteClient.premierClient;
+    }
 }
 
 /**
@@ -519,20 +520,87 @@ void applicationClient()
 
     /* lancement du thread de demande de fichier à l'annuaire */
     nbThreadClientLance++;
-    pthread_create(&variableThread, NULL, threadDemandeFichier, NULL);
+    pthread_create(&variableThread, NULL, (void*(*)(void*))threadDemandeFichier, NULL);
 
+    /* lancement des threads pour télécharger des blocs */
+    pthread_create(&variableThread, NULL, (void*(*)(void*))threadTelechargement, NULL);
 
-
-
+    /* Attente du changement de valeur de "finThreadClient" apres une lecture au clavier */
+    while (1)
+    {
+        if (finThreadClient)
+        {
+            break;
+        }
+    }
+/* arrêt du client */
+    /* arrêt de tous les threads lancés */
+    while(1)
+    {
+        /* on boucle tant qu'il y a au moins un thread lancé */
+        if (nbThreadClientLance != 0)
+        {
+            break;
+        }
+    }
+    /* suppression de la liste d'attente */
+    arretClient();
 
 }
 
 void threadDemandeFichier()
 {
 
+
+
+    /* boucle qui demande à l'utilisateur des fichiers à télécharger */
+    while (!finThreadClient)
+    {
+        char buff[TAILLE_BUFF];
+        printf("Veuillez entrer un nom de fichier a telecharger, ");
+        printf("vous pouvez aussi rentrer  \"fin client\" ou \"fin serveur\" ");
+        printf("pour arreter le client ou le serveur.\n ");
+
+
+/************** A refaire : l'arret du client coupe la lecture clavier *********************/
+
+        fgets(buff, TAILLE_BUFF, stdin);
+        /* Le dernier carractère est un retour chariot */
+        buff[strlen(buff)-1] = '\0';
+
+        if (strcmp(buff, "fin client") == 0)
+        {
+            /* si le texte "fin client" est entré : on arrete le client */
+            finThreadClient = 1;
+        }
+        else if (strcmp(buff, "fin serveur") == 0)
+        {
+            /* si le texte "fin client" est entré : on arrete le client */
+            finThreadServeur = 1;
+        }
+    }
+    /* décrémentation du nombre de thread */
+    nbThreadClientLance--;
 }
 
 void threadTelechargement()
+{
+    pthread_t variableThread;
+
+    /* boucler tant que l'arret du serveur n'a pas été demandée */
+    while(!finThreadClient)
+    {
+        /* s'il n'y a pas déjà trop de thread lancé */
+        if (nbThreadClientLance < NBTHREAD)
+        {
+            /* incrémentation du nombre de thread et création du thread */
+            nbThreadClientLance++;
+            pthread_create(&variableThread, NULL, (void*(*)(void*))threadRecuperationBloc, NULL);
+        }
+    }
+}
+
+void threadRecuperationBloc()
 {
 
 }
@@ -541,6 +609,46 @@ void threadTelechargement()
 {
 
 }*/
+
+void arretClient()
+{
+     /* variable temporaire */
+    struct hostent *hp;
+    char* message;
+    Telechargement* tempBloc;
+
+    /* iniitalisation des variables */
+    message = malloc(100* sizeof(char));
+
+    /* récupération du nom et du port du serveur */
+    hp = gethostbyname("localhost");
+
+    /* création du message à envoyer à l'annuaire */
+    message = "05 arret ";
+    strcat(message, hp->h_addr_list[0]);
+
+    /* envoi du message à l'annuaire */
+    ecritureSocket(socketAnnuaire, message);
+
+    free(message);
+
+    /* vidage de la liste d'attente */
+    tempBloc = listeAttenteTelechargement.premierTelechargement;
+    while (tempBloc != NULL)
+    {
+        /* affectation du novueau premier élément de la liste */
+    	listeAttenteTelechargement.premierTelechargement = tempBloc->telechargementSuivant;
+    	/* libération de l'espace mémoire occupé */
+    	free(tempBloc->nomFichier);
+    	free(tempBloc->adresseServeur);
+    	free(tempBloc);
+        /* re-affectation du pointeur temporaire */
+    	tempBloc = listeAttenteTelechargement.premierTelechargement;
+    }
+
+
+}
+
 
 /*****************
 * Fin de Fichier
