@@ -3,7 +3,7 @@
  * @project: lif12p2p
  * @author: Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
  * @since: 16/03/2009
- * @version: 26/03/2009
+ * @version: 31/03/2009
  */
 
 #ifndef ANNUAIRE_H
@@ -49,10 +49,12 @@ typedef struct Serveur
 typedef struct Bloc
 {
 	struct Serveur* listeServeurs;
+	int nbServeursDansListe;
 }Bloc;
 /**
 * @note: structure stockant la liste des serveurs possédant le bloc.
 * @param: listeServeurs : liste chainée de structures Serveur.
+* @param: nbServeursDansListe : nombre de serveurs répétoriés dans la liste.
 */
 
 typedef struct Fichier
