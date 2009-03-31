@@ -59,12 +59,13 @@ a) Format des messages qui transitent sur le réseau
 	-> du serveur vers l'annuaire
 		* Disponibilité pour chaque bloc :			08 bloc nomDeFichier nombreTotalDeBloc numeroDeBloc adresseServeur portServeur
 		* Indication d'arrêt du serveur :			09 arret adresseServeur portServeur
+		* Indication de charge serveur :			10 charge (-) 1
 	-> du serveur vers le client
-		* Envoi d'un bloc :						10 bloc nomDeFichier numeroDeBloc contenuDuBloc
-		* Bloc introuvable :						11 erreur nomDeFichier numeroDeBloc
-		* Déconnexion du serveur :				12 arret adresseServeur portServeur
+		* Envoi d'un bloc :						11 bloc nomDeFichier numeroDeBloc contenuDuBloc
+		* Bloc introuvable :						12 erreur nomDeFichier numeroDeBloc
+		* Déconnexion du serveur :				13 arret adresseServeur portServeur
 	-> entre n'importe quelle source et destinataire
-		* Réponse à un message inconnu :			13 erreur mauvais destinataire
+		* Réponse à un message inconnu :			14 erreur mauvais destinataire
 
 
 b) Annuaire

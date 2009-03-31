@@ -74,7 +74,8 @@ typedef struct BddFichiers
 {
 	int nbFichiers;
 	Fichier* listeFichiers;
-	pthread_mutex_t verrou_bddfich; /* mutex de la BddFichiers */
+	pthread_mutex_t verrou_bddfich_w; /* mutex de la BddFichiers en écriture */
+	pthread_mutex_t verrou_bddfich_r; /* mutex de la BddServeurs en lecture */
 }BddFichiers;
 /**
 * @note: gère la liste des fichiers référencés par l'annuaire.
@@ -103,7 +104,8 @@ typedef struct BddServeurs
 {
 	int nbServeurs;
 	InfoServeurs** tabServeurs;
-	pthread_mutex_t verrou_bddserv; /* mutex de la BddServeurs */
+	pthread_mutex_t verrou_bddserv_w; /* mutex de la BddServeurs en écriture */
+	pthread_mutex_t verrou_bddserv_r; /* mutex de la BddServeurs en lecture */
 }BddServeurs;
 /**
 * @note: gère la liste des serveurs en contact avec l'annuaire.
