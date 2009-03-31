@@ -123,7 +123,7 @@ void applicationServeur();
 * @param:
 */
 
-void signalisationFichierAnnuaire();
+void signalisationFichierAnnuaire(Socket socketAnnuaire);
 /**
 * @note: fonction qui signale les fichiers disponibles à l'annuaire
 * @param:
@@ -164,7 +164,13 @@ void traitementMessageArret(Socket socketDialogue, char* buff);
 
 void traitementMessageErreur(Socket socketDialogue);
 /**
-* @note: procédure qui
+* @note: procédure qui répond au message d'erreur
+* @param:
+*/
+
+void threadEmmission();
+/**
+* @note: procédure qui lance les threads d'emmission des blocs
 * @param:
 */
 
@@ -204,10 +210,9 @@ void applicationClient();
 * @param:
 */
 
-void demandeFichier();
+void threadDemandeFichier();
 /**
-* @note: demande à l'utilisateur un fichier à télécharger
-* @note: le met dans la liste des fichiers, et demande à l'annuaire
+* @note: demande à l'utilisateur un fichier à télécharger, le met dans la liste des fichiers, et demande à l'annuaire
 * @param:
 */
 
