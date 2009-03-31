@@ -59,6 +59,7 @@ typedef struct Telechargement
 	char* nomFichier;
 	char* adresseServeur;
 	int numPortServeur;
+	struct Telechargement* telechargementSuivant;
 }Telechargement;
 /**
 * @note: structure stockant les informations nécéssaires pour le téléchargement d'un bloc.
@@ -218,6 +219,12 @@ void threadDemandeFichier();
 
 void threadTelechargement();
 /**
+* @note: procédure qui lance en boucle des threads pour téléchargerdes blocs
+* @param:
+*/
+
+void threadRecuperationBloc();
+/**
 * @note: procédure à exécuter dans un thread pour télécharger un bloc
 * @note: la focntion boucle tant qu'il y a des blocs à télécharger
 * @param:
@@ -234,6 +241,14 @@ void telechargementBloc(Telechargement* );
 * @note: procédure qui demande et télécharge le bloc aupres du serveur
 * @param: Telechargement* : pointeur sur le bloc à télécharger
 */
+
+void arretClient();
+/**
+* @note: procédure qui signale l'arret du client à l'annuaire, et l'arrete
+* @param:
+*/
+
+
 
 
 #endif

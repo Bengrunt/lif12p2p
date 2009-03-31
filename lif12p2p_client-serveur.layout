@@ -2,7 +2,7 @@
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
 	<File name="client_serveur.c" open="1" top="1" tabpos="1">
-		<Cursor position="15191" topLine="144" />
+		<Cursor position="15220" topLine="188" />
 	</File>
 	<File name="client_serveur.h" open="1" top="0" tabpos="2">
 		<Cursor position="2832" topLine="81" />
