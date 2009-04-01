@@ -3,7 +3,7 @@
  * @project: lif12p2p
  * @author: Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
  * @since: 20/03/2009
- * @version: 30/03/2009
+ * @version: 01/04/2009
  */
 
 #include "client_serveur.h"
@@ -97,12 +97,20 @@ void applicationServeur()
     /* création des threads pour envoyer des blocs */
     pthread_create(&variableThread, NULL, (void*(*)(void*))threadEmmission, NULL);
 
-    /* Attente du changement de valeur de la variable "finThreadServeur" apres une lecture clavier */
-    while (1)
+    /* lecture du clavier en attente du message "fin serveur" */
+    while (!finThreadServeur)
     {
-        if (finThreadServeur)
+
+        char buff[TAILLE_BUFF];
+
+        fgets(buff, TAILLE_BUFF, stdin);
+        /* Le dernier carractère est un retour chariot */
+        buff[strlen(buff)-1] = '\0';
+
+        if (strcmp(buff, "fin serveur") == 0)
         {
-            break;
+            /* si le texte "fin serveur" est entré : on arrete le serveur */
+            finThreadServeur = 1;
         }
     }
 
@@ -180,6 +188,8 @@ void dialogueClient(Socket socketDialogue)
         {
             /* analyse du code :
                6 - message d'un client demandant un bloc
+               7 - message d'arrêt d'un client
+               14- fermeture du thread
                autre - message non destiné au serveur */
             switch (code)
             {
@@ -455,8 +465,10 @@ void envoiMessage(Client* client)
     /* ouverture du fichier */
     fichierALire = fopen(client->nomFichier, "r");
     /* récupération de la chaine appropriée */
-    lseek(fichierALire, (client->numeroBloc) * 65536, SEEK_SET);
-    fscanf(fichierALire, "%s", buff);
+    fseek(fichierALire, (client->numeroBloc) * 65536, SEEK_SET);
+
+    /** Utliser la fonction "read" pour récupérer un bloc dans un fichier */
+  /*  fscanf(fichierALire, "%s", buff);  */
     /* écriture des données sur la socket */
     ecritureSocket(client->socketClient, buff);
 
@@ -482,7 +494,7 @@ void arretServeur()
     sprintf(numPortServeur, "%d", portServeur);
 
     /* création du message à envoyer à l'annuaire */
-    message = "09 arret ";
+    message = "9 arret ";
     strcat(message, hp->h_addr_list[0]);
     strcat(message, " ");
     strcat(message, numPortServeur);
@@ -550,9 +562,6 @@ void applicationClient()
 
 void threadDemandeFichier()
 {
-
-
-
     /* boucle qui demande à l'utilisateur des fichiers à télécharger */
     while (!finThreadClient)
     {
@@ -560,9 +569,6 @@ void threadDemandeFichier()
         printf("Veuillez entrer un nom de fichier a telecharger, ");
         printf("vous pouvez aussi rentrer  \"fin client\" ou \"fin serveur\" ");
         printf("pour arreter le client ou le serveur.\n ");
-
-
-/************** A refaire : l'arret du client coupe la lecture clavier *********************/
 
         fgets(buff, TAILLE_BUFF, stdin);
         /* Le dernier carractère est un retour chariot */
@@ -575,12 +581,143 @@ void threadDemandeFichier()
         }
         else if (strcmp(buff, "fin serveur") == 0)
         {
-            /* si le texte "fin client" est entré : on arrete le client */
+            /* si le texte "fin serveur" est entré : on arrete le serveur */
             finThreadServeur = 1;
         }
+        else
+        {
+            /* traitement de la demande de téléchargement d'un fichier */
+            demandeFichier(buff);
+        }
+        /* boucle jusqu'à ce que le texte "fin client" est entré */
     }
     /* décrémentation du nombre de thread */
     nbThreadClientLance--;
+}
+
+void demandeFichier(char* nomFichier)
+{
+    int finDialogue;
+    char* message;
+    int code;
+    int nbBlocTotal;
+    int compteur;
+
+    /* initialisation */
+    finDialogue = 0;
+    compteur = 0;
+    message = malloc(200* sizeof(char));
+    /* demande à l'annuaire */
+    ecritureSocket(socketAnnuaire, nomFichier);
+
+    /* traitement de la réponse de l'annuaire */
+    while (!finDialogue)
+    {
+    	ecouteSocket(socketAnnuaire, message);
+
+    	if (sscanf(message, "%d", &code) == 1)
+        {
+            /* analyse du code :
+               1 - réponse positive de l'annuaire
+               2 - réponse négative de l'annuaire
+               autre - message non destiné au client */
+            switch (code)
+            {
+            case 1:
+                /* réponse positive de l'annuaire */
+                compteur++;
+                nbBlocTotal = traitementMessagePositif(message);
+                if (compteur == nbBlocTotal)
+                {
+                    finDialogue = 1;
+                }
+                break;
+            case 2:
+                /* message d'arret du client */
+                traitementMessageNegatif(message);
+                finDialogue = 1;
+                break;
+            default:
+                /* code inconnu : coupure du dialogue */
+                finDialogue = 1;
+                break;
+            }
+        }
+        else
+        {
+            /* le code au début du message reçu n'a pas été reconnu */
+            /* message ignoré */
+            perror("Le message suivant non reconnu a été reçu : ");
+            perror(message);
+        }
+    }
+    free(message);
+
+
+}
+
+int traitementMessagePositif(char* buff)
+{
+    /* variable */
+    int code;
+    char* mot;
+    Telechargement* blocAAjouter;
+    Fichier* fichierAAjouter;
+    int nbTotalBloc;
+
+    /* initialisation des variables */
+    blocAAjouter = malloc(sizeof(Telechargement));
+    blocAAjouter->nomFichier = malloc(100* sizeof(char));
+
+    /* récupération des champs du message */
+    if (sscanf(buff, "%d %s %s %d %d %s %d", &code, mot, blocAAjouter->nomFichier, &nbTotalBloc
+                   , &(blocAAjouter->numeroBloc), blocAAjouter->adresseServeur, &(blocAAjouter->numPortServeur)) == 7);
+    {
+        /* test si le fichier est déja dans la liste des fichiers */
+            /** verrou mutex sur la liste des fichiers (lecture) */
+        while (1)
+        {
+
+
+        }
+        /* si le fichier n'existe pas : ajout */
+        if(1)
+        {
+            fichierAAjouter = malloc(sizeof(Fichier));
+            /* allocation de la structure */
+            /** verrou mutex sur la liste des fichiers (écriture) */
+        }
+        /** libération des mutex (écriture et lecture) */
+
+
+        /* ajout du bloc du fichier dans la liste d'attente */
+        /** verrou mutex liste d'attente (écriture) */
+
+        /** libération du mutex liste d'attente (écriture) */
+    }
+
+
+
+
+}
+
+void traitementMessageNegatif(char* buff)
+{
+    int code;
+    char* mot;
+    char* nomFichier;
+
+    /* initialisation */
+    mot = malloc(10* sizeof(char));
+    nomFichier = malloc(40* sizeof(char));
+
+    /* affichage de l'échec de la recherche du fichier */
+    if(sscanf(buff, "%d %s %s", &code, mot, nomFichier) == 3)
+    {
+        printf("Le fichier suivant n'a pas été trouvé : %s\n", nomFichier);
+    }
+    free(mot);
+    free(nomFichier);
 }
 
 void threadTelechargement()

@@ -3,7 +3,7 @@
  * @project: lif12p2p
  * @author: Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
  * @since: 16/03/2009
- * @version: 26/03/2009
+ * @version: 01/04/2009
  */
 
 #ifndef CLIENT_SERVEUR_H
@@ -69,6 +69,7 @@ typedef struct Telechargement
 
 typedef struct FileAttenteTelechargements
 {
+    pthread_mutex_t mutexListeAttenteClient;
 	int nbTelechargements;
 	struct Telechargement* premierTelechargement;
 	struct Telechargement* dernierTelechargement;
@@ -91,7 +92,7 @@ typedef struct Fichier
 * @note: structure stockant les informations sur les fichiers en cours de traitement.
 * @param: nbBlocs : nombre de blocs du fichier.
 * @param: nomFichier : nom du fichier.
-* @param: statutBlocs : status du traitement des blocs:
+* @param: statutBlocs : tableau des status du traitement des blocs:
 * 			0 - Pas traité
 * 			1 - Traité
 * @param: fichierSuivant : pointeur sur le fichier suivant dans la liste.
@@ -99,6 +100,8 @@ typedef struct Fichier
 
 typedef struct ListeFichiers
 {
+    pthread_mutex_t mutexListeFichierEcriture;
+    pthread_mutex_t mutexListeFichierLecture;
 	int nbFichiers;
 	Fichier* listeFichiers;
 }ListeFichiers;
@@ -213,8 +216,27 @@ void applicationClient();
 
 void threadDemandeFichier();
 /**
-* @note: demande à l'utilisateur un fichier à télécharger, le met dans la liste des fichiers, et demande à l'annuaire
+* @note: demande à l'utilisateur un fichier à télécharger, et traite les messages d'arrêts
 * @param:
+*/
+
+void demandeFichier(char* nomFichier);
+/**
+* @note: met le fichier dans la liste des fichiers, et demande à l'annuaire
+* @param: nomFichier : nom du fichier à télécharger
+*/
+
+int traitementMessagePositif(char* buff);
+/**
+* @note: procédure qui analyse la réponse positive de l'annuaire
+* @param: buff : chaine de caractère à traiter
+* @param: la fonction retourne le nombre de bloc total du fichier
+*/
+
+void traitementMessageNegatif(char* buff);
+/**
+* @note: procédure qui analyse la réponse négative de l'annuaire
+* @param: buff : chaine de caractère à traiter
 */
 
 void threadTelechargement();
@@ -247,9 +269,6 @@ void arretClient();
 * @note: procédure qui signale l'arret du client à l'annuaire, et l'arrete
 * @param:
 */
-
-
-
 
 #endif
 /***************************
