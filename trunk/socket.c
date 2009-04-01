@@ -151,37 +151,29 @@ int demandeConnexionSocket(Socket s) /* On pourra passer le nom et le port du se
 
 void ecouteSocket(Socket s, char* buff)
 {
-        if( recv(s, buff, TAILLE_BUFF, 0) < 0)
-        {
-            perror("erreur à la réception");
-        }
+    if( recv(s, buff, TAILLE_BUFF, 0) < 0)
+    {
+        perror("erreur à la réception");
+    }
 }
 
-int ecritureSocket(Socket s, char* buff) /** ici, le message est lu au clavier, on pourra le passer en parametre */
+int ecritureSocket(Socket s, char* buff)
 {
     int sock_err; /* Une variable pour stocker les erreurs */
 
-  /*  while (1)
-    {*/
-/*        char buff[TAILLE_BUFF];
-        fgets(buff, TAILLE_BUFF, stdin); */
-            /* Le dernier carractère est un retour chariot */
-/*        buff[strlen(buff)-1] = '\0'; */
 
-
-        sock_err = send(s, (char*)buff, (strlen(buff)+1)*sizeof(char), MSG_NOSIGNAL);
-            /* s le socket sur laquel on ecrit */
-            /* buff le message écrit */
-            /* (strlen(buff)+1)*sizeof(char) la longueur du mesage */
-            /* MSG_NOSIGNAL lorsque la connexion est brisée, send renvoie une erreur et */
-            /*              ne génère pas de signaux (que je n'ai pas envie de traiter) */
-        if (sock_err < 0)
-        {
-            perror("erreur dans le send");
-            return 1;
-        }
-        return 0;
-   /*}*/
+    sock_err = send(s, (char*)buff, (strlen(buff)+1)*sizeof(char), MSG_NOSIGNAL);
+        /* s le socket sur laquel on ecrit */
+        /* buff le message écrit */
+        /* (strlen(buff)+1)*sizeof(char) la longueur du mesage */
+        /* MSG_NOSIGNAL lorsque la connexion est brisée, send renvoie une erreur et */
+        /*              ne génère pas de signaux (que je n'ai pas envie de traiter) */
+    if (sock_err < 0)
+    {
+        perror("erreur dans le send");
+        return 1;
+    }
+    return 0;
 }
 
 void clotureSocket(Socket s)
