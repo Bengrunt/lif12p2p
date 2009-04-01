@@ -34,6 +34,8 @@ int initialisationAnnuaire(BddServeurs * serveurs, BddFichiers * fichiers)
         perror("Echec de l'allocation en mémoire de la base de donnée des serveurs.\n");
         return -1;
     }
+    serveurs->nbServeurs=0;
+
     /* Creation des listes de fichiers */
     fichiers = malloc(sizeof(BddFichiers));
     if (serveurs == NULL)
@@ -41,6 +43,7 @@ int initialisationAnnuaire(BddServeurs * serveurs, BddFichiers * fichiers)
         perror("Echec de l'allocation en mémoire de la base de donnée des fichiers.\n");
         return -1;
     }
+    fichiers->nbFichiers=0;
 
     return 0;
 }
@@ -115,7 +118,7 @@ int traiteMessage(Socket arg)
                 traiteArretServeur(arg, buff);
                 fin_thread=0;
                 break;
-            case 14: /* Indiquation que l'on a envoyé des messages au mauvais destinataire sur la socket donc fermeture */
+            case 13: /* Indiquation que l'on a envoyé des messages au mauvais destinataire sur la socket donc fermeture */
                 fin_thread=0;
                 break;
             default: /* Un message géré par le réseau a bien été reçu mais inadapté donc la connexion
@@ -142,7 +145,8 @@ void traiteDemandeFichierClient(Socket s, char* mess)
 */
 {
 /* Variables */
-    int type_message; /* type du message : ici 03 */
+    int fichTrouve; /* Booléen indiquant si le fichier a été trouvé dans la BDD des fichiers */
+    int type_message; /* type du message : ici 3 */
     int i,j; /* itérateur */
 
     char* buff; /* tampon pour écriture du message */
@@ -155,9 +159,11 @@ void traiteDemandeFichierClient(Socket s, char* mess)
     Fichier* ptBddFichiers; /* pointeur de travail pour se déplacer dans la BDD des fichiers */
     Serveur* ptListeServeurs; /* pointeur de travail pour se déplacer dans la liste des serveurs d'un bloc */
 
+/* On initialise le booleen de réussite :p */
+    fichTrouve=1; /* On a pas encore trouvé le fichier */
 
 /* On récupère le contenu du message */
-/* Doit être de la forme "03 fichier nomDeFichier" */
+/* Doit être de la forme "3 fichier nomDeFichier" */
     if (sscanf(mess, "%d %s %s", &type_message, var_fichier, var_nomDeFichier ) < 3)
     {
         fprintf(stderr, "Message invalide, impossible de l'utiliser.\n Contenu du message: %s \n", mess);
@@ -175,19 +181,14 @@ void traiteDemandeFichierClient(Socket s, char* mess)
         if( strcmp( fichiers->listeFichiers->nomFichier, var_nomDeFichier ) == 0 )
         {
 /* Pour chaque bloc constituant du fichier on envoie un message indiquant où le télécharger au client */
+            buff=malloc(200*sizeof(char));
+
             for(i=ptBddFichiers->nbBlocs;i>0;i--)
             {
-                ptListeServeurs=ptBddFichiers->tabBlocs[i]->listeServeurs;
 
-                for(j=rand();j>0;j--)
-                {
-                    ptListeServeurs=ptListeServeurs->serveurSuivant;
-                }
 /* On envoie pour chaque bloc un message indiquant au client où télécharger chaque bloc */
 /* Message de la forme : "01 bloc nomDeFichier nombreTotalDeBloc numeroDeBloc adresseServeur portServeur" */
-                buff=malloc(200*sizeof(char));
-
-                strcat(buff, "01 bloc ");
+                strcpy(buff, "01 bloc ");
                 strcat(buff, ptBddFichiers->nomFichier);
                 strcat(buff, " ");
                 sprintf(str_nbBlocs, "%d", ptBddFichiers->nbBlocs);
@@ -196,23 +197,59 @@ void traiteDemandeFichierClient(Socket s, char* mess)
                 sprintf(str_numBloc, "%d", i);
                 strcat(buff, str_numBloc);
                 strcat(buff, " ");
-                strcat(buff, serveurs->tabServeurs[ptListeServeurs->numServeur]->adresseServeur);
-                strcat(buff, " ");
-                sprintf(str_numPort, "%d", serveurs->tabServeurs[ptListeServeurs->numServeur]->numPort);
-                strcat(buff, str_numPort);
+
+                ptListeServeurs=ptBddFichiers->tabBlocs[i].listeServeurs;
+
+/* On a des serveurs proposant ce bloc */
+                if(ptListeServeurs != NULL)
+                {
+/* On fait un rand parmi les serveurs pour répartir leur charge en attributan les requetes aléatoirement */
+                    for(j=rand()%ptBddFichiers->tabBlocs[i].nbServeursDansListe;j>=0;j--)
+                    {
+                        ptListeServeurs=ptListeServeurs->serveurSuivant;
+                    }
+
+                    strcat(buff, serveurs->tabServeurs[ptListeServeurs->numServeur]->adresseServeur);
+                    strcat(buff, " ");
+                    sprintf(str_numPort, "%d", serveurs->tabServeurs[ptListeServeurs->numServeur]->numPort);
+                    strcat(buff, str_numPort);
+
+                }
+/* On a pas de serveur proposant ce bloc, on envoie dans la réponse -1 -1 pour indiquer au client que des blocs sont manquants */
+                else
+                {
+                    strcat(buff, " -1 -1");
+                }
 
 /* Envoi du message sur la socket */
                 ecritureSocket(s,buff);
-
-/* Libération de la chaine après utilisation */
-                free(buff);
             }
+/* Libération de la chaine après utilisation */
+            free(buff);
+/* On a bien trouvé le fichier et envoyé le message */
+            fichTrouve=0;
         }
 /******** Le fichier n'a pas encore été trouvé, continue la recherche ********/
         else
         {
             ptBddFichiers = ptBddFichiers->fichierSuivant;
         }
+    }
+/******** Le fichier n'est pas dans la BDD des fichiers, on envoie une réponse défavorable au client *********/
+    if(!fichTrouve)
+    {
+/* On envoie un message de réponse défavorable au client */
+/* Message de la forme: "02 erreur nomDeFichier" */
+        buff=malloc(200*sizeof(char));
+
+        strcpy(buff, "02 erreur ");
+        strcat(buff, var_nomDeFichier);
+
+/* Envoi du message sur la socket */
+        ecritureSocket(s,buff);
+
+/* Libération de la chaine après utilisation */
+        free(buff);
     }
 
 /* On dévérouille en écriture la BDD des fichiers après la lecture */
@@ -227,7 +264,109 @@ void traiteDemandeBlocClient(Socket s, char* mess)
 * @param: mess : la demande de bloc client a traiter.
 */
 {
+/* Variables */
+    int type_message; /* type du message : ici 4 */
+    int var_numBloc; /* numero du bloc demandé */
+    int j; /* Itérateur */
+    int fichTrouve; /* Booléen indiquant si le fichier a été trouvé dans la BDD des fichiers */
 
+    char* buff; /* tampon pour écriture du message */
+    char* var_bloc; /* bloc */
+    char* var_nomDeFichier; /* nom du fichier auquel appartient le bloc */
+    char* str_nbBlocs; /* transformation du nombre de blocs du fichier en chaine de caractères */
+    char* str_numBloc; /* transformation du numéro du bloc du fichier en chaine de caractères */
+    char* str_numPort; /* transformation du numéro de port du serveur en chaine de caractères */
+
+    Fichier* ptBddFichiers; /* pointeur de travail pour se déplacer dans la BDD des fichiers */
+    Serveur* ptListeServeurs; /* pointeur de travail pour se déplacer dans la liste des serveurs d'un bloc */
+
+/* On récupère le contenu du message */
+/* Doit être de la forme "4 bloc nomDeFichier numeroDeBloc" */
+    if (sscanf(mess, "%d %s %s %d", &type_message, var_bloc, var_nomDeFichier, &var_numBloc ) < 4)
+    {
+        fprintf(stderr, "Message invalide, impossible de l'utiliser.\n Contenu du message: %s \n", mess);
+    }
+
+/* On vérrouille en ecriture la BDD des fichiers avant la lecture */
+    pthread_mutex_lock(&(fichiers->verrou_bddfich_w));
+
+/* On recherche ans la BDD des fichiers si on possède celui qui est demandé */
+    ptBddFichiers=fichiers->listeFichiers;
+
+    while( ptBddFichiers != NULL)
+    {
+/******** Le fichier demandé est trouvé ********/
+        if( strcmp( fichiers->listeFichiers->nomFichier, var_nomDeFichier ) == 0 )
+        {
+/* On envoie un message indiquant où télécharger le bloc demandé au client */
+            buff=malloc(200*sizeof(char));
+/* On envoie pour chaque bloc un message indiquant au client où télécharger chaque bloc */
+/* Message de la forme : "01 bloc nomDeFichier nombreTotalDeBloc numeroDeBloc adresseServeur portServeur" */
+            strcpy(buff, "01 bloc ");
+            strcat(buff, ptBddFichiers->nomFichier);
+            strcat(buff, " ");
+            sprintf(str_nbBlocs, "%d", ptBddFichiers->nbBlocs);
+            strcat(buff, str_nbBlocs);
+            strcat(buff, " ");
+            sprintf(str_numBloc, "%d", var_numBloc);
+            strcat(buff, str_numBloc);
+            strcat(buff, " ");
+
+            ptListeServeurs=ptBddFichiers->tabBlocs[var_numBloc].listeServeurs;
+
+/* On a des serveurs proposant ce bloc */
+            if(ptListeServeurs != NULL)
+            {
+/* On fait un rand parmi les serveurs pour répartir leur charge en attribuant les requetes aléatoirement */
+                for(j=rand()%ptBddFichiers->tabBlocs[var_numBloc].nbServeursDansListe;j>=0;j--)
+                {
+                    ptListeServeurs=ptListeServeurs->serveurSuivant;
+                }
+
+                strcat(buff, serveurs->tabServeurs[ptListeServeurs->numServeur]->adresseServeur);
+                strcat(buff, " ");
+                sprintf(str_numPort, "%d", serveurs->tabServeurs[ptListeServeurs->numServeur]->numPort);
+                strcat(buff, str_numPort);
+
+            }
+/* On a pas de serveur proposant ce bloc, on envoie dans la réponse -1 -1 pour indiquer au client que des blocs sont manquants */
+            else
+            {
+                strcat(buff, " -1 -1");
+            }
+
+/* Envoi du message sur la socket */
+            ecritureSocket(s,buff);
+/* Libération de la chaine après utilisation */
+            free(buff);
+/* On a bien trouvé le fichier et envoyé le message */
+            fichTrouve=0;
+        }
+/******** Le fichier n'a pas encore été trouvé, continue la recherche ********/
+        else
+        {
+            ptBddFichiers = ptBddFichiers->fichierSuivant;
+        }
+    }
+/******** Le fichier n'est pas dans la BDD des fichiers, on envoie une réponse défavorable au client *********/
+    if(!fichTrouve)
+    {
+/* On envoie un message de réponse défavorable au client */
+/* Message de la forme: "02 erreur nomDeFichier" */
+        buff=malloc(200*sizeof(char));
+
+        strcpy(buff, "02 erreur ");
+        strcat(buff, var_nomDeFichier);
+
+/* Envoi du message sur la socket */
+        ecritureSocket(s,buff);
+
+/* Libération de la chaine après utilisation */
+        free(buff);
+    }
+
+/* On dévérouille en écriture la BDD des fichiers après la lecture */
+    pthread_mutex_unlock(&fichiers->verrou_bddfich_r);
 }
 
 
@@ -334,6 +473,9 @@ int main(void)
 
     pthread_t* th_client; /* tableau de threads pour gerer les connexions clients */
 
+
+/* Initialisation de la graine pour utiliser le rand() */
+    srand(time(NULL));
 
 /* Initialisation de l'annuaire */
     printf("Bienvenue sur le programme lif12p2p.\n");
