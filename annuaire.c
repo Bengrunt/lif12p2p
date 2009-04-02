@@ -3,7 +3,7 @@
  * @project: lif12p2p
  * @author: Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
  * @since: 20/03/2009
- * @version: 31/03/2009
+ * @version: 02/04/2009
  */
 
 #include "annuaire.h"
@@ -388,7 +388,45 @@ void traiteBlocDisponibleServeur(Socket s, char* mess)
 * @param: mess : le message de nouveau bloc disponible a traiter.
 */
 {
+/* Variables */
+    int type_message; /* Type du message : ici 8 */
+    int var_nbBlocs; /*  nombre de blocs du fichier */
+    int var_numBloc; /* numero de bloc */
+    int var_portServeur; /* port du serveur */
 
+    char* var_bloc; /* bloc */
+    char* var_nomDeFichier; /* nom du fichier */
+    char* var_adresseServeur; /* adresse du serveur */
+
+    Fichier* ptListeFichiers; /*  */
+
+/* On récupère le contenu du message */
+/* Doit être de la forme "8 bloc nomDeFichier nombreTotalDeBloc numeroDeBloc adresseServeur portServeur" */
+    if (sscanf(mess, "%d %s %s %d %d %s %d", &type_message, var_bloc, var_nomDeFichier, &var_nbBlocs, &var_numBloc, var_adresseServeur, &var_portServeur ) < 7)
+    {
+        fprintf(stderr, "Message invalide, impossible de l'utiliser.\n Contenu du message: %s \n", mess);
+    }
+
+/* On vérouille la BDD des fichiers en lecture et en écriture avant l'écriture des nouvelles données */
+    pthread_mutex_lock(&fichiers->verrou_bddfich_r);
+    pthread_mutex_lock(&fichiers->verrou_bddfich_w);
+
+/* Mise à jour de la BDD des fichiers avec les nouvelles informations */
+    ptListeFichiers=fichiers->listeFichiers;
+/* Si il n'y a encore aucun fichier dans la BDD des fichiers */
+    if(ptListeFichiers == NULL)
+    {
+        ptListeFichiers=malloc(sizeof(Fichier));
+        ptListeFichiers->nomFichier=var_nomDeFichier;
+        ptListeFichiers->tabBlocs=malloc(sizeof(Serveur));
+        ptListeFichiers->nbBlocs++;
+        fichiers->nbFichiers++;
+    }
+/* Si il y a déjà des fichiers dans la BDD des fichiers */
+    else
+    {
+
+    }
 }
 
 void traiteArretServeur(Socket s, char* mess)
