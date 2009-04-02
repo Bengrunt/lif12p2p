@@ -35,15 +35,22 @@ int initialisationAnnuaire(BddServeurs * serveurs, BddFichiers * fichiers)
         return -1;
     }
     serveurs->nbServeurs=0;
+    serveurs->capaTabServeurs=1;
+    serveurs->tabServeurs=malloc(serveurs->capaTabServeurs*sizeof(InfoServeurs*));
+    pthread_mutex_init(&serveurs->verrou_bddserv_r, NULL);
+    pthread_mutex_init(&serveurs->verrou_bddserv_w, NULL);
 
     /* Creation des listes de fichiers */
     fichiers = malloc(sizeof(BddFichiers));
-    if (serveurs == NULL)
+    if (fichiers == NULL)
     {
         perror("Echec de l'allocation en mémoire de la base de donnée des fichiers.\n");
         return -1;
     }
     fichiers->nbFichiers=0;
+    fichiers->listeFichiers=NULL;
+    pthread_mutex_init(&fichiers->verrou_bddfich_r, NULL);
+    pthread_mutex_init(&fichiers->verrou_bddfich_w, NULL);
 
     return 0;
 }
@@ -152,8 +159,10 @@ void traiteDemandeFichierClient(Socket s, char* mess)
     char* buff; /* tampon pour écriture du message */
     char* var_fichier; /* fichier forcément */
     char* var_nomDeFichier; /* nom du fichier demandé */
+    char* str_idFichier; /* transformation de l'identificateur du fichier en chaine de caractères */
     char* str_nbBlocs; /* transformation du nombre de blocs du fichier en chaine de caractères */
     char* str_numBloc; /* transformation du numéro du bloc du fichier en chaine de caractères */
+    char* str_idServeur; /* transformation de l'identificateur de serveur en chaine de caractères */
     char* str_numPort; /* transformation du numéro de port du serveur en chaine de caractères */
 
     Fichier* ptBddFichiers; /* pointeur de travail pour se déplacer dans la BDD des fichiers */
@@ -187,8 +196,11 @@ void traiteDemandeFichierClient(Socket s, char* mess)
             {
 
 /* On envoie pour chaque bloc un message indiquant au client où télécharger chaque bloc */
-/* Message de la forme : "01 bloc nomDeFichier nombreTotalDeBloc numeroDeBloc adresseServeur portServeur" */
-                strcpy(buff, "01 bloc ");
+/* Message de la forme : "1 bloc idFichier nomDeFichier nombreTotalDeBloc numeroDeBloc idServeur adresseServeur portServeur" */
+                strcpy(buff, "1 bloc ");
+                sprintf(str_idFichier, "%d", ptBddFichiers->idFichier);
+                strcat(buff, str_idFichier);
+                strcat(buff, " ");
                 strcat(buff, ptBddFichiers->nomFichier);
                 strcat(buff, " ");
                 sprintf(str_nbBlocs, "%d", ptBddFichiers->nbBlocs);
@@ -209,6 +221,9 @@ void traiteDemandeFichierClient(Socket s, char* mess)
                         ptListeServeurs=ptListeServeurs->serveurSuivant;
                     }
 
+                    sprintf(str_idServeur, "%d", serveurs->tabServeurs[ptListeServeurs->numServeur]->idServeur);
+                    strcat(buff, str_idServeur);
+                    strcat(buff, " ");
                     strcat(buff, serveurs->tabServeurs[ptListeServeurs->numServeur]->adresseServeur);
                     strcat(buff, " ");
                     sprintf(str_numPort, "%d", serveurs->tabServeurs[ptListeServeurs->numServeur]->numPort);
@@ -242,7 +257,7 @@ void traiteDemandeFichierClient(Socket s, char* mess)
 /* Message de la forme: "02 erreur nomDeFichier" */
         buff=malloc(200*sizeof(char));
 
-        strcpy(buff, "02 erreur ");
+        strcpy(buff, "2 erreur ");
         strcat(buff, var_nomDeFichier);
 
 /* Envoi du message sur la socket */
@@ -266,6 +281,7 @@ void traiteDemandeBlocClient(Socket s, char* mess)
 {
 /* Variables */
     int type_message; /* type du message : ici 4 */
+    int var_idFichier; /* identificateur du fichier */
     int var_numBloc; /* numero du bloc demandé */
     int j; /* Itérateur */
     int fichTrouve; /* Booléen indiquant si le fichier a été trouvé dans la BDD des fichiers */
@@ -273,18 +289,21 @@ void traiteDemandeBlocClient(Socket s, char* mess)
     char* buff; /* tampon pour écriture du message */
     char* var_bloc; /* bloc */
     char* var_nomDeFichier; /* nom du fichier auquel appartient le bloc */
+    char* str_idFichier; /* transformation de l'identificateur du fichier en chaine de caractères */
     char* str_nbBlocs; /* transformation du nombre de blocs du fichier en chaine de caractères */
     char* str_numBloc; /* transformation du numéro du bloc du fichier en chaine de caractères */
+    char* str_idServeur; /* transformation de l'identificateur de serveur en chaine de caractères */
     char* str_numPort; /* transformation du numéro de port du serveur en chaine de caractères */
 
     Fichier* ptBddFichiers; /* pointeur de travail pour se déplacer dans la BDD des fichiers */
     Serveur* ptListeServeurs; /* pointeur de travail pour se déplacer dans la liste des serveurs d'un bloc */
 
 /* On récupère le contenu du message */
-/* Doit être de la forme "4 bloc nomDeFichier numeroDeBloc" */
-    if (sscanf(mess, "%d %s %s %d", &type_message, var_bloc, var_nomDeFichier, &var_numBloc ) < 4)
+/* Doit être de la forme "4 bloc idFichier nomDeFichier numeroDeBloc" */
+    if (sscanf(mess, "%d %s %d %s %d", &type_message, var_bloc, &var_idFichier, var_nomDeFichier, &var_numBloc ) < 5)
     {
         fprintf(stderr, "Message invalide, impossible de l'utiliser.\n Contenu du message: %s \n", mess);
+        exit(1);
     }
 
 /* On vérrouille en ecriture la BDD des fichiers avant la lecture */
@@ -296,13 +315,16 @@ void traiteDemandeBlocClient(Socket s, char* mess)
     while( ptBddFichiers != NULL)
     {
 /******** Le fichier demandé est trouvé ********/
-        if( strcmp( fichiers->listeFichiers->nomFichier, var_nomDeFichier ) == 0 )
+        if( strcmp( fichiers->listeFichiers->nomFichier, var_nomDeFichier ) == 0 && var_idFichier == fichiers->listeFichiers->idFichier)
         {
 /* On envoie un message indiquant où télécharger le bloc demandé au client */
             buff=malloc(200*sizeof(char));
 /* On envoie pour chaque bloc un message indiquant au client où télécharger chaque bloc */
-/* Message de la forme : "01 bloc nomDeFichier nombreTotalDeBloc numeroDeBloc adresseServeur portServeur" */
-            strcpy(buff, "01 bloc ");
+/* Message de la forme : "1 bloc idFichier nomDeFichier nombreTotalDeBloc numeroDeBloc idServeur adresseServeur portServeur" */
+            strcpy(buff, "1 bloc ");
+            sprintf(str_idFichier, "%d", ptBddFichiers->idFichier);
+            strcat(buff, str_idFichier);
+            strcat(buff, " ");
             strcat(buff, ptBddFichiers->nomFichier);
             strcat(buff, " ");
             sprintf(str_nbBlocs, "%d", ptBddFichiers->nbBlocs);
@@ -323,6 +345,9 @@ void traiteDemandeBlocClient(Socket s, char* mess)
                     ptListeServeurs=ptListeServeurs->serveurSuivant;
                 }
 
+                sprintf(str_idServeur, "%d", serveurs->tabServeurs[ptListeServeurs->numServeur]->idServeur);
+                strcat(buff, str_idServeur);
+                strcat(buff, " ");
                 strcat(buff, serveurs->tabServeurs[ptListeServeurs->numServeur]->adresseServeur);
                 strcat(buff, " ");
                 sprintf(str_numPort, "%d", serveurs->tabServeurs[ptListeServeurs->numServeur]->numPort);
@@ -355,7 +380,7 @@ void traiteDemandeBlocClient(Socket s, char* mess)
 /* Message de la forme: "02 erreur nomDeFichier" */
         buff=malloc(200*sizeof(char));
 
-        strcpy(buff, "02 erreur ");
+        strcpy(buff, "2 erreur ");
         strcat(buff, var_nomDeFichier);
 
 /* Envoi du message sur la socket */
@@ -390,19 +415,31 @@ void traiteBlocDisponibleServeur(Socket s, char* mess)
 {
 /* Variables */
     int type_message; /* Type du message : ici 8 */
+    int var_idFichier; /* identificateur du fichier */
     int var_nbBlocs; /*  nombre de blocs du fichier */
     int var_numBloc; /* numero de bloc */
+    int var_idServeur; /* identificateur du serveur */
     int var_portServeur; /* port du serveur */
+    int i; /* Itérateur */
+
+    int fichTrouve; /* booléen */
+    int servTrouve; /* booléen */
 
     char* var_bloc; /* bloc */
     char* var_nomDeFichier; /* nom du fichier */
     char* var_adresseServeur; /* adresse du serveur */
 
-    Fichier* ptListeFichiers; /*  */
+    Fichier* ptListeFichiers; /* pointeur de travail sur une liste de fichiers */
+    Serveur* ptListeServeurs; /* pointeur de travail sur une liste de serveurs */
+    InfoServeurs** temp; /* pointeur de travail sur un tableau de pointeurs sur InfoServeurs */
+
+/* Initialisation des booléens */
+    fichTrouve = 1;
+    servTrouve = 1;
 
 /* On récupère le contenu du message */
-/* Doit être de la forme "8 bloc nomDeFichier nombreTotalDeBloc numeroDeBloc adresseServeur portServeur" */
-    if (sscanf(mess, "%d %s %s %d %d %s %d", &type_message, var_bloc, var_nomDeFichier, &var_nbBlocs, &var_numBloc, var_adresseServeur, &var_portServeur ) < 7)
+/* Doit être de la forme "8 bloc idFichier nomDeFichier nombreTotalDeBloc numeroDeBloc idServeur adresseServeur portServeur" */
+    if (sscanf(mess, "%d %s %d %s %d %d %d %s %d", &type_message, var_bloc, &var_idFichier, var_nomDeFichier, &var_nbBlocs, &var_numBloc, &var_idServeur, var_adresseServeur, &var_portServeur ) < 7)
     {
         fprintf(stderr, "Message invalide, impossible de l'utiliser.\n Contenu du message: %s \n", mess);
     }
@@ -413,8 +450,59 @@ void traiteBlocDisponibleServeur(Socket s, char* mess)
 
 /* Mise à jour de la BDD des fichiers avec les nouvelles informations */
     ptListeFichiers=fichiers->listeFichiers;
-/* Si il n'y a encore aucun fichier dans la BDD des fichiers */
-    if(ptListeFichiers == NULL)
+
+/* On parcourre la liste des fichiers du début et on ajoute le nouveau fichier à la fin si on ne l'a pas trouvé dans la liste */
+    while(ptListeFichiers != NULL && fichTrouve) /* Tant qu'on est pas au bout de la liste ou qu'on a pas trouvé le fichier */
+    {
+        if( strcmp(ptListeFichiers->nomFichier, var_nomDeFichier) == 0 && ptListeFichiers->idFichier == var_idFichier) /* Si on trouve le fichier déjà référencé */
+        {
+            fichTrouve = 0;
+            ptListeServeurs=ptListeFichiers->tabBlocs[var_numBloc].listeServeurs;
+
+            while(ptListeServeurs != NULL && servTrouve) /* Tant qu'on arrive pas au bout de la liste des serveurs ou qu'on trouve le serveur déjà référencé */
+            {
+                if(serveurs->tabServeurs[ptListeServeurs->numServeur]->idServeur == var_idServeur) /* Si on trouve le serveur pas besoin de le rajouter */
+                {
+                    servTrouve = 0;
+                }
+                else  /* Sinon on continue */
+                {
+                    ptListeServeurs=ptListeServeurs->serveurSuivant;
+                }
+            }
+
+            if(!servTrouve) /* Si on a pas trouvé le serveur on le rajoute en fin de liste et on crée son entité dans la BDD des serveurs */
+            {
+                ptListeServeurs=malloc(sizeof(Serveur));
+                ptListeServeurs->serveurSuivant=NULL;
+
+                /* Création de son entité dans la BDD des serveurs */
+                if(serveurs->capaTabServeurs <= serveurs->nbServeurs) /* Si il n y a pas assez de place dans la tableau dynamique, on l'agrandit */
+                {
+                    temp=serveurs->tabServeurs;
+                    serveurs->tabServeurs=malloc(2*serveurs->capaTabServeurs*sizeof(InfoServeurs*));
+
+                    for(i=serveurs->nbServeurs;i>0;i--)
+                    {
+                        serveurs->tabServeurs[i]=temp[i];
+                    }
+                }
+
+                serveurs->tabServeurs[serveurs->nbServeurs]=malloc(sizeof(InfoServeurs*));
+                serveurs->tabServeurs[serveurs->nbServeurs]->adresseServeur = var_adresseServeur;
+                serveurs->tabServeurs[serveurs->nbServeurs]->idServeur = var_idServeur;
+                serveurs->tabServeurs[serveurs->nbServeurs]->numPort = var_portServeur;
+
+                serveurs->nbServeurs++;
+
+            }
+        }
+        else /* Sinon on continue */
+        {
+            ptListeFichiers=ptListeFichiers->fichierSuivant;
+        }
+    }
+    if(!fichTrouve) /* Si on ne trouve pas le fichier dans la BDD on le référence à la fin */
     {
         ptListeFichiers=malloc(sizeof(Fichier));
         ptListeFichiers->nomFichier=var_nomDeFichier;
@@ -422,11 +510,11 @@ void traiteBlocDisponibleServeur(Socket s, char* mess)
         ptListeFichiers->nbBlocs++;
         fichiers->nbFichiers++;
     }
-/* Si il y a déjà des fichiers dans la BDD des fichiers */
-    else
-    {
 
-    }
+
+/* On dévérouille la BDD des fichiers en lecture et en écriture */
+    pthread_mutex_unlock(&fichiers->verrou_bddfich_r);
+    pthread_mutex_unlock(&fichiers->verrou_bddfich_w);
 }
 
 void traiteArretServeur(Socket s, char* mess)

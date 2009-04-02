@@ -59,15 +59,19 @@ typedef struct Bloc
 
 typedef struct Fichier
 {
+    int idFichier;
 	char * nomFichier;
 	int nbBlocs;
+	int capaTabBlocs;
 	Bloc* tabBlocs;
 	struct Fichier* fichierSuivant;
 }Fichier;
 /**
 * @note: structure "cellule" stockant les informations sur les fichiers.
+* @param: idFichier : identificateur.
 * @param: nomFichier : nom du fichier.
 * @param: nbBlocs : nombre de blocs du fichier.
+* @param: capaTabBlocs : capacité max de tabBlocs.
 * @param: tabBlocs : tableau de structures Bloc contenant les informations sur chaque bloc.
 * @param: fichierSuivant : pointeur sur le fichier suivant.
 */
@@ -76,13 +80,15 @@ typedef struct BddFichiers
 {
 	int nbFichiers;
 	Fichier* listeFichiers;
-	pthread_mutex_t verrou_bddfich_w; /* mutex de la BddFichiers en écriture */
-	pthread_mutex_t verrou_bddfich_r; /* mutex de la BddServeurs en lecture */
+	pthread_mutex_t verrou_bddfich_w;
+	pthread_mutex_t verrou_bddfich_r;
 }BddFichiers;
 /**
 * @note: gère la liste des fichiers référencés par l'annuaire.
 * @param: nbFichiers : nombre de fichiers  référencés.
 * @param: listeFichiers : liste chainée de structures Fichier.
+* @param: verrou_bddfich_w : mutex de la BddFichiers en écriture.
+* @param: verrou_bddfich_r : mutex de la BddServeurs en lecture.
 */
 
 
@@ -92,11 +98,13 @@ typedef struct BddFichiers
 */
 typedef struct InfoServeurs
 {
+    int idServeur;
 	int numPort;
 	char* adresseServeur;
 }InfoServeurs;
 /**
 * @note: structure stockant les informations sur les serveurs.
+* @param: idServeur : identificateur.
 * @param: numPort : numéro de port du serveur.
 * @param: adresseServeur : adresse du serveur (IP ou hostname)
 */
@@ -105,14 +113,18 @@ typedef struct InfoServeurs
 typedef struct BddServeurs
 {
 	int nbServeurs;
+	int capaTabServeurs;
 	InfoServeurs** tabServeurs;
-	pthread_mutex_t verrou_bddserv_w; /* mutex de la BddServeurs en écriture */
-	pthread_mutex_t verrou_bddserv_r; /* mutex de la BddServeurs en lecture */
+	pthread_mutex_t verrou_bddserv_w;
+	pthread_mutex_t verrou_bddserv_r;
 }BddServeurs;
 /**
 * @note: gère la liste des serveurs en contact avec l'annuaire.
 * @param: nbServeurs : nombre de serveurs référencés dans la liste.
+* @param: capaTabServeurs : capacité max de tabServeurs.
 * @param: tabServeurs : tableau de pointeurs sur des structures de type InfoServeurs stockant les informations des serveurs référencés.
+* @param: verrou_bddserv_w : mutex de la BddServeurs en écriture.
+* @param: verrou_bddserv_r : mutex de la BddServeurs en lecture.
 */
 
 
