@@ -2,10 +2,10 @@
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
 	<File name="annuaire.c" open="1" top="1" tabpos="1">
-		<Cursor position="19519" topLine="468" />
+		<Cursor position="24225" topLine="582" />
 	</File>
 	<File name="annuaire.h" open="1" top="0" tabpos="2">
-		<Cursor position="2912" topLine="82" />
+		<Cursor position="154" topLine="54" />
 	</File>
 	<File name="socket.c" open="1" top="0" tabpos="4">
 		<Cursor position="6077" topLine="0" />
