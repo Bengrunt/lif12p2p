@@ -3,7 +3,7 @@
  * @project: lif12p2p
  * @author: Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
  * @since: 20/03/2009
- * @version: 02/04/2009
+ * @version: 03/04/2009
  */
 
 #include "annuaire.h"
@@ -178,8 +178,9 @@ void traiteDemandeFichierClient(Socket s, char* mess)
         fprintf(stderr, "Message invalide, impossible de l'utiliser.\n Contenu du message: %s \n", mess);
     }
 
-/* On vérrouille en ecriture la BDD des fichiers avant la lecture */
-    pthread_mutex_lock(&(fichiers->verrou_bddfich_w));
+/* On vérrouille en ecriture les BDD des fichiers et serveurs avant la lecture */
+    pthread_mutex_lock(&fichiers->verrou_bddfich_w);
+    pthread_mutex_lock(&serveurs->verrou_bddserv_w);
 
 /* On recherche ans la BDD des fichiers si on possède celui qui est demandé */
     ptBddFichiers=fichiers->listeFichiers;
@@ -267,8 +268,9 @@ void traiteDemandeFichierClient(Socket s, char* mess)
         free(buff);
     }
 
-/* On dévérouille en écriture la BDD des fichiers après la lecture */
-    pthread_mutex_unlock(&fichiers->verrou_bddfich_r);
+/* On dévérouille en écriture les BDD des fichiers et serveurs après la lecture */
+    pthread_mutex_unlock(&fichiers->verrou_bddfich_w);
+    pthread_mutex_unlock(&serveurs->verrou_bddserv_w);
 }
 
 
@@ -306,8 +308,9 @@ void traiteDemandeBlocClient(Socket s, char* mess)
         exit(1);
     }
 
-/* On vérrouille en ecriture la BDD des fichiers avant la lecture */
-    pthread_mutex_lock(&(fichiers->verrou_bddfich_w));
+/* On vérrouille en ecriture les BDD des fichiers et serveurs avant la lecture */
+    pthread_mutex_lock(&fichiers->verrou_bddfich_w);
+    pthread_mutex_lock(&serveurs->verrou_bddserv_w);
 
 /* On recherche ans la BDD des fichiers si on possède celui qui est demandé */
     ptBddFichiers=fichiers->listeFichiers;
@@ -390,8 +393,9 @@ void traiteDemandeBlocClient(Socket s, char* mess)
         free(buff);
     }
 
-/* On dévérouille en écriture la BDD des fichiers après la lecture */
-    pthread_mutex_unlock(&fichiers->verrou_bddfich_r);
+/* On dévérouille en écriture les BDD des fichiers et serveurs après la lecture */
+    pthread_mutex_unlock(&fichiers->verrou_bddfich_w);
+    pthread_mutex_unlock(&serveurs->verrou_bddserv_w);
 }
 
 
@@ -444,9 +448,11 @@ void traiteBlocDisponibleServeur(Socket s, char* mess)
         fprintf(stderr, "Message invalide, impossible de l'utiliser.\n Contenu du message: %s \n", mess);
     }
 
-/* On vérouille la BDD des fichiers en lecture et en écriture avant l'écriture des nouvelles données */
+/* On vérouille les BDD des fichiers et serveurs en lecture et en écriture avant l'écriture des nouvelles données */
     pthread_mutex_lock(&fichiers->verrou_bddfich_r);
     pthread_mutex_lock(&fichiers->verrou_bddfich_w);
+    pthread_mutex_lock(&serveurs->verrou_bddserv_r);
+    pthread_mutex_lock(&serveurs->verrou_bddserv_w);
 
 /* Mise à jour de la BDD des fichiers avec les nouvelles informations */
     ptListeFichiers=fichiers->listeFichiers;
@@ -515,6 +521,8 @@ void traiteBlocDisponibleServeur(Socket s, char* mess)
 /* On dévérouille la BDD des fichiers en lecture et en écriture */
     pthread_mutex_unlock(&fichiers->verrou_bddfich_r);
     pthread_mutex_unlock(&fichiers->verrou_bddfich_w);
+    pthread_mutex_unlock(&serveurs->verrou_bddserv_r);
+    pthread_mutex_unlock(&serveurs->verrou_bddserv_w);
 }
 
 void traiteArretServeur(Socket s, char* mess)
@@ -524,7 +532,99 @@ void traiteArretServeur(Socket s, char* mess)
 * @param: mess : le message d'arret serveur a traiter.
 */
 {
+/* Variables */
+    int type_message; /* type du message reçu : ici 9 */
+    int var_idServeur; /* identificateur du serveur */
+    int var_portServeur; /* port du serveur */
 
+    int i; /* itérateur */
+    int compt_nbServ; /* compteur de travail */
+
+    int sourceExiste; /* booléen */
+
+    char* var_arret; /* "arret" */
+    char* var_adresseServeur; /* adresse du serveur */
+
+    Fichier* ptListeFichiers; /* pointeur de travail sur la liste des fichiers de la BDD */
+    Serveur* ptListeServeurs; /* pointeur de travail sur la liste des serveurs de la BDD */
+    Serveur* ptTempServeur; /* pointeur de travail sur un Serveur */
+    Fichier* ptTempFichier; /* pointeur de travail sur un Fichier */
+
+/* Initialisation des booléens */
+    sourceExiste = 0;
+
+/* On récupère le contenu du message */
+/* Doit être de la forme "9 arret idServeur adresseServeur portServeur" */
+    if (sscanf(mess, "%d %s %d %s %d", &type_message, var_arret, &var_idServeur, var_adresseServeur, &var_portServeur) < 5)
+    {
+        fprintf(stderr, "Message invalide, impossible de l'utiliser.\n Contenu du message: %s \n", mess);
+    }
+
+/* On vérouille la BDD des fichiers en lecture et en écriture avant l'écriture des nouvelles données */
+    pthread_mutex_lock(&fichiers->verrou_bddfich_r);
+    pthread_mutex_lock(&fichiers->verrou_bddfich_w);
+    pthread_mutex_lock(&serveurs->verrou_bddserv_r);
+    pthread_mutex_lock(&serveurs->verrou_bddserv_w);
+
+/* On supprime de la BDD des fichiers les informations relatives au serveur qui s'arrete */
+    ptListeFichiers=fichiers->listeFichiers;
+    ptTempFichier=ptListeFichiers;
+
+    while(ptListeFichiers != NULL) /* Tant que l'on a pas parcouru toute la liste des fichiers */
+    {
+        for(i=ptListeFichiers->nbBlocs;i>0;i--) /* Pour chaque bloc du fichier */
+        {
+            ptListeServeurs=ptListeFichiers->tabBlocs[i].listeServeurs;
+            compt_nbServ=0;
+
+            while(serveurs->tabServeurs[ptListeServeurs->numServeur]->idServeur != var_idServeur || ptListeServeurs !=NULL) /* Tant que l'on a pas parcouru toute la liste des serveurs ou trouvé le serveur */
+            {
+                compt_nbServ++;
+                if( compt_nbServ == 1 && ptListeServeurs->serveurSuivant == NULL ) /* Si le serveur que l'on doit enlever est le seul de la liste */
+                {
+                    ptListeFichiers->tabBlocs[i].listeServeurs = NULL;
+                }
+                else /* Il restera au moins un serveur dans la liste donc inutile de mettre NULL */
+                {
+                    ptTempServeur = ptListeServeurs; /* /!\ CHECK THAT ! */
+                    ptListeServeurs = ptTempServeur->serveurSuivant; /* /!\ CHECK THAT ! */
+                    free(ptTempServeur); /* /!\ CHECK THAT ! */
+                }
+
+                ptListeServeurs=ptListeServeurs->serveurSuivant;
+            }
+        }
+
+        for(i=ptListeFichiers->nbBlocs;i>0;i--) /* On vérifie qu'il reste encore au moins un bloc disponible pour le fichier */
+        {
+            if(ptListeFichiers->tabBlocs[i].listeServeurs == NULL)
+            {
+                sourceExiste = 1; /* Plus aucun bloc n'est disponible pour le fichier */
+                break;
+            }
+        }
+
+        if(!sourceExiste) /* Auquel cas on le supprime de la BDD des fichiers */
+        {
+            ptTempFichier = ptListeFichiers; /* /!\ CHECK THAT ! */
+            ptListeFichiers = ptTempFichier->fichierSuivant; /* /!\ CHECK THAT ! */
+            free(ptTempFichier);  /* /!\ CHECK THAT ! */
+        }
+
+        ptListeFichiers=ptListeFichiers->fichierSuivant;
+    }
+
+/* On peut maintenant supprimer de la BDD des serveurs le serveur qui s'arrete */
+    for(i=serveurs->nbServeurs;i>0;i--)
+    {
+
+    }
+
+/* On dévérouille la BDD des fichiers en lecture et en écriture */
+    pthread_mutex_unlock(&fichiers->verrou_bddfich_r);
+    pthread_mutex_unlock(&fichiers->verrou_bddfich_w);
+    pthread_mutex_unlock(&serveurs->verrou_bddserv_r);
+    pthread_mutex_unlock(&serveurs->verrou_bddserv_w);
 }
 
 
@@ -558,6 +658,10 @@ void fermetureAnnuaire(BddServeurs * serveurs, BddFichiers * fichiers)
         free(serveurs->tabServeurs[j]);
     }
     free(serveurs->tabServeurs);
+
+    pthread_mutex_destroy(&serveurs->verrou_bddserv_r);
+    pthread_mutex_destroy(&serveurs->verrou_bddserv_w);
+
     free(serveurs);
 
 /* Destruction des listes de fichiers */
@@ -579,6 +683,10 @@ void fermetureAnnuaire(BddServeurs * serveurs, BddFichiers * fichiers)
         fichiers->listeFichiers=temp_fichier->fichierSuivant;
         free(temp_fichier);
     }
+
+    pthread_mutex_destroy(&fichiers->verrou_bddfich_r);
+    pthread_mutex_destroy(&fichiers->verrou_bddfich_w);
+
     free(fichiers);
 }
 
