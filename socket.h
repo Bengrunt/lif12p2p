@@ -62,7 +62,7 @@ Socket acceptationConnexion(Socket s);
 *
 */
 
-int demandeConnexionSocket(Socket s); /* On pourra passer le nom et le port du serveur en parametre */
+int demandeConnexionSocket(Socket s, char* nomServeur, int port); /* On pourra passer le nom et le port du serveur en parametre */
 /**
 * @note: procédure de demande de connexion
 * @param: la socket passée en parametre essai de se connecter à

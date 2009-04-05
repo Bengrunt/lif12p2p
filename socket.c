@@ -47,7 +47,7 @@ Socket creationSocket()
     return s;
 }
 
-void definitionNomSocket(Socket s, int port) /* on pourra rajouter le port en parametre */
+void definitionNomSocket(Socket s, int port)
 {
     int sock_err; /* Une variable pour stocker les erreurs */
     SOCKADDR_IN sin; /* La structure de description d'adresse */
@@ -60,11 +60,11 @@ void definitionNomSocket(Socket s, int port) /* on pourra rajouter le port en pa
     // (2.1) Définition d'un nom externe
     // Pour être atteind, le socket doit avoir un nom (couple adresse/port)
     // #####################################################*/
-    sin.sin_family         = AF_INET;              /* IPv4 */
-    sin.sin_port           = htons (port);       /* Le port d'écoute */
-    sin.sin_addr.s_addr    = htonl (INADDR_ANY);   /* Si la machine a plusieurs adresses */
-                                                 /* on les écoute toutes */
-                                                 /* Voir le code du client pour d'autre forme */
+    sin.sin_family         = AF_INET;               /* IPv4 */
+    sin.sin_port           = htons (port);          /* Le port d'écoute */
+    sin.sin_addr.s_addr    = htonl (INADDR_ANY);    /* Si la machine a plusieurs adresses */
+                                                    /* on les écoute toutes */
+                                                    /* Voir le code du client pour d'autre forme */
     sock_err = bind (s, (SOCKADDR *) &sin, sizeof(sin));
     if (sock_err < 0)
     {
@@ -101,34 +101,34 @@ Socket acceptationConnexion(Socket s)
     SOCKADDR_IN tadr;
     size_t recsize = sizeof(tadr);
 
-    t = accept (s, (SOCKADDR *) &tadr, &recsize); /*s : la socket d'attente */
-                                                /*tadr : la structure ou on va stocker les info sur le client */
-                                                /*recsize : donnée = la taille de tadr (pour éviter le dépassement) */
-                                                /*          resultat = la taille de ce qui est réellement mis dans tadr */
+    t = accept (s, (SOCKADDR *) &tadr, &recsize);   /* s : la socket d'attente */
+                                                    /* tadr : la structure ou on va stocker les info sur le client */
+                                                    /* recsize : donnée = la taille de tadr (pour éviter le dépassement) */
+                                                    /*          resultat = la taille de ce qui est réellement mis dans tadr */
 
     printf("Connection de %s sur le port %d\n", inet_ntoa (tadr.sin_addr), htons(tadr.sin_port));
     return t;
 }
 
-int demandeConnexionSocket(Socket s) /* On pourra passer le nom et le port du serveur en parametre */
+int demandeConnexionSocket(Socket s, char* nomServeur, int port)
 {
-    struct hostent *hp; /* Pour obtenir l'adresse du serveur à partir de son nom */
-    SOCKADDR_IN sin; /* La structure de description d'adresse */
-                   /* Elle dépend du réseau que nous allons utilisé */
-                   /* SOCKADDR_IN = Internet IPV4 */
-                   /* SOCKADDR_IN6 = Internet IPV6 */
-                   /* SOCKADDR_atalk = apple talk */
+    struct hostent *hp;    /* Pour obtenir l'adresse du serveur à partir de son nom */
+    SOCKADDR_IN sin;       /* La structure de description d'adresse */
+                           /* Elle dépend du réseau que nous allons utilisé */
+                           /* SOCKADDR_IN = Internet IPV4 */
+                           /* SOCKADDR_IN6 = Internet IPV6 */
+                           /* SOCKADDR_atalk = apple talk */
 
     /* ######################################################
     // (3) Préparation de la connexion
     // ensuite il faut retrouver l'adresse IP de l'hôte (ordinateur) hébergeant
     // le serveur à l'aide de la fonction gethostbyname()
     // #####################################################*/
-    hp = gethostbyname(NOM_SERVEUR); /* Pour le test c'est "localhost" */
+    hp = gethostbyname(nomServeur); /* Pour le test c'est "localhost" */
 
     /* Definition de l'adresse du serveur */
     sin.sin_family = AF_INET;
-    sin.sin_port = htons(PORT_SERVEUR); /* htons sert à transformer l'entier en entier 16bits */
+    sin.sin_port = htons(port); /* htons sert à transformer l'entier en entier 16bits */
     memcpy(&sin.sin_addr, hp->h_addr_list[0], hp->h_length); /* On copie le résultat de gethostbyname */
                                                    /* au bon endroit */
     /* Si on connait l'addresse IP On peut aussi utiliser */
@@ -160,7 +160,6 @@ void ecouteSocket(Socket s, char* buff)
 int ecritureSocket(Socket s, char* buff)
 {
     int sock_err; /* Une variable pour stocker les erreurs */
-
 
     sock_err = send(s, (char*)buff, (strlen(buff)+1)*sizeof(char), MSG_NOSIGNAL);
         /* s le socket sur laquel on ecrit */
