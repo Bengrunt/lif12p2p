@@ -115,6 +115,18 @@ typedef struct ListeFichiers
 /***********************************
 * Fonctions et procédures
 ***********************************/
+/**
+*
+*/
+
+int creationMessage(int code, void* structure, char* message);
+/**
+* @note: procédure créant le message approprié en chaine de cartactère
+* @param: code : entier correspondant au code du message à créer
+* @param: structure : pointeur sur la structure avec les "bonnes" données
+* @param: message : chaine de caractère contenant le message créé
+* @param: retourne 0 si le message est bien créé, 1 sinon
+*/
 
 /**
 * Application coté serveur
@@ -126,7 +138,7 @@ void applicationServeur();
 * @param:
 */
 
-void signalisationFichierAnnuaire(Socket socketAnnuaire);
+void signalisationFichierAnnuaire();
 /**
 * @note: fonction qui signale les fichiers disponibles à l'annuaire
 * @param:
@@ -141,34 +153,34 @@ void threadDialogueClient();
 void initialisationListeAttenteClient(FileAttenteClients listeAttente);
 /**
 * @note: procédure d'initialisation de la liste d'attente des clients
-* @param: listeAttente : liste d'attente à initialiser
+* @param: listeAttente : structure "liste d'attente" à initialiser
 */
 
 
 void dialogueClient(Socket socketDialogue);
 /**
 * @note: procédure dialoguant avec le client
-* @param:
+* @param: socketDialogue : socket de dialogue avec le client
 */
 
 void traitementMessageBloc(Socket socketDialogue, char* buff);
 /**
-* @note: procédure qui analyse le message reçu du client
-* @note: rempli la liste d'attente si besoin
-* @param:
+* @note: procédure qui analyse le message reçu du client (rempli la liste d'attente si besoin)
+* @param: socketDialogue : socket de dialogue avec le client
+* @param: buff : chaine de caractère contenant le message reçu du client
 */
 
 void traitementMessageArret(Socket socketDialogue, char* buff);
 /**
-* @note: procédure qui analyse le message reçu du client
-* @note: demandant une déconnexion du client
-* @param:
+* @note: procédure qui analyse le message reçu du client (demandant une déconnexion du client)
+* @param: socketDialogue : socket de dialogue avec le client
+* @param: buff : chaine de caractère contenant le message reçu du client
 */
 
 void traitementMessageErreur(Socket socketDialogue);
 /**
 * @note: procédure qui répond au message d'erreur
-* @param:
+* @param: socketDialogue : socket de dialogue avec le client
 */
 
 void threadEmmission();
@@ -193,7 +205,7 @@ void signalisationChargeServeur(int valeur);
 void envoiMessage(Client* client);
 /**
 * @note: cherche et envoie les données à transmettre
-* @param: les données sont écrites sur la socket passée en parametre (dans la structure client)
+* @param: client : pointeur sur la structure contenant les informations sur le bloc à envoyer
 */
 
 void arretServeur();
@@ -251,17 +263,25 @@ void threadRecuperationBloc();
 * @param:
 */
 
-Telechargement* rechercheBloc();
-/**
-* @note: fonction qui retourne le bloc suivant à télécharger
-* @param:
-*/
-
-void telechargementBloc(Telechargement* );
+void telechargementBloc(Telechargement* telechargementATraiter);
 /**
 * @note: procédure qui demande et télécharge le bloc aupres du serveur
-* @param: Telechargement* : pointeur sur le bloc à télécharger
+* @param: telechargementATraiter : pointeur sur le bloc à télécharger
 */
+
+void traitementMessageReceptionBloc(char* buff);
+/**
+* @note: procédure qui analyse la reception d'un bloc
+* @param: buff : chaine de caractère à traiter
+*/
+
+int traitementMessageBlocIntrouvable(char* buff, Telechargement* telechargementATraiter);
+/**
+* @note: procédure qui analyse le fait de ne pas avoir trouvé le bloc
+* @param: buff : chaine de caractère à traiter
+* @param: retourne 0 si l'annuaire a renvoyé un autre serveur pour récupérer le bloc, 1 sinon
+*/
+
 
 void arretClient();
 /**

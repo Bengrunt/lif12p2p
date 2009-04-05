@@ -25,7 +25,7 @@ int nbThreadClientLance;
 ListeFichiers listeFichier;
 
 /**
-* main
+* main et fonctions communes
 */
 
 int main()
@@ -48,7 +48,7 @@ int main()
         /* création de la socket */
         socketAnnuaire = creationSocket();
         /* connexion à l'annuaire */
-        if (demandeConnexionSocket(socketAnnuaire) == 1)
+        if (demandeConnexionSocket(socketAnnuaire, adresseAnnuaire, portAnnuaire) == 1)
         {
             /* si la connexion échoue, demande à l'utilisateur s'il veut recommencer avec un autre annuaire */
             printf("La connexion a l'annuaire a échouer ! Voulez-vous vous connecter sur un autre annuaire ? (O/N)\n");
@@ -75,6 +75,154 @@ int main()
     pthread_create(&variableThread, NULL, (void*(*)(void*))applicationServeur, NULL);
     pthread_create(&variableThread, NULL, (void*(*)(void*))applicationClient, NULL);
 
+    return 0;
+}
+
+int creationMessage(int code, void* structure, char* message)
+{
+    /* variables */
+    struct hostent *hp;         /* structure récupérant le nom du client */
+    char* tempChaine;           /* chaine de caractère temporaire pour passer les entiers en chaine */
+
+    /* initialisation */
+    tempChaine = malloc(100* sizeof(char));
+
+    switch (code)
+    {
+    	case 3 :
+    	/* message de demande de fichier à l'annuaire */
+            message = "3 fichier ";
+            strcat(message, (char*) structure);
+    		break;
+    	case 4 :
+    	/* message de demande de bloc à l'annuaire */
+            message = "4 bloc ";
+            sprintf(tempChaine, "%d", ((Telechargement*) structure)->idFichier);
+            strcat(message, tempChaine);
+            strcat(message, " ");
+            strcat(message, ((Telechargement*) structure)->nomFichier);
+            strcat(message, " ");
+            sprintf(tempChaine, "%d", ((Telechargement*) structure)->numeroBloc);
+            strcat(message, tempChaine);
+    		break;
+    	case 5 :
+    	/* message d'arret du client à l'annuaire */
+    	    /* récupération du nom et du port du serveur */
+            hp = gethostbyname("localhost");
+            /* création du message */
+            message = "5 arret ";
+            strcat(message, hp->h_addr_list[0]);
+            /* libération de l'espace mémoire */
+            free(hp);
+    		break;
+    	case 6 :
+    	/* message de demande de bloc à un serveur */
+            message = "6 bloc ";
+            sprintf(tempChaine, "%d", ((Telechargement*) structure)->idFichier);
+            strcat(message, tempChaine);
+            strcat(message, " ");
+            strcat(message, ((Telechargement*) structure)->nomFichier);
+            strcat(message, " ");
+            sprintf(tempChaine, "%d", ((Telechargement*) structure)->numeroBloc);
+            strcat(message, tempChaine);
+    		break;
+    	case 7 :
+    	/* message d'arret du client aux serveurs */
+            /* récupération du nom et du port du serveur */
+            hp = gethostbyname("localhost");
+            /* création du message */
+            message = "7 arret ";
+            strcat(message, hp->h_addr_list[0]);
+            /* libération de l'espace mémoire */
+            free(hp);
+            break;
+    	case 8 :
+    	/* message de disponibilité d'un bloc à l'annuaire */
+    	/* récupération du nom et du port du serveur */
+            hp = gethostbyname("localhost");
+            /* création du message */
+            message = "8 bloc ";
+            sprintf(tempChaine, "%d", ((*) structure)->idFichier);
+            strcat(message, tempChaine);
+            strcat(message, " ");
+            strcat(message, ((*) structure)->nomFichier);
+            strcat(message, " ");
+            sprintf(tempChaine, "%d", ((*) structure)->numTotalBloc);
+            strcat(message, tempChaine);
+            strcat(message, " ");
+            sprintf(tempChaine, "%d", ((*) structure)->numeroBloc);
+            strcat(message, tempChaine);
+            strcat(message, " ");
+            sprintf(tempChaine, "%d", ((*) structure)->idServeur);
+            strcat(message, tempChaine);
+            strcat(message, " ");
+            strcat(message, hp->h_addr_list[0]);
+            strcat(message, " ");
+            sprintf(tempChaine, "%d", portServeur);
+            strcat(message, tempChaine);
+            /* libération de l'espace mémoire */
+            free(hp);
+    		break;
+    	case 9 :
+    	/* message d'arret du serveur à l'annuaire */
+            /* récupération du nom et du port du serveur */
+            hp = gethostbyname("localhost");
+            /* création du message */
+            message = "9 arret ";
+            strcat(message, hp->h_addr_list[0]);
+            /* libération de l'espace mémoire */
+            free(hp);
+            break;
+    	case 10 :
+    	/* message de charge du serveur vers l'annuaire */
+            message = "10 charge ";
+            sprintf(tempChaine, "%d", *((int*) structure));
+            strcat(message, tempChaine);
+    		break;
+    	case 11:
+    	/* envoi d'un bloc d'un serveur à un client */
+            message = "11 bloc ";
+            sprintf(tempChaine, "%d", ((Client*) structure)->idFichier);
+            strcat(message, tempChaine);
+            strcat(message, " ");
+            strcat(message, ((Client*) structure)->nomFichier);
+            strcat(message, " ");
+            sprintf(tempChaine, "%d", ((Client*) structure)->numeroBloc);
+            strcat(message, tempChaine);
+    		break;
+    	case 12:
+    	/* envoi d'un bloc d'un serveur à un client */
+            message = "12 erreur ";
+            sprintf(tempChaine, "%d", ((Client*) structure)->idFichier);
+            strcat(message, tempChaine);
+            strcat(message, " ");
+            strcat(message, ((Client*) structure)->nomFichier);
+            strcat(message, " ");
+            sprintf(tempChaine, "%d", ((Client*) structure)->numeroBloc);
+            strcat(message, tempChaine);
+    		break;
+    	case 13:
+    	/* envoi d'un bloc d'un serveur à un client */
+            /* récupération du nom et du port du serveur */
+            hp = gethostbyname("localhost");
+            /* création du message */
+            message = "13 arret ";
+            sprintf(tempChaine, "%d", ((*) structure)->idServeur);
+            strcat(message, tempChaine);
+            strcat(message, " ");
+            strcat(message, hp->h_addr_list[0]);
+            strcat(message, " ");
+            sprintf(tempChaine, "%d", portServeur);
+            strcat(message, tempChaine);
+            /* libération de l'espace mémoire */
+            free(hp);
+    		break;
+    	default:
+    	/* code non reconnu */
+            return 1;
+    		break;
+    }
+    free(tempChaine);
     return 0;
 }
 
@@ -235,31 +383,17 @@ void dialogueClient(Socket socketDialogue)
     if (finThreadServeur == 1)
     {   /* il faut alors envoyer un message à tous les clients */
         /* variables */
-        struct hostent *hp;     /* structure pour récupérer le nom du serveur */
         char* message;          /* chaine de caractère pour créer le message à envoyer */
-        char* numPortServeur;   /* chaine de caractère comportant le numéro du port du serveur */
 
         /* initialisation */
         message = malloc(100* sizeof(char));
-        numPortServeur = malloc (10* sizeof(char));
-
-        /* récupération du nom et du port du serveur */
-        hp = gethostbyname("localhost");
-        sprintf(numPortServeur, "%d", portServeur);
-
-        /* création du message à envoyer au client */
-        message = "13 arret ";
-        strcat(message, hp->h_addr_list[0]);
-        strcat(message, " ");
-        strcat(message, numPortServeur);
-
+        /* création du message */
+        creationMessage(13, NULL, message);
         /* envoi du message */
         ecritureSocket(socketDialogue, message);
 
         /* libération de l'espace mémoire */
         free(message);
-        free(numPortServeur);
-        free(hp);
     }
     /* soit parce que le client le demande */
     clotureSocket(socketDialogue);
@@ -460,78 +594,71 @@ void signalisationChargeServeur(int valeur)
 {
     /* variables */
     char* message;          /* chaine de caractère pour le message à envoyer */
-    char* messageValeur;    /* chaine de caractère pour la valeur de la charge */
 
     /* initialisation des variables */
     message = malloc(50* sizeof(char));
-    messageValeur = malloc(5* sizeof(char));
-
     /* création de la chaine à envoyer */
-    sprintf(messageValeur, "%d", valeur);
-    message = "10 charge ";
-    strcat(message, messageValeur);
-
+    creationMessage(10, (void*) &valeur, message);
     /* envoi du message */
     ecritureSocket(socketAnnuaire, message);
-
     /* libération de l'espace mémoire */
     free(message);
-    free(messageValeur);
 }
 
+/** A finir */
 void envoiMessage(Client* client)
 {
     /* variables */
-    char* buff;             /* chaine de caractère pour le message à envoyer */
+    char* buff;             /* chaine de caractère pour le contenu du bloc */
+    char* message;          /* chaine de caractère pour le message à envoyer */
     FILE* fichierALire;     /* fichier dans lequel il faut lire les données */
 
     /* initialisation */
     buff = malloc(65536 * sizeof(char));
+    message = malloc(65736 * sizeof(char)); /* prévision de 200 caractère en plus du contenu du bloc */
 
     /* ouverture du fichier */
-    fichierALire = fopen(client->nomFichier, "r");
-    /* récupération de la chaine appropriée */
-    fseek(fichierALire, (client->numeroBloc) * 65536, SEEK_SET);
+    if(fichierALire = fopen(client->nomFichier, "r") == 0
+    {/* le fichier a été trouvé */
+        /* récupération de la chaine appropriée */
+        fseek(fichierALire, (client->numeroBloc) * 65536, SEEK_SET);
+        /** Utliser la fonction "read" pour récupérer un bloc dans un fichier */
+        /**  fscanf(fichierALire, "%s", buff);  */
 
-    /** Utliser la fonction "read" pour récupérer un bloc dans un fichier */
-  /*  fscanf(fichierALire, "%s", buff);  */
+        /* fermeture du fichier */
+        fclose(fichierALire);
+        /* création du message à envoyer */
+        creationMessage(11, (void*) client, message);
+        strcat(message, buff);
+    }
+    else
+    {/* le fichier n'a pas été trouvé */
+        /* création du message à envoyer */
+        creationMessage(12, (void*) client, message);
+    }
     /* écriture des données sur la socket */
-    ecritureSocket(client->socketClient, buff);
-
-    /* fermeture du fichier */
-    fclose(fichierALire);
+    ecritureSocket(client->socketClient, message);
+    /* libération de l'espace mémoire */
     free(buff);
+    free(message);
 }
 
 void arretServeur()
 {
     /* variable */
-    struct hostent *hp;
     char* message;
-    char* numPortServeur;
     Client* tempClient;
 
     /* iniitalisation des variables */
     message = malloc(100* sizeof(char));
-    numPortServeur = malloc(10* sizeof(char));
-
-    /* récupération du nom et du port du serveur */
-    hp = gethostbyname("localhost");
-    sprintf(numPortServeur, "%d", portServeur);
 
     /* création du message à envoyer à l'annuaire */
-    message = "9 arret ";
-    strcat(message, hp->h_addr_list[0]);
-    strcat(message, " ");
-    strcat(message, numPortServeur);
-
+    creationMessage(9, NULL, message);
     /* envoi du message à l'annuaire */
     ecritureSocket(socketAnnuaire, message);
 
     /* libération de l'espace mémoire */
     free(message);
-    free(numPortServeur);
-    free(hp);
 
     /* vidage de la liste d'attente */
     tempClient = listeAttenteClient.premierClient;
@@ -586,7 +713,6 @@ void applicationClient()
     }
     /* suppression de la liste d'attente */
     arretClient();
-
 }
 
 void threadDemandeFichier()
@@ -631,7 +757,8 @@ void threadDemandeFichier()
 void demandeFichier(char* nomFichier)
 {
     /* variables */
-    int finDialogue;    /* booléen indiquand l'arrêt (ou non) du dialogue */
+    int finDialogue;    /* booléen indiquant l'arrêt (ou non) du dialogue */
+    char* messageEnvoi; /* chaine de caractère stockant le message à envoyer */
     char* message;      /* chaine de caractère stockant le message reçu */
     int code;           /* entier stockant le code du message */
     int nbBlocTotal;    /* entier stockant le nombre total de message (1 par bloc) attendu */
@@ -641,8 +768,10 @@ void demandeFichier(char* nomFichier)
     finDialogue = 0;
     compteur = 0;
     message = malloc(200* sizeof(char));
+    messageEnvoi = malloc(200* sizeof(char));
     /* demande à l'annuaire */
-    ecritureSocket(socketAnnuaire, nomFichier);
+    creationMessage(3, (void*) nomFichier, messageEnvoi);
+    ecritureSocket(socketAnnuaire, messageEnvoi);
 
     /* traitement de la réponse de l'annuaire */
     while (!finDialogue)
@@ -741,7 +870,7 @@ int traitementMessagePositif(char* buff)
         pthread_mutex_unlock(&(listeFichier.mutexListeFichierLecture));
         pthread_mutex_unlock(&(listeFichier.mutexListeFichierEcriture));
 
-        /* ajout du bloc du fichier dans la liste d'attente */
+    /* ajout du bloc du fichier dans la liste d'attente */
         /** verrou mutex liste d'attente (écriture) */
         pthread_mutex_lock(&(listeAttenteTelechargement.mutexListeAttenteClient));
         /* incrémentation du nombre de téléchargement */
@@ -754,7 +883,6 @@ int traitementMessagePositif(char* buff)
         pthread_mutex_unlock(&(listeAttenteTelechargement.mutexListeAttenteClient));
 
     }
-
     /* libération de l'espace mémoire */
     free(mot);
     return nbTotalBloc;
@@ -783,13 +911,14 @@ void traitementMessageNegatif(char* buff)
 
 void threadTelechargement()
 {
-    pthread_t variableThread;
+    /* variables */
+    pthread_t variableThread;   /* variable pour lancer les threads de téléchargement */
 
     /* boucler tant que l'arret du serveur n'a pas été demandée */
     while(!finThreadClient)
     {
         /* s'il n'y a pas déjà trop de thread lancé */
-        if (nbThreadClientLance < NBTHREAD)
+        if ((nbThreadClientLance < NBTHREAD) && (listeAttenteTelechargement.premiertelechargement != NULL))
         {
             /* incrémentation du nombre de thread et création du thread */
             nbThreadClientLance++;
@@ -800,18 +929,119 @@ void threadTelechargement()
 
 void threadRecuperationBloc()
 {
+    /* variables */
+    Telechargement* telechargementATraiter;     /* pointeur sur le téléchargement à récupérer */
+
+    /** verrou mutex liste d'attente (écriture) */
+    pthread_mutex_lock(&(listeAttenteTelechargement.mutexListeAttenteClient));
+    /* récupération du premier élément en liste d'attente */
+    telechargementATraiter = listeAttenteTelechargement.premierTelechargement;
+    /* boucler tant qu'il y a un élément en liste d'attente */
+    while ((telechargementATraiter != NULL) && (!finThreadClient))
+    {
+    	/* suppression de l'élément de la liste d'attente */
+    	listeAttenteTelechargement.nbTelechargements--;
+    	listeAttenteTelechargement.premierTelechargement = telechargementATraiter.telechargementSuivant;
+    	/* cas où il n'y a plus aucun téléchargement en attente */
+    	if (listeAttenteTelechargement.nbTelechargements == 0)
+    	{
+    		listeAttenteTelechargement.dernierTelechargement = NULL;
+    	}
+    	/** libération du mutex liste d'attente (écriture) */
+        pthread_mutex_unlock(&(listeAttenteTelechargement.mutexListeAttenteClient));
+        /* téléchargement du bloc */
+        telechargementBloc(telechargementATraiter);
+        /* libération de l'espace mémoire */
+        free(telechargementATraiter->adresseServeur);
+        free(telechargementATraiter->nomFichier);
+        free(telechargementATraiter);
+
+        /** verrou mutex liste d'attente (écriture) */
+        pthread_mutex_lock(&(listeAttenteTelechargement.mutexListeAttenteClient));
+        /* re-affectation du pointeur temporaire pour le prochain téléchargement */
+        telechargementATraiter = listeAttenteTelechargement.premierTelechargement;
+    }
+
+    /** libération du mutex liste d'attente (écriture) */
+    pthread_mutex_unlock(&(listeAttenteTelechargement.mutexListeAttenteClient));
+}
+
+void telechargementBloc(Telechargement* telechargementATraiter)
+{
+    Socket socketDialogue;  /* socket de dialogue avec le serveur */
+    char* message;          /* chaine de caractère contenant le message destiné au serveur */
+    char* buff;             /* chaine de caractère récupérant la réponse du serveur */
+    int code;               /* entier correspondant au code du message reçu */
+    int finDialogue;        /* booléen indiquant l'arret du dialogue */
+
+    /* initialisation */
+    message = malloc(100* sizeof(char));
+    buff = malloc(65736* sizeof(char));
+    do
+    {
+        /* création d'une socket */
+        socketDialogue = creationSocket();
+        /* connexion à la socket du serveur */
+        demandeConnexionSocket(socketDialogue, telechargementATraiter->adresseServeur, telechargementATraiter->numPortServeur);
+        /* création du message à envoyer */
+        creationMessage(6, (void*) telechargementATraiter, message);
+        /* envoi de la demande de fichier */
+        ecritureSocket(socketDialogue, message);
+        /* récupération de la réponse du serveur */
+        ecouteSocket(socketDialogue, buff);
+        /* traitement de la réponse du serveur */
+        if (sscanf(buff, "%d", &code) == 1)
+        {
+            /* analyse du code :
+               11 - reception du bloc
+               12 - bloc introuvable
+               autre - message non destiné au client */
+            switch (code)
+            {
+            case 11:
+                /* reception du bloc */
+                traitementMessageReceptionBloc(buff);
+                break;
+            case 12:
+                /* bloc introuvable, nouvelle demande à l'annuaire */
+                finDialogue = traitementMessageBlocIntrouvable(buff, telechargementATraiter);
+                break;
+            default:
+                /* code inconnu : coupure du dialogue */
+                finDialogue = 1;
+                break;
+            }
+        }
+        else
+        {
+            /* le code au début du message reçu n'a pas été reconnu */
+            /* message ignoré */
+            perror("Le message suivant non reconnu a été reçu : ");
+            perror(message);
+        }
+        /* fermeture de la socket */
+        clotureSocket(socketDialogue);
+    /* boucle tant que la fin du dialogue n'est pas demandé */
+    }while((!finDialogue) && (!finThreadClient))
+
+    /* libération de l'espace mémoire */
+    free(message);
+    free(buff);
+}
+
+void traitementMessageReceptionBloc(char* buff)
+{
 
 }
 
-/*Telechargement* rechercheBloc()
+int traitementMessageBlocIntrouvable(char* buff, Telechargement* telechargementATraiter)
 {
 
-}*/
+}
 
 void arretClient()
 {
     /* variables */
-    struct hostent *hp;         /* structure récupérant le nom du client */
     char* message;              /* chaine de caractère pour le message à envoyer */
     Telechargement* tempBloc;   /* pointeur temporaire pour supprimer la liste d'attente */
     Fichier* tempFichier;       /* pointeur temporaire pour supprimer la liste de fichiers */
@@ -819,11 +1049,12 @@ void arretClient()
     /** envoi du message d'arret à l'annuaire */
     /* iniitalisation des variables */
     message = malloc(100* sizeof(char));
-    /* récupération du nom et du port du serveur */
-    hp = gethostbyname("localhost");
-    /* création du message à envoyer à l'annuaire */
-    message = "05 arret ";
-    strcat(message, hp->h_addr_list[0]);
+    /* création du message */
+    if (creationMessage(5, NULL, message) == 1)
+    {
+        printf("Erreur inconnu !!!\n");
+        exit(1);
+    }
     /* envoi du message à l'annuaire */
     ecritureSocket(socketAnnuaire, message);
     /* libération de l'espace mémoire */
@@ -856,7 +1087,6 @@ void arretClient()
     	tempFichier = listeFichier.listeFichiers;
     }
 }
-
 
 /*****************
 * Fin de Fichier
