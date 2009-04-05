@@ -3,14 +3,13 @@
  * @project: lif12p2p
  * @author: Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
  * @since: 16/03/2009
- * @version: 01/04/2009
+ * @version: 05/04/2009
  */
 
 #ifndef CLIENT_SERVEUR_H
 #define CLIENT_SERVEUR_H
 
 #include "socket.h"
-#include "pthread.h"
 
 /******************************************
 * Structures de données
