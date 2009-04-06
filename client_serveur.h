@@ -18,10 +18,12 @@
 /**
 * Gestion de la file d'attente des clients côté serveur.
 */
+
 typedef struct Client
 {
 	Socket socketClient;
 	int numeroBloc;
+	int idFichier;
 	char* nomFichier;
 	struct Client* clientSuivant;
 }Client;
@@ -32,7 +34,6 @@ typedef struct Client
 * @param: nomFichier : nom du fichier demandé.
 * @param: clientSuivant : pointeur sur le client suivant dans la file.
 */
-
 
 typedef struct FileAttenteClients
 {
@@ -48,6 +49,15 @@ typedef struct FileAttenteClients
 * @param: dernierClient : pointeur sur structure Client correspondant au dernier client de la file.
 */
 
+typedef struct StructureDisponibiliteBloc
+{
+    int idFichier;
+    char* nomFichier;
+    int numTotalBloc;
+    int numeroBloc;
+    int idServeur;
+}StructureDisponibiliteBloc;
+
 /**
 * Gestion de la file d'attente des telechargements côté client.
 */
@@ -55,6 +65,7 @@ typedef struct FileAttenteClients
 typedef struct Telechargement
 {
 	int numeroBloc;
+	int idFichier;
 	char* nomFichier;
 	char* adresseServeur;
 	int numPortServeur;
@@ -83,6 +94,7 @@ typedef struct FileAttenteTelechargements
 typedef struct Fichier
 {
 	int nbBlocs;
+	int idFichier;
 	char* nomFichier;
 	int* statutBlocs;
 	struct Fichier* fichierSuivant;
@@ -275,7 +287,7 @@ void traitementMessageReceptionBloc(char* buff);
 * @param: buff : chaine de caractère à traiter
 */
 
-int traitementMessageBlocIntrouvable(char* buff, Telechargement* telechargementATraiter);
+int traitementMessageBlocIntrouvable(Telechargement* telechargementATraiter);
 /**
 * @note: procédure qui analyse le fait de ne pas avoir trouvé le bloc
 * @param: buff : chaine de caractère à traiter
