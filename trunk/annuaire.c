@@ -500,6 +500,8 @@ void traiteBlocDisponibleServeur(Socket s, char* mess)
                 serveurs->tabServeurs[serveurs->nbServeurs]->numPort = var_portServeur;
 
                 serveurs->nbServeurs++;
+                ptListeServeurs->numServeur=serveurs->nbServeurs;
+                ptListeFichiers->tabBlocs[var_numBloc].nbServeursDansListe++;
 
             }
         }
@@ -537,8 +539,7 @@ void traiteArretServeur(Socket s, char* mess)
     int var_idServeur; /* identificateur du serveur */
     int var_portServeur; /* port du serveur */
 
-    int i; /* itérateur */
-    int compt_nbServ; /* compteur de travail */
+    int i,j; /* itérateur */
 
     int sourceExiste; /* booléen */
 
@@ -546,12 +547,16 @@ void traiteArretServeur(Socket s, char* mess)
     char* var_adresseServeur; /* adresse du serveur */
 
     Fichier* ptListeFichiers; /* pointeur de travail sur la liste des fichiers de la BDD */
+    Fichier* ptRetListeFichiers; /* pointeur de travail sur la liste des fichiers de la BDD */
+
     Serveur* ptListeServeurs; /* pointeur de travail sur la liste des serveurs de la BDD */
+    Serveur* ptRetListeServeurs; /* pointeur de travail sur la liste des serveurs de la BDD */
+
     Serveur* ptTempServeur; /* pointeur de travail sur un Serveur */
     Fichier* ptTempFichier; /* pointeur de travail sur un Fichier */
 
 /* Initialisation des booléens */
-    sourceExiste = 0;
+    sourceExiste = 1;
 
 /* On récupère le contenu du message */
 /* Doit être de la forme "9 arret idServeur adresseServeur portServeur" */
@@ -575,49 +580,75 @@ void traiteArretServeur(Socket s, char* mess)
         for(i=ptListeFichiers->nbBlocs;i>0;i--) /* Pour chaque bloc du fichier */
         {
             ptListeServeurs=ptListeFichiers->tabBlocs[i].listeServeurs;
-            compt_nbServ=0;
+            ptRetListeServeurs=NULL;
 
-            while(serveurs->tabServeurs[ptListeServeurs->numServeur]->idServeur != var_idServeur || ptListeServeurs !=NULL) /* Tant que l'on a pas parcouru toute la liste des serveurs ou trouvé le serveur */
+            while(ptListeServeurs !=NULL) /* Tant que l'on a pas parcouru toute la liste des serveurs */
             {
-                compt_nbServ++;
-                if( compt_nbServ == 1 && ptListeServeurs->serveurSuivant == NULL ) /* Si le serveur que l'on doit enlever est le seul de la liste */
+                if(serveurs->tabServeurs[ptListeServeurs->numServeur]->idServeur == var_idServeur) /* Si on trouve le serveur à supprimer */
                 {
-                    ptListeFichiers->tabBlocs[i].listeServeurs = NULL;
-                }
-                else /* Il restera au moins un serveur dans la liste donc inutile de mettre NULL */
-                {
-                    ptTempServeur = ptListeServeurs; /* /!\ CHECK THAT ! */
-                    ptListeServeurs = ptTempServeur->serveurSuivant; /* /!\ CHECK THAT ! */
-                    free(ptTempServeur); /* /!\ CHECK THAT ! */
-                }
+                    if( ptListeFichiers->tabBlocs[i].nbServeursDansListe == 1) /* Si il est le seul de la liste */
+                    {
+                        ptTempServeur=ptListeServeurs;
+                        free(ptTempServeur);
 
-                ptListeServeurs=ptListeServeurs->serveurSuivant;
+                        ptListeFichiers->tabBlocs[i].listeServeurs = NULL;
+                        ptListeFichiers->tabBlocs[i].nbServeursDansListe = 0;
+                        break;
+                    }
+                    else /* Sinon il restera au moins un serveur dans la liste donc inutile de mettre NULL */
+                    {
+                        ptTempServeur=ptListeServeurs;
+                        ptRetListeServeurs->serveurSuivant=ptListeServeurs->serveurSuivant;
+                        ptListeServeurs=ptListeServeurs->serveurSuivant;
+                        free(ptTempServeur);
+                        break;
+                    }
+                }
+                else /* Sinon on n'a pas encore trouvé le serveur à supprimer donc on continue à parcourir la liste des serveurs */
+                {
+                    ptRetListeServeurs=ptListeServeurs;
+                    ptListeServeurs=ptListeServeurs->serveurSuivant;
+                }
             }
         }
 
         for(i=ptListeFichiers->nbBlocs;i>0;i--) /* On vérifie qu'il reste encore au moins un bloc disponible pour le fichier */
         {
-            if(ptListeFichiers->tabBlocs[i].listeServeurs == NULL)
+            if(ptListeFichiers->tabBlocs[i].listeServeurs != NULL)
             {
-                sourceExiste = 1; /* Plus aucun bloc n'est disponible pour le fichier */
+                sourceExiste = 0; /* On a trouvé encore au moins un bloc pour le fichier */
                 break;
             }
         }
 
         if(!sourceExiste) /* Auquel cas on le supprime de la BDD des fichiers */
         {
-            ptTempFichier = ptListeFichiers; /* /!\ CHECK THAT ! */
-            ptListeFichiers = ptTempFichier->fichierSuivant; /* /!\ CHECK THAT ! */
-            free(ptTempFichier);  /* /!\ CHECK THAT ! */
+            ptTempFichier=ptListeFichiers;
+            ptRetListeFichiers->fichierSuivant=ptListeFichiers->fichierSuivant;
+            ptListeFichiers=ptListeFichiers->fichierSuivant;
+            free(ptTempFichier);
         }
-
-        ptListeFichiers=ptListeFichiers->fichierSuivant;
+        else /* Sinon on passe au fichier suivant */
+        {
+            ptRetListeFichiers=ptListeFichiers;
+            ptListeFichiers=ptListeFichiers->fichierSuivant;
+        }
     }
 
 /* On peut maintenant supprimer de la BDD des serveurs le serveur qui s'arrete */
     for(i=serveurs->nbServeurs;i>0;i--)
     {
+        if(serveurs->tabServeurs[i]->idServeur == var_idServeur) /* Si on trouve le serveur on le supprime */
+        {
+            free(serveurs->tabServeurs[i]);
+            for(j=i;j<serveurs->nbServeurs;j++)
+            {
+                serveurs->tabServeurs[j]=serveurs->tabServeurs[j+1];
+            }
+            serveurs->nbServeurs--;
 
+            break;
+        }
     }
 
 /* On dévérouille la BDD des fichiers en lecture et en écriture */
