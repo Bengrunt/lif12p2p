@@ -42,6 +42,7 @@
 			<Add option="-Wall" />
 			<Add option="-ansi" />
 			<Add option="-g" />
+			<Add option="-lefence -O0" />
 		</Compiler>
 		<Unit filename="annuaire.c">
 			<Option compilerVar="CC" />
