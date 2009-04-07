@@ -9,6 +9,7 @@
 #ifndef SOCKET_H
 #define SOCKET_H
 
+#include "errno.h"
 #include "error.h"
 #include "string.h"
 #include "stdio.h"

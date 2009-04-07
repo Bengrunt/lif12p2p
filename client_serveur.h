@@ -128,7 +128,7 @@ typedef struct ListeFichiers
 * Fonctions et procédures
 ***********************************/
 /**
-*
+* fonction et procédure communes
 */
 
 int creationMessage(int code, void* structure, char* message);
@@ -138,6 +138,18 @@ int creationMessage(int code, void* structure, char* message);
 * @param: structure : pointeur sur la structure avec les "bonnes" données
 * @param: message : chaine de caractère contenant le message créé
 * @param: retourne 0 si le message est bien créé, 1 sinon
+*/
+
+void threadLectureClavier();
+/**
+* @note: procédure à lancer dans un thread pour gérer toute la lecture clavier du programe
+* @param:
+*/
+
+void lireLigne(char* message);
+/**
+* @note: procédure qui récupère la ligne tapé au clavier (boucle s'il y a une ligne vide)
+* @param: message : chaine de caractère lu
 */
 
 /**
@@ -150,10 +162,10 @@ void applicationServeur();
 * @param:
 */
 
-void signalisationFichierAnnuaire();
+void signalisationFichierAnnuaire(char* nomFichier);
 /**
 * @note: fonction qui signale les fichiers disponibles à l'annuaire
-* @param:
+* @param: nomFichier : chaine de caractère contenant le nom du fichier à mettre sur le réseau
 */
 
 void threadDialogueClient();
@@ -162,7 +174,7 @@ void threadDialogueClient();
 * @param:
 */
 
-void initialisationListeAttenteClient(FileAttenteClients listeAttente);
+void initialisationListeAttenteClient();
 /**
 * @note: procédure d'initialisation de la liste d'attente des clients
 * @param: listeAttente : structure "liste d'attente" à initialiser
@@ -235,6 +247,12 @@ void applicationClient();
 /**
 * @note: Application coté serveur gérant le téléchargement des fichiers.
 * @param:
+*/
+
+void initialisationListeAttenteTelechargement();
+/**
+* @note: procédure d'initialisation de la liste d'attente des telechargements
+* @param: listeAttente : structure "liste d'attente" à initialiser
 */
 
 void threadDemandeFichier();
