@@ -148,7 +148,7 @@ typedef struct BddClients
 * Fonctions et procédures
 ***********************************/
 
-int initialisationAnnuaire(BddServeurs * serveurs, BddFichiers * fichiers);
+int initialisationAnnuaire();
 /**
 * @note: procédure d'initialisation de l'annuaire :  les listes de clients, de serveurs, de fichiers.
 * @param: serveurs : pointeur sur la base de données des serveurs.
@@ -217,7 +217,7 @@ void traiteMessageErr(Socket s, char* mess);
 */
 
 
-void fermetureAnnuaire(BddServeurs * serveurs, BddFichiers * fichiers);
+void fermetureAnnuaire();
 /**
 * @note: procédure de fermeture de l'annuaire de façon propre.
 * @param: serveurs : pointeur sur la base de données des serveurs.

@@ -19,7 +19,7 @@ BddFichiers* fichiers; /* pointeur sur la liste des fichiers connus */
 * Fonctions et procédures du module
 */
 
-int initialisationAnnuaire(BddServeurs * serveurs, BddFichiers * fichiers)
+int initialisationAnnuaire()
 /**
 * @note: procédure d'initialisation de l'annuaire :  les listes de clients, de serveurs, de fichiers.
 * @param: serveurs : pointeur sur la base de données des serveurs.
@@ -89,9 +89,9 @@ int traiteMessage(Socket arg)
     int fin_thread; /* booléen qui détermine si le thread doit se finir ou pas */
 
     /* boucle de traitement des messages */
-    buff=malloc(100*sizeof(char)); /* */
+    buff=malloc(200*sizeof(char));
 
-    fin_thread=1; /* booleen qui décide de l'arret du thread */
+    fin_thread=0; /* booleen qui décide de l'arret du thread */
 
     while (!fin_thread)
     {
@@ -105,6 +105,7 @@ int traiteMessage(Socket arg)
         }
         else
         {
+            printf("Message reçu.\n");
             /* On lance l'action correspondant au type de message. */
             switch (type_message)
             {
@@ -116,22 +117,22 @@ int traiteMessage(Socket arg)
                 break;
             case 5: /* Arret d'échange d'un client */
                 traiteArretClient(arg, buff);
-                fin_thread=0;
+                fin_thread=1;
                 break;
             case 8: /* Disponibilité d'un bloc */
                 traiteBlocDisponibleServeur(arg, buff);
                 break;
             case 9: /* Arret d'un serveur */
                 traiteArretServeur(arg, buff);
-                fin_thread=0;
+                fin_thread=1;
                 break;
             case 13: /* Indiquation que l'on a envoyé des messages au mauvais destinataire sur la socket donc fermeture */
-                fin_thread=0;
+                fin_thread=1;
                 break;
             default: /* Un message géré par le réseau a bien été reçu mais inadapté donc la connexion
                             doit être terminé car ce ne sont pas les bons interlocuteurs. */
                 traiteMessageErr(arg, buff);
-                fin_thread=0;
+                fin_thread=1;
             }
         }
     }
@@ -169,7 +170,16 @@ void traiteDemandeFichierClient(Socket s, char* mess)
     Serveur* ptListeServeurs; /* pointeur de travail pour se déplacer dans la liste des serveurs d'un bloc */
 
 /* On initialise le booleen de réussite :p */
-    fichTrouve=1; /* On a pas encore trouvé le fichier */
+    fichTrouve=0; /* On a pas encore trouvé le fichier */
+
+/* Allocations mémoire des chaines de caractère */
+    var_fichier=malloc(20*sizeof(char));
+    var_nomDeFichier=malloc(200*sizeof(char));
+    str_idFichier=malloc(20*sizeof(char));
+    str_idServeur=malloc(20*sizeof(char));
+    str_nbBlocs=malloc(20*sizeof(char));
+    str_numBloc=malloc(20*sizeof(char));
+    str_numPort=malloc(20*sizeof(char));
 
 /* On récupère le contenu du message */
 /* Doit être de la forme "3 fichier nomDeFichier" */
@@ -179,8 +189,8 @@ void traiteDemandeFichierClient(Socket s, char* mess)
     }
 
 /* On vérrouille en ecriture les BDD des fichiers et serveurs avant la lecture */
-    pthread_mutex_lock(&fichiers->verrou_bddfich_w);
-    pthread_mutex_lock(&serveurs->verrou_bddserv_w);
+    pthread_mutex_lock(&(fichiers->verrou_bddfich_w));
+    pthread_mutex_lock(&(serveurs->verrou_bddserv_w));
 
 /* On recherche ans la BDD des fichiers si on possède celui qui est demandé */
     ptBddFichiers=fichiers->listeFichiers;
@@ -243,7 +253,7 @@ void traiteDemandeFichierClient(Socket s, char* mess)
 /* Libération de la chaine après utilisation */
             free(buff);
 /* On a bien trouvé le fichier et envoyé le message */
-            fichTrouve=0;
+            fichTrouve=1;
         }
 /******** Le fichier n'a pas encore été trouvé, continue la recherche ********/
         else
@@ -268,9 +278,18 @@ void traiteDemandeFichierClient(Socket s, char* mess)
         free(buff);
     }
 
+/* Libérations mémoire de chaines de caractère */
+    free(var_fichier);
+    free(var_nomDeFichier);
+    free(str_idFichier);
+    free(str_idServeur);
+    free(str_nbBlocs);
+    free(str_numBloc);
+    free(str_numPort);
+
 /* On dévérouille en écriture les BDD des fichiers et serveurs après la lecture */
-    pthread_mutex_unlock(&fichiers->verrou_bddfich_w);
-    pthread_mutex_unlock(&serveurs->verrou_bddserv_w);
+    pthread_mutex_unlock(&(fichiers->verrou_bddfich_w));
+    pthread_mutex_unlock(&(serveurs->verrou_bddserv_w));
 }
 
 
@@ -300,6 +319,18 @@ void traiteDemandeBlocClient(Socket s, char* mess)
     Fichier* ptBddFichiers; /* pointeur de travail pour se déplacer dans la BDD des fichiers */
     Serveur* ptListeServeurs; /* pointeur de travail pour se déplacer dans la liste des serveurs d'un bloc */
 
+/* Initialisation des booléens */
+    fichTrouve=0;
+
+/* Allocations mémoire des chaines de caractère */
+    var_bloc=malloc(20*sizeof(char));
+    var_nomDeFichier=malloc(200*sizeof(char));
+    str_idFichier=malloc(20*sizeof(char));
+    str_idServeur=malloc(20*sizeof(char));
+    str_nbBlocs=malloc(20*sizeof(char));
+    str_numBloc=malloc(20*sizeof(char));
+    str_numPort=malloc(20*sizeof(char));
+
 /* On récupère le contenu du message */
 /* Doit être de la forme "4 bloc idFichier nomDeFichier numeroDeBloc" */
     if (sscanf(mess, "%d %s %d %s %d", &type_message, var_bloc, &var_idFichier, var_nomDeFichier, &var_numBloc ) < 5)
@@ -309,8 +340,8 @@ void traiteDemandeBlocClient(Socket s, char* mess)
     }
 
 /* On vérrouille en ecriture les BDD des fichiers et serveurs avant la lecture */
-    pthread_mutex_lock(&fichiers->verrou_bddfich_w);
-    pthread_mutex_lock(&serveurs->verrou_bddserv_w);
+    pthread_mutex_lock(&(fichiers->verrou_bddfich_w));
+    pthread_mutex_lock(&(serveurs->verrou_bddserv_w));
 
 /* On recherche ans la BDD des fichiers si on possède celui qui est demandé */
     ptBddFichiers=fichiers->listeFichiers;
@@ -368,7 +399,7 @@ void traiteDemandeBlocClient(Socket s, char* mess)
 /* Libération de la chaine après utilisation */
             free(buff);
 /* On a bien trouvé le fichier et envoyé le message */
-            fichTrouve=0;
+            fichTrouve=1;
         }
 /******** Le fichier n'a pas encore été trouvé, continue la recherche ********/
         else
@@ -392,6 +423,15 @@ void traiteDemandeBlocClient(Socket s, char* mess)
 /* Libération de la chaine après utilisation */
         free(buff);
     }
+
+/* Libérations mémoire de chaines de caractère */
+    free(var_bloc);
+    free(var_nomDeFichier);
+    free(str_idFichier);
+    free(str_idServeur);
+    free(str_nbBlocs);
+    free(str_numBloc);
+    free(str_numPort);
 
 /* On dévérouille en écriture les BDD des fichiers et serveurs après la lecture */
     pthread_mutex_unlock(&fichiers->verrou_bddfich_w);
@@ -556,7 +596,7 @@ void traiteArretServeur(Socket s, char* mess)
     Fichier* ptTempFichier; /* pointeur de travail sur un Fichier */
 
 /* Initialisation des booléens */
-    sourceExiste = 1;
+    sourceExiste = 0;
 
 /* On récupère le contenu du message */
 /* Doit être de la forme "9 arret idServeur adresseServeur portServeur" */
@@ -670,7 +710,7 @@ void traiteMessageErr(Socket s, char* mess)
 }
 
 
-void fermetureAnnuaire(BddServeurs * serveurs, BddFichiers * fichiers)
+void fermetureAnnuaire()
 /**
 * @note: procédure de fermeture de l'annuaire de façon propre.
 * @param: serveurs : pointeur sur la base de données des serveurs.
@@ -732,11 +772,10 @@ int main(void)
     Socket socketDemandeConnexion; /* Socket ouverte par un client */
 
     int quitter; /* Booléen pour savoir si on quitte ou pas */
-    int numport_ok; /* booleen pour l'entrée du port annuaire */
 
-    char numport_key; /* confirmation de réponse pour le port annuaire */
+    char* numport_key; /* confirmation de réponse pour le port annuaire */
 
-    pthread_t* th_client; /* tableau de threads pour gerer les connexions clients */
+    pthread_t th_client; /* tableau de threads pour gerer les connexions clients */
 
 
 /* Initialisation de la graine pour utiliser le rand() */
@@ -745,7 +784,7 @@ int main(void)
 /* Initialisation de l'annuaire */
     printf("Bienvenue sur le programme lif12p2p.\n");
     printf("Initialisation des bases de données de l'annuaire.\n");
-    if (initialisationAnnuaire(serveurs, fichiers)<0)
+    if (initialisationAnnuaire()<0)
     {
         perror("Problème lors de l'initialisation des bases de données de l'annuaire. \n Fermeture du programme.\n");
         exit(1);
@@ -753,38 +792,46 @@ int main(void)
 
 /* Initialisation de la socket d'écoute de l'annuaire */
 
-    do
+    while(1)
     {
+        numport_key=malloc(2*sizeof(char));
         /* NE FONCTIONNE PAS : A VERIFIER */
-        numport_ok=1;
-
         printf("Sur quel port souhaitez vous lancer le serveur annuaire?\n");
         scanf("%d",&portEcouteAnnuaire);
         printf("Vous avez choisi le port numero %d.\n",portEcouteAnnuaire);
+
         printf("Si ce choix vous convient appuyez sur 'Y' sinon appuyez sur n'importe quelle touche pour changer.\n");
-        scanf("%c",&numport_key);
-        printf("%c",numport_key);
-        if (numport_key=='y' || numport_key=='Y')
-            numport_ok=0;
+        scanf("%s",numport_key);
+
+        if (strcmp(numport_key,"y") || strcmp(numport_key, "Y"))
+        {
+            break;
+        }
 
     }
-    while (numport_ok);
 
     socketEcouteAnnuaire=initialiseSocketEcouteAnnuaire(portEcouteAnnuaire);
 
 /* Menu */
-    quitter=1;
+    quitter=0;
     nbthreads=0;
-    while (quitter)
+    while (!quitter)
     {
         socketDemandeConnexion=acceptationConnexion(socketEcouteAnnuaire);
 
-        pthread_create(&th_client[nbthreads+1], NULL, (void* (*)(void*))traiteMessage , (void*)socketDemandeConnexion );
-        nbthreads++;
+        if(pthread_create(&th_client, NULL, (void* (*)(void*))traiteMessage , (void*)socketDemandeConnexion ) != 0)
+        {
+            perror("Un thread de traitement de message n'a pas pu être créé. Message ignoré.\n");
+        }
+        else
+        {
+            nbthreads++;
+            printf("Il y a actuellement %d thread(s) de discussion ouvert(s).\n", nbthreads);
+        }
     }
 
 /* Fermeture de l'annuaire */
-    fermetureAnnuaire(serveurs, fichiers);
+    fermetureAnnuaire();
 
 
     return 0;
