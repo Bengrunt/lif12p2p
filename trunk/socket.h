@@ -3,7 +3,7 @@
  * @project: lif12p2p
  * @author: Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
  * @since: 19/03/2009
- * @version: 26/03/2009
+ * @version: 8/04/2009
  */
 
 #ifndef SOCKET_H
@@ -29,69 +29,70 @@
     #include "netdb.h"
 /*#endif
 */
+
+/**
+* Definition des types.
+*/
 typedef int Socket;
 typedef struct sockaddr_in SOCKADDR_IN;
 typedef struct sockaddr SOCKADDR;
 
-/**
-* @note: un "serveur" doit exécuter creationSocket, definitionSocket puis acceptationSocket
-* @note: un "client" doit exécuter creationSocket puis demande de connexion
-* @note: pour communiquer, les deux utilisent ecouteSocket et ecritureSocket
-* @note: enfin, toute socket doit etre fermée avec fermetureSocket
-*/
 
+/**
+* @note procédure de création d'une socket.
+* @return la socket créée est retournée.
+*/
 Socket creationSocket();
-/**
-* @note: procédure de création d'une socket
-* @param: la socket créée est retournée comme valeur de retour
-* @param:
-*
-*/
 
+
+/**
+* @note procédure de définition de nom d'une socket.
+* @param s : socket que l'on va lier à un numéro de port.
+* @param port : numéro de port auquel on va lier la socket s.
+*/
 void definitionNomSocket(Socket s, int port);
-/**
-* @note: procédure de définition de nom d'une socket.
-* @param: s : socket que l'on va lier à un numéro de port.
-* @param: port : numéro de port auquel on va lier la socket s.
-*/
 
+
+/**
+* @note procédure d'acceptation d'une connexion.
+* @param s : socket sur laquelle on accepte la connexion.
+* @return renvoie la socket sur laquelle la connexion est acceptée.
+*/
 Socket acceptationConnexion(Socket s);
-/**
-* @note: procédure d'acceptation d'une connexion
-* @param: la socket créée lors de l'acceptation de la connexion est
-* @param: renvoyée comme valeur de retour
-*
-*/
 
-int demandeConnexionSocket(Socket s, char* nomServeur, int port); /* On pourra passer le nom et le port du serveur en parametre */
-/**
-* @note: procédure de demande de connexion
-* @param: la socket passée en parametre essai de se connecter à
-* @param: une socket distante (nom d'hote et numéro de port en variable globale)
-*
-*/
 
-void ecouteSocket(Socket s, char* buff);
 /**
-* @note: fonction qui capture un message sur la socket s.
-* @param: s : socket d'écoute.
-* @param: buff : chaine de caractere stockant un message capturé.
+* @note procédure de demande de connexion à une socket.
+* @param la socket passée en parametre essai de se connecter à un serveur distant.
+* @param nomServeur : le nom du serveur.
+* @param port : le numero de port du serveur.
+* @return renvoie 0 si tout se passe bien, 1 sinon.
 */
+int demandeConnexionSocket(Socket s, char* nomServeur, int port);
 
-int ecritureSocket(Socket s, char* buff); /* ici, le message est lu au clavier, on pourra le passer en parametre */
+
 /**
-* @note: procédure d'envoi de message
-* @param: le message passé en parametre est envoyé sur la socket (en parametre)
-* @param: retourne 0 si tout se passe bien, 1 sinon
-*
+* @note procedure de capture de message sur une socket.
+* @param s : socket d'écoute.
+* @param buff : chaine de caractere stockant un message capturé.
 */
+void ecouteSocket(Socket s, char* buff, int taille_buff);
 
+
+/**
+* @note fonction d'envoi de message sur une socket.
+* @param s : socket sur laquelle on envoie le message.
+* @param buff : message que l'on veut envoyer.
+* @return retourne 0 si tout se passe bien, 1 sinon.
+*/
+int ecritureSocket(Socket s, char* buff, int taille_buff);
+
+
+/**
+* @note procédure de fermeture d'une socket.
+* @param s : socket que l'on ferme.
+*/
 void clotureSocket(Socket s);
-/**
-* @note: procédure de fermeture d'une socket
-* @param:
-*
-*/
 
 
 #endif
