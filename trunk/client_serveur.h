@@ -3,7 +3,7 @@
  * @project: lif12p2p
  * @author: Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
  * @since: 16/03/2009
- * @version: 05/04/2009
+ * @version: 08/04/2009
  */
 
 #ifndef CLIENT_SERVEUR_H
@@ -94,6 +94,7 @@ typedef struct Fichier
 {
     pthread_mutex_t mutexFichierEcriture;
     int longueurDernierBloc;
+    int tailleFichier;
 	int nbBlocs;
 	int idFichier;
 	char* nomFichier;
@@ -313,6 +314,11 @@ int traitementMessageBlocIntrouvable(Telechargement* telechargementATraiter);
 * @param: retourne 0 si l'annuaire a renvoyé un autre serveur pour récupérer le bloc, 1 sinon
 */
 
+void finalisationFichier(Fichier* pointeurFichier);
+/**
+* @note: procédure qui test si le fichier est complet (et le finalise le cas échéant)
+* @param:
+*/
 
 void arretClient();
 /**
