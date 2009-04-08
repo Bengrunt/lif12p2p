@@ -62,8 +62,8 @@ a) Format des messages qui transitent sur le réseau
 		* Indication d'arrêt du serveur :			52 idServeur adresseServeur portServeur
 		* Indication de charge serveur :			53 (-) 1
 	-> du serveur vers le client
-		* Envoi d'un bloc :						61 idFichier nomDeFichier numeroDeBloc
-											contenuDuBloc
+		* Envoi d'un bloc :						61 idFichier nomDeFichier numeroDeBloc 
+												contenuDuBloc
 		* Bloc introuvable :						62 idFichier nomDeFichier numeroDeBloc
 		* Déconnexion du serveur :				63 idServeur adresseServeur portServeur
 	-> entre n'importe quelle source et destinataire
