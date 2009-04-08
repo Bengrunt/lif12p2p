@@ -3,7 +3,7 @@
  * @project: lif12p2p
  * @author: Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
  * @since: 20/03/2009
- * @version: 03/04/2009
+ * @version: 08/04/2009
  */
 
 #include "annuaire.h"
@@ -19,15 +19,14 @@ BddFichiers* fichiers; /* pointeur sur la liste des fichiers connus */
 * Fonctions et procédures du module
 */
 
-int initialisationAnnuaire()
 /**
-* @note: procédure d'initialisation de l'annuaire :  les listes de clients, de serveurs, de fichiers.
-* @param: serveurs : pointeur sur la base de données des serveurs.
-* @param: fichiers : pointeur sur la base de données des fichiers.
-* @return: renvoie 0 si tout se passe bien, -1 sinon.
+* @note procédure d'initialisation de l'annuaire :  les listes de clients, de serveurs, de fichiers.
+* @brief modifie le contenu des variables globales serveurs et fichiers.
+* @return renvoie 0 si tout se passe bien, -1 sinon.
 */
+int initialisationAnnuaire()
 {
-    /* Creation des listes de serveurs */
+/* Creation des bases de données de serveurs */
     serveurs = malloc(sizeof(BddServeurs));
     if (serveurs == NULL)
     {
@@ -40,7 +39,7 @@ int initialisationAnnuaire()
     pthread_mutex_init(&serveurs->verrou_bddserv_r, NULL);
     pthread_mutex_init(&serveurs->verrou_bddserv_w, NULL);
 
-    /* Creation des listes de fichiers */
+/* Creation des bases de données de fichiers */
     fichiers = malloc(sizeof(BddFichiers));
     if (fichiers == NULL)
     {
@@ -56,49 +55,52 @@ int initialisationAnnuaire()
 }
 
 
-Socket initialiseSocketEcouteAnnuaire(int portAnnuaire)
 /**
-* @note: fonction d'initialisation de la socket d'écoute de l'annuaire.
-* @param: portAnnuaire : numéro de port sur lequel on crée la socket d'écoute.
-* @return: renvoie la socket créée.
+* @note fonction d'initialisation de la socket d'écoute de l'annuaire.
+* @param portAnnuaire : numéro de port sur lequel on crée la socket d'écoute.
+* @return renvoie la socket créée.
 */
+Socket initialiseSocketEcouteAnnuaire(int portAnnuaire)
 {
-    /* On déclare la socket pour l'annuaire */
+/* On déclare la socket pour l'annuaire */
     Socket socketEcouteAnnuaire;
 
-    /* On la crée */
+/* On la crée */
     socketEcouteAnnuaire=creationSocket();
 
-    /* On lie la socket au numero de port portAnnuaire */
+/* On lie la socket au numero de port portAnnuaire */
     definitionNomSocket(socketEcouteAnnuaire,portAnnuaire);
 
     return socketEcouteAnnuaire;
 }
 
 
-int traiteMessage(Socket arg)
 /**
-* @note: fonction globale de traitement d'un message reçu.
-* @param: arg : socket sur laquelle le message est arrivé.
-* @return: renvoir 0 si tout se passe bien, -1 sinon.
+* @note fonction globale de traitement d'un message reçu.
+* @param arg : socket sur laquelle le message est arrivé.
+* @return renvoie 0 si tout se passe bien, -1 sinon.
 */
+int traiteMessage(Socket arg)
 {
-    /* variables */
+/* variables */
     char* buff; /* Message lu sur la socket */
+
     int type_message; /* type de message */
     int fin_thread; /* booléen qui détermine si le thread doit se finir ou pas */
 
-    /* boucle de traitement des messages */
-    buff=malloc(200*sizeof(char));
-
+/* Initialisation des booléens */
     fin_thread=0; /* booleen qui décide de l'arret du thread */
 
+/* Allocation mémoire des chaines de caracteres */
+    buff=malloc(200*sizeof(char));
+
+/* boucle de traitement des messages */
     while (!fin_thread)
     {
-        /* on ecoute sur la socket arg */
+/* on ecoute sur la socket arg */
         ecouteSocket(arg, buff);
 
-        /* on analyse le type du message reçu et on agit en conséquence */
+/* on analyse le type du message reçu et on agit en conséquence */
         if (sscanf ( buff, "%d", &type_message) != 1 )
         {
             fprintf(stderr, "Message ignoré, impossible de l'analyser.\n Contenu du message: %s \n", buff);
@@ -106,7 +108,7 @@ int traiteMessage(Socket arg)
         else
         {
             printf("Message reçu.\n");
-            /* On lance l'action correspondant au type de message. */
+/* On lance l'action correspondant au type de message. */
             switch (type_message)
             {
             case 3: /* Demande d'un fichier */
@@ -137,7 +139,7 @@ int traiteMessage(Socket arg)
         }
     }
 
-    /* Fermeture de la socket arg */
+/* Fermeture de la socket arg */
     clotureSocket(arg);
 
     return 0;
@@ -145,12 +147,12 @@ int traiteMessage(Socket arg)
 }
 
 
-void traiteDemandeFichierClient(Socket s, char* mess)
 /**
-* @note: traitement d'un message de type demande de fichier d'un client.
-* @param: s : la socket sur laquelle la demande de fichier client a été émise.
-* @param: mess : la demande de fichier client a traiter.
+* @note traitement d'un message de type demande de fichier d'un client.
+* @param s : la socket sur laquelle la demande de fichier client a été émise.
+* @param mess : la demande de fichier client a traiter.
 */
+void traiteDemandeFichierClient(Socket s, char* mess)
 {
 /* Variables */
     int fichTrouve; /* Booléen indiquant si le fichier a été trouvé dans la BDD des fichiers */
@@ -158,7 +160,6 @@ void traiteDemandeFichierClient(Socket s, char* mess)
     int i,j; /* itérateur */
 
     char* buff; /* tampon pour écriture du message */
-    char* var_fichier; /* fichier forcément */
     char* var_nomDeFichier; /* nom du fichier demandé */
     char* str_idFichier; /* transformation de l'identificateur du fichier en chaine de caractères */
     char* str_nbBlocs; /* transformation du nombre de blocs du fichier en chaine de caractères */
@@ -173,7 +174,6 @@ void traiteDemandeFichierClient(Socket s, char* mess)
     fichTrouve=0; /* On a pas encore trouvé le fichier */
 
 /* Allocations mémoire des chaines de caractère */
-    var_fichier=malloc(20*sizeof(char));
     var_nomDeFichier=malloc(200*sizeof(char));
     str_idFichier=malloc(20*sizeof(char));
     str_idServeur=malloc(20*sizeof(char));
@@ -182,8 +182,8 @@ void traiteDemandeFichierClient(Socket s, char* mess)
     str_numPort=malloc(20*sizeof(char));
 
 /* On récupère le contenu du message */
-/* Doit être de la forme "3 fichier nomDeFichier" */
-    if (sscanf(mess, "%d %s %s", &type_message, var_fichier, var_nomDeFichier ) < 3)
+/* Doit être de la forme "3 nomDeFichier" */
+    if (sscanf(mess, "%d %s", &type_message, var_nomDeFichier ) < 2)
     {
         fprintf(stderr, "Message invalide, impossible de l'utiliser.\n Contenu du message: %s \n", mess);
     }
@@ -207,8 +207,8 @@ void traiteDemandeFichierClient(Socket s, char* mess)
             {
 
 /* On envoie pour chaque bloc un message indiquant au client où télécharger chaque bloc */
-/* Message de la forme : "1 bloc idFichier nomDeFichier nombreTotalDeBloc numeroDeBloc idServeur adresseServeur portServeur" */
-                strcpy(buff, "1 bloc ");
+/* Message de la forme : "1 idFichier nomDeFichier nombreTotalDeBloc numeroDeBloc idServeur adresseServeur portServeur" */
+                strcpy(buff, "1 ");
                 sprintf(str_idFichier, "%d", ptBddFichiers->idFichier);
                 strcat(buff, str_idFichier);
                 strcat(buff, " ");
@@ -279,7 +279,6 @@ void traiteDemandeFichierClient(Socket s, char* mess)
     }
 
 /* Libérations mémoire de chaines de caractère */
-    free(var_fichier);
     free(var_nomDeFichier);
     free(str_idFichier);
     free(str_idServeur);
@@ -293,12 +292,12 @@ void traiteDemandeFichierClient(Socket s, char* mess)
 }
 
 
-void traiteDemandeBlocClient(Socket s, char* mess)
 /**
-* @note: traitement d'un message de type demande de bloc d'un client.
-* @param: s : la socket sur laquelle la demande de bloc client a été émise.
-* @param: mess : la demande de bloc client a traiter.
+* @note traitement d'un message de type demande de bloc d'un client.
+* @param s : la socket sur laquelle la demande de bloc client a été émise.
+* @param mess : la demande de bloc client a traiter.
 */
+void traiteDemandeBlocClient(Socket s, char* mess)
 {
 /* Variables */
     int type_message; /* type du message : ici 4 */
@@ -308,7 +307,6 @@ void traiteDemandeBlocClient(Socket s, char* mess)
     int fichTrouve; /* Booléen indiquant si le fichier a été trouvé dans la BDD des fichiers */
 
     char* buff; /* tampon pour écriture du message */
-    char* var_bloc; /* bloc */
     char* var_nomDeFichier; /* nom du fichier auquel appartient le bloc */
     char* str_idFichier; /* transformation de l'identificateur du fichier en chaine de caractères */
     char* str_nbBlocs; /* transformation du nombre de blocs du fichier en chaine de caractères */
@@ -323,7 +321,6 @@ void traiteDemandeBlocClient(Socket s, char* mess)
     fichTrouve=0;
 
 /* Allocations mémoire des chaines de caractère */
-    var_bloc=malloc(20*sizeof(char));
     var_nomDeFichier=malloc(200*sizeof(char));
     str_idFichier=malloc(20*sizeof(char));
     str_idServeur=malloc(20*sizeof(char));
@@ -332,8 +329,8 @@ void traiteDemandeBlocClient(Socket s, char* mess)
     str_numPort=malloc(20*sizeof(char));
 
 /* On récupère le contenu du message */
-/* Doit être de la forme "4 bloc idFichier nomDeFichier numeroDeBloc" */
-    if (sscanf(mess, "%d %s %d %s %d", &type_message, var_bloc, &var_idFichier, var_nomDeFichier, &var_numBloc ) < 5)
+/* Doit être de la forme "4 idFichier nomDeFichier numeroDeBloc" */
+    if (sscanf(mess, "%d %d %s %d", &type_message, &var_idFichier, var_nomDeFichier, &var_numBloc ) < 4)
     {
         fprintf(stderr, "Message invalide, impossible de l'utiliser.\n Contenu du message: %s \n", mess);
         exit(1);
@@ -355,7 +352,7 @@ void traiteDemandeBlocClient(Socket s, char* mess)
             buff=malloc(200*sizeof(char));
 /* On envoie pour chaque bloc un message indiquant au client où télécharger chaque bloc */
 /* Message de la forme : "1 bloc idFichier nomDeFichier nombreTotalDeBloc numeroDeBloc idServeur adresseServeur portServeur" */
-            strcpy(buff, "1 bloc ");
+            strcpy(buff, "1 ");
             sprintf(str_idFichier, "%d", ptBddFichiers->idFichier);
             strcat(buff, str_idFichier);
             strcat(buff, " ");
@@ -425,7 +422,6 @@ void traiteDemandeBlocClient(Socket s, char* mess)
     }
 
 /* Libérations mémoire de chaines de caractère */
-    free(var_bloc);
     free(var_nomDeFichier);
     free(str_idFichier);
     free(str_idServeur);
@@ -439,23 +435,23 @@ void traiteDemandeBlocClient(Socket s, char* mess)
 }
 
 
-void traiteArretClient(Socket s, char* mess)
 /**
-* @note: traitement d'un message de type arret d'échange client.
-* @param: s : la socket sur laquelle le message d'arret client a été émis.
-* @param: mess : le message d'arret client a traiter.
+* @note traitement d'un message de type arret d'échange client.
+* @param s : la socket sur laquelle le message d'arret client a été émis.
+* @param mess : le message d'arret client a traiter.
 */
+void traiteArretClient(Socket s, char* mess)
 {
 
 }
 
 
-void traiteBlocDisponibleServeur(Socket s, char* mess)
 /**
-* @note: traitement d'un message de type nouveau bloc disponible sur serveur.
-* @param: s : la socket sur laquelle le message de nouveau bloc disponible sur serveur a été émis.
-* @param: mess : le message de nouveau bloc disponible a traiter.
+* @note traitement d'un message de type nouveau bloc disponible sur serveur.
+* @param s : la socket sur laquelle le message de nouveau bloc disponible sur serveur a été émis.
+* @param mess : le message de nouveau bloc disponible a traiter.
 */
+void traiteBlocDisponibleServeur(Socket s, char* mess)
 {
 /* Variables */
     int type_message; /* Type du message : ici 8 */
@@ -469,7 +465,6 @@ void traiteBlocDisponibleServeur(Socket s, char* mess)
     int fichTrouve; /* booléen */
     int servTrouve; /* booléen */
 
-    char* var_bloc; /* bloc */
     char* var_nomDeFichier; /* nom du fichier */
     char* var_adresseServeur; /* adresse du serveur */
 
@@ -478,12 +473,16 @@ void traiteBlocDisponibleServeur(Socket s, char* mess)
     InfoServeurs** temp; /* pointeur de travail sur un tableau de pointeurs sur InfoServeurs */
 
 /* Initialisation des booléens */
-    fichTrouve = 1;
-    servTrouve = 1;
+    fichTrouve = 0;
+    servTrouve = 0;
+
+/* Allocations mémoire des chaines de caractère */
+    var_nomDeFichier=malloc(200*sizeof(char));
+    var_adresseServeur=malloc(200*sizeof(char));
 
 /* On récupère le contenu du message */
-/* Doit être de la forme "8 bloc idFichier nomDeFichier nombreTotalDeBloc numeroDeBloc idServeur adresseServeur portServeur" */
-    if (sscanf(mess, "%d %s %d %s %d %d %d %s %d", &type_message, var_bloc, &var_idFichier, var_nomDeFichier, &var_nbBlocs, &var_numBloc, &var_idServeur, var_adresseServeur, &var_portServeur ) < 7)
+/* Doit être de la forme "8 idFichier nomDeFichier nombreTotalDeBloc numeroDeBloc idServeur adresseServeur portServeur" */
+    if (sscanf(mess, "%d %d %s %d %d %d %s %d", &type_message, &var_idFichier, var_nomDeFichier, &var_nbBlocs, &var_numBloc, &var_idServeur, var_adresseServeur, &var_portServeur ) < 6)
     {
         fprintf(stderr, "Message invalide, impossible de l'utiliser.\n Contenu du message: %s \n", mess);
     }
@@ -502,14 +501,14 @@ void traiteBlocDisponibleServeur(Socket s, char* mess)
     {
         if( strcmp(ptListeFichiers->nomFichier, var_nomDeFichier) == 0 && ptListeFichiers->idFichier == var_idFichier) /* Si on trouve le fichier déjà référencé */
         {
-            fichTrouve = 0;
+            fichTrouve = 1;
             ptListeServeurs=ptListeFichiers->tabBlocs[var_numBloc].listeServeurs;
 
             while(ptListeServeurs != NULL && servTrouve) /* Tant qu'on arrive pas au bout de la liste des serveurs ou qu'on trouve le serveur déjà référencé */
             {
                 if(serveurs->tabServeurs[ptListeServeurs->numServeur]->idServeur == var_idServeur) /* Si on trouve le serveur pas besoin de le rajouter */
                 {
-                    servTrouve = 0;
+                    servTrouve = 1;
                 }
                 else  /* Sinon on continue */
                 {
@@ -560,6 +559,10 @@ void traiteBlocDisponibleServeur(Socket s, char* mess)
     }
 
 
+/* Libérations mémoire de chaines de caractère */
+    free(var_nomDeFichier);
+    free(var_adresseServeur);
+
 /* On dévérouille la BDD des fichiers en lecture et en écriture */
     pthread_mutex_unlock(&fichiers->verrou_bddfich_r);
     pthread_mutex_unlock(&fichiers->verrou_bddfich_w);
@@ -567,12 +570,13 @@ void traiteBlocDisponibleServeur(Socket s, char* mess)
     pthread_mutex_unlock(&serveurs->verrou_bddserv_w);
 }
 
-void traiteArretServeur(Socket s, char* mess)
+
 /**
-* @note: traitement d'un message de type arrêt de serveur.
-* @param: s : la socket sur laquelle le message d'arret de serveur a été emis.
-* @param: mess : le message d'arret serveur a traiter.
+* @note traitement d'un message de type arrêt de serveur.
+* @param s : la socket sur laquelle le message d'arret de serveur a été emis.
+* @param mess : le message d'arret serveur a traiter.
 */
+void traiteArretServeur(Socket s, char* mess)
 {
 /* Variables */
     int type_message; /* type du message reçu : ici 9 */
@@ -583,7 +587,6 @@ void traiteArretServeur(Socket s, char* mess)
 
     int sourceExiste; /* booléen */
 
-    char* var_arret; /* "arret" */
     char* var_adresseServeur; /* adresse du serveur */
 
     Fichier* ptListeFichiers; /* pointeur de travail sur la liste des fichiers de la BDD */
@@ -598,9 +601,12 @@ void traiteArretServeur(Socket s, char* mess)
 /* Initialisation des booléens */
     sourceExiste = 0;
 
+/* Allocations mémoire des chaines de caractère */
+    var_adresseServeur=malloc(200*sizeof(char));
+
 /* On récupère le contenu du message */
 /* Doit être de la forme "9 arret idServeur adresseServeur portServeur" */
-    if (sscanf(mess, "%d %s %d %s %d", &type_message, var_arret, &var_idServeur, var_adresseServeur, &var_portServeur) < 5)
+    if (sscanf(mess, "%d %d %s %d", &type_message, &var_idServeur, var_adresseServeur, &var_portServeur) < 4)
     {
         fprintf(stderr, "Message invalide, impossible de l'utiliser.\n Contenu du message: %s \n", mess);
     }
@@ -656,7 +662,7 @@ void traiteArretServeur(Socket s, char* mess)
         {
             if(ptListeFichiers->tabBlocs[i].listeServeurs != NULL)
             {
-                sourceExiste = 0; /* On a trouvé encore au moins un bloc pour le fichier */
+                sourceExiste = 1; /* On a trouvé encore au moins un bloc pour le fichier */
                 break;
             }
         }
@@ -691,6 +697,9 @@ void traiteArretServeur(Socket s, char* mess)
         }
     }
 
+/* Libérations mémoire de chaines de caractère */
+    free(var_adresseServeur);
+
 /* On dévérouille la BDD des fichiers en lecture et en écriture */
     pthread_mutex_unlock(&fichiers->verrou_bddfich_r);
     pthread_mutex_unlock(&fichiers->verrou_bddfich_w);
@@ -699,23 +708,22 @@ void traiteArretServeur(Socket s, char* mess)
 }
 
 
-void traiteMessageErr(Socket s, char* mess)
 /**
-* @note: traitement d'un message adressé au mauvais destinataire.
-* @param: s : la socket sur laquelle le message inattendu a été émis.
-* @param: mess : le message en question.
+* @note traitement d'un message adressé au mauvais destinataire.
+* @param s : la socket sur laquelle le message inattendu a été émis.
+* @param mess : le message en question.
 */
+void traiteMessageErr(Socket s, char* mess)
 {
     ecritureSocket(s, "13 erreur mauvais destinataire");
 }
 
 
-void fermetureAnnuaire()
 /**
-* @note: procédure de fermeture de l'annuaire de façon propre.
-* @param: serveurs : pointeur sur la base de données des serveurs.
-* @param: fichiers : pointeur sur la base de données des fichiers.
+* @note procédure de fermeture de l'annuaire de façon propre.
+* @brief modifie le contenu des variables globales serveurs et fichiers.
 */
+void fermetureAnnuaire()
 {
 /* Variables locales */
     int i,j;
@@ -773,9 +781,7 @@ int main(void)
 
     int quitter; /* Booléen pour savoir si on quitte ou pas */
 
-    char* numport_key; /* confirmation de réponse pour le port annuaire */
-
-    pthread_t th_client; /* tableau de threads pour gerer les connexions clients */
+    pthread_t th_client; /* Thread pour gerer les connexions clients */
 
 
 /* Initialisation de la graine pour utiliser le rand() */
@@ -783,34 +789,22 @@ int main(void)
 
 /* Initialisation de l'annuaire */
     printf("Bienvenue sur le programme lif12p2p.\n");
-    printf("Initialisation des bases de données de l'annuaire.\n");
+    printf("Initialisation des bases de données de l'annuaire...\n");
     if (initialisationAnnuaire()<0)
     {
         perror("Problème lors de l'initialisation des bases de données de l'annuaire. \n Fermeture du programme.\n");
         exit(1);
     }
+    printf("Bases de données de l'annuaire initialisées.\n");
 
 /* Initialisation de la socket d'écoute de l'annuaire */
+    printf("Sur quel port souhaitez vous lancer le serveur annuaire?\n");
+    scanf("%d",&portEcouteAnnuaire);
+    printf("Vous avez choisi le port numero %d.\n",portEcouteAnnuaire);
 
-    while(1)
-    {
-        numport_key=malloc(2*sizeof(char));
-        /* NE FONCTIONNE PAS : A VERIFIER */
-        printf("Sur quel port souhaitez vous lancer le serveur annuaire?\n");
-        scanf("%d",&portEcouteAnnuaire);
-        printf("Vous avez choisi le port numero %d.\n",portEcouteAnnuaire);
-
-        printf("Si ce choix vous convient appuyez sur 'Y' sinon appuyez sur n'importe quelle touche pour changer.\n");
-        scanf("%s",numport_key);
-
-        if (strcmp(numport_key,"y") || strcmp(numport_key, "Y"))
-        {
-            break;
-        }
-
-    }
-
+    printf("Initialisation de la socket d'écoute de l'annuaire...\n");
     socketEcouteAnnuaire=initialiseSocketEcouteAnnuaire(portEcouteAnnuaire);
+    printf("Socket d'écoute de l'annuaire initialisée.\n");
 
 /* Menu */
     quitter=0;
@@ -819,20 +813,21 @@ int main(void)
     {
         socketDemandeConnexion=acceptationConnexion(socketEcouteAnnuaire);
 
-        if(pthread_create(&th_client, NULL, (void* (*)(void*))traiteMessage , (void*)socketDemandeConnexion ) != 0)
-        {
-            perror("Un thread de traitement de message n'a pas pu être créé. Message ignoré.\n");
-        }
-        else
+        if(pthread_create(&th_client, NULL, (void* (*)(void*))traiteMessage , (void*)socketDemandeConnexion ) == 0)
         {
             nbthreads++;
             printf("Il y a actuellement %d thread(s) de discussion ouvert(s).\n", nbthreads);
         }
+        else
+        {
+            perror("Un thread de traitement de message n'a pas pu être créé. Message ignoré.\n");
+        }
     }
 
 /* Fermeture de l'annuaire */
+    printf("Destruction des bases de données de l'annuaire...\n");
     fermetureAnnuaire();
-
+    printf("Destruction des bases de données de l'annuaire terminée.\n");
 
     return 0;
 }
