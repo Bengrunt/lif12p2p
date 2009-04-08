@@ -51,7 +51,6 @@ typedef struct FileAttenteClients
 
 typedef struct StructureDisponibiliteBloc
 {
-    int idFichier;
     char* nomFichier;
     int numTotalBloc;
     int numeroBloc;
@@ -93,6 +92,8 @@ typedef struct FileAttenteTelechargements
 
 typedef struct Fichier
 {
+    pthread_mutex_t mutexFichierEcriture;
+    int longueurDernierBloc;
 	int nbBlocs;
 	int idFichier;
 	char* nomFichier;
@@ -299,7 +300,7 @@ void telechargementBloc(Telechargement* telechargementATraiter);
 * @param: telechargementATraiter : pointeur sur le bloc à télécharger
 */
 
-void traitementMessageReceptionBloc(char* buff);
+void traitementMessageReceptionBloc(Socket socketDialogue, char* buff);
 /**
 * @note: procédure qui analyse la reception d'un bloc
 * @param: buff : chaine de caractère à traiter
