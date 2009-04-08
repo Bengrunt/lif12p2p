@@ -49,7 +49,8 @@ a) Format des messages qui transitent sur le réseau
 		* Réponse défavorable : 					12 nomDeFichier
 		* message de fin de transmission :			13 fin communication
 	-> de l'annuaire vers le serveur
-		* aucun message
+		* réponse avec un ID serveur
+		* réponse avec un ID fichier
 	-> du client vers l'annuaire
 		* Demande d'un fichier : 					31 nomDeFichier
 		* Demande d'un bloc : 					32 idFichier nomDeFichier numeroDeBloc
@@ -61,9 +62,16 @@ a) Format des messages qui transitent sur le réseau
 		* Disponibilité pour chaque bloc :			51 nomDeFichier nombreTotalDeBloc numeroDeBloc idServeur adresseServeur portServeur
 		* Indication d'arrêt du serveur :			52 idServeur adresseServeur portServeur
 		* Indication de charge serveur :			53 (-) 1
+		* demande ID serveur
+		* demande ID fichier
 	-> du serveur vers le client
+<<<<<<< .mine
+		* Envoi d'un bloc :						61 idFichier nomDeFichier numeroDeBloc tailleBloc
+											contenuDuBloc
+=======
 		* Envoi d'un bloc :						61 idFichier nomDeFichier numeroDeBloc 
 												contenuDuBloc
+>>>>>>> .r45
 		* Bloc introuvable :						62 idFichier nomDeFichier numeroDeBloc
 		* Déconnexion du serveur :				63 idServeur adresseServeur portServeur
 	-> entre n'importe quelle source et destinataire
