@@ -111,24 +111,24 @@ int traiteMessage(Socket arg)
 /* On lance l'action correspondant au type de message. */
             switch (type_message)
             {
-            case 3: /* Demande d'un fichier */
+            case 31: /* Demande d'un fichier */
                 traiteDemandeFichierClient(arg, buff);
                 break;
-            case 4: /* Demande d'un bloc */
+            case 32: /* Demande d'un bloc */
                 traiteDemandeBlocClient(arg, buff);
                 break;
-            case 5: /* Arret d'échange d'un client */
+            case 33: /* Arret d'échange d'un client */
                 traiteArretClient(arg, buff);
                 fin_thread=1;
                 break;
-            case 8: /* Disponibilité d'un bloc */
+            case 51: /* Disponibilité d'un bloc */
                 traiteBlocDisponibleServeur(arg, buff);
                 break;
-            case 9: /* Arret d'un serveur */
+            case 52: /* Arret d'un serveur */
                 traiteArretServeur(arg, buff);
                 fin_thread=1;
                 break;
-            case 13: /* Indiquation que l'on a envoyé des messages au mauvais destinataire sur la socket donc fermeture */
+            case 53: /* Indiquation que l'on a envoyé des messages au mauvais destinataire sur la socket donc fermeture */
                 fin_thread=1;
                 break;
             default: /* Un message géré par le réseau a bien été reçu mais inadapté donc la connexion
@@ -156,7 +156,7 @@ void traiteDemandeFichierClient(Socket s, char* mess)
 {
 /* Variables */
     int fichTrouve; /* Booléen indiquant si le fichier a été trouvé dans la BDD des fichiers */
-    int type_message; /* type du message : ici 3 */
+    int type_message; /* type du message : ici 31 */
     int i,j; /* itérateur */
 
     char* buff; /* tampon pour écriture du message */
@@ -182,7 +182,7 @@ void traiteDemandeFichierClient(Socket s, char* mess)
     str_numPort=malloc(10*sizeof(char));
 
 /* On récupère le contenu du message */
-/* Doit être de la forme "3 nomDeFichier" */
+/* Doit être de la forme "31 nomDeFichier" */
     if (sscanf(mess, "%d %s", &type_message, var_nomDeFichier ) < 2)
     {
         fprintf(stderr, "Message invalide, impossible de l'utiliser.\n Contenu du message: %s \n", mess);
@@ -207,8 +207,8 @@ void traiteDemandeFichierClient(Socket s, char* mess)
             {
 
 /* On envoie pour chaque bloc un message indiquant au client où télécharger chaque bloc */
-/* Message de la forme : "1 idFichier nomDeFichier nombreTotalDeBloc numeroDeBloc idServeur adresseServeur portServeur" */
-                strcpy(buff, "1 ");
+/* Message de la forme : "11 idFichier nomDeFichier nombreTotalDeBloc numeroDeBloc idServeur adresseServeur portServeur" */
+                strcpy(buff, "11 ");
                 sprintf(str_idFichier, "%d", ptBddFichiers->idFichier);
                 strcat(buff, str_idFichier);
                 strcat(buff, " ");
@@ -248,7 +248,7 @@ void traiteDemandeFichierClient(Socket s, char* mess)
                 }
 
 /* Envoi du message sur la socket */
-                ecritureSocket(s,buff);
+                ecritureSocket(s,buff,200);
             }
 /* Libération de la chaine après utilisation */
             free(buff);
@@ -268,11 +268,11 @@ void traiteDemandeFichierClient(Socket s, char* mess)
 /* Message de la forme: "02 erreur nomDeFichier" */
         buff=malloc(200*sizeof(char));
 
-        strcpy(buff, "2 erreur ");
+        strcpy(buff, "12 erreur ");
         strcat(buff, var_nomDeFichier);
 
 /* Envoi du message sur la socket */
-        ecritureSocket(s,buff);
+        ecritureSocket(s,buff,200);
 
 /* Libération de la chaine après utilisation */
         free(buff);
@@ -300,7 +300,7 @@ void traiteDemandeFichierClient(Socket s, char* mess)
 void traiteDemandeBlocClient(Socket s, char* mess)
 {
 /* Variables */
-    int type_message; /* type du message : ici 4 */
+    int type_message; /* type du message : ici 32 */
     int var_idFichier; /* identificateur du fichier */
     int var_numBloc; /* numero du bloc demandé */
     int j; /* Itérateur */
@@ -329,7 +329,7 @@ void traiteDemandeBlocClient(Socket s, char* mess)
     str_numPort=malloc(10*sizeof(char));
 
 /* On récupère le contenu du message */
-/* Doit être de la forme "4 idFichier nomDeFichier numeroDeBloc" */
+/* Doit être de la forme "32 idFichier nomDeFichier numeroDeBloc" */
     if (sscanf(mess, "%d %d %s %d", &type_message, &var_idFichier, var_nomDeFichier, &var_numBloc ) < 4)
     {
         fprintf(stderr, "Message invalide, impossible de l'utiliser.\n Contenu du message: %s \n", mess);
@@ -351,8 +351,8 @@ void traiteDemandeBlocClient(Socket s, char* mess)
 /* On envoie un message indiquant où télécharger le bloc demandé au client */
             buff=malloc(200*sizeof(char));
 /* On envoie pour chaque bloc un message indiquant au client où télécharger chaque bloc */
-/* Message de la forme : "1 bloc idFichier nomDeFichier nombreTotalDeBloc numeroDeBloc idServeur adresseServeur portServeur" */
-            strcpy(buff, "1 ");
+/* Message de la forme : "11 bloc idFichier nomDeFichier nombreTotalDeBloc numeroDeBloc idServeur adresseServeur portServeur" */
+            strcpy(buff, "11 ");
             sprintf(str_idFichier, "%d", ptBddFichiers->idFichier);
             strcat(buff, str_idFichier);
             strcat(buff, " ");
@@ -392,7 +392,7 @@ void traiteDemandeBlocClient(Socket s, char* mess)
             }
 
 /* Envoi du message sur la socket */
-            ecritureSocket(s,buff);
+            ecritureSocket(s,buff,200);
 /* Libération de la chaine après utilisation */
             free(buff);
 /* On a bien trouvé le fichier et envoyé le message */
@@ -408,14 +408,14 @@ void traiteDemandeBlocClient(Socket s, char* mess)
     if(!fichTrouve)
     {
 /* On envoie un message de réponse défavorable au client */
-/* Message de la forme: "02 erreur nomDeFichier" */
+/* Message de la forme: "12 erreur nomDeFichier" */
         buff=malloc(200*sizeof(char));
 
-        strcpy(buff, "2 erreur ");
+        strcpy(buff, "12 erreur ");
         strcat(buff, var_nomDeFichier);
 
 /* Envoi du message sur la socket */
-        ecritureSocket(s,buff);
+        ecritureSocket(s,buff,200);
 
 /* Libération de la chaine après utilisation */
         free(buff);
@@ -454,7 +454,7 @@ void traiteArretClient(Socket s, char* mess)
 void traiteBlocDisponibleServeur(Socket s, char* mess)
 {
 /* Variables */
-    int type_message; /* Type du message : ici 8 */
+    int type_message; /* Type du message : ici 51 */
     int var_idFichier; /* identificateur du fichier */
     int var_nbBlocs; /*  nombre de blocs du fichier */
     int var_numBloc; /* numero de bloc */
@@ -481,7 +481,7 @@ void traiteBlocDisponibleServeur(Socket s, char* mess)
     var_adresseServeur=malloc(40*sizeof(char));
 
 /* On récupère le contenu du message */
-/* Doit être de la forme "8 idFichier nomDeFichier nombreTotalDeBloc numeroDeBloc idServeur adresseServeur portServeur" */
+/* Doit être de la forme "51 idFichier nomDeFichier nombreTotalDeBloc numeroDeBloc idServeur adresseServeur portServeur" */
     if (sscanf(mess, "%d %d %s %d %d %d %s %d", &type_message, &var_idFichier, var_nomDeFichier, &var_nbBlocs, &var_numBloc, &var_idServeur, var_adresseServeur, &var_portServeur ) < 6)
     {
         fprintf(stderr, "Message invalide, impossible de l'utiliser.\n Contenu du message: %s \n", mess);
@@ -579,7 +579,7 @@ void traiteBlocDisponibleServeur(Socket s, char* mess)
 void traiteArretServeur(Socket s, char* mess)
 {
 /* Variables */
-    int type_message; /* type du message reçu : ici 9 */
+    int type_message; /* type du message reçu : ici 52 */
     int var_idServeur; /* identificateur du serveur */
     int var_portServeur; /* port du serveur */
 
@@ -605,7 +605,7 @@ void traiteArretServeur(Socket s, char* mess)
     var_adresseServeur=malloc(40*sizeof(char));
 
 /* On récupère le contenu du message */
-/* Doit être de la forme "9 arret idServeur adresseServeur portServeur" */
+/* Doit être de la forme "52 arret idServeur adresseServeur portServeur" */
     if (sscanf(mess, "%d %d %s %d", &type_message, &var_idServeur, var_adresseServeur, &var_portServeur) < 4)
     {
         fprintf(stderr, "Message invalide, impossible de l'utiliser.\n Contenu du message: %s \n", mess);
@@ -715,7 +715,7 @@ void traiteArretServeur(Socket s, char* mess)
 */
 void traiteMessageErr(Socket s, char* mess)
 {
-    ecritureSocket(s, "13 erreur mauvais destinataire");
+    ecritureSocket(s, "71 erreur mauvais destinataire", 200);
 }
 
 
