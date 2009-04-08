@@ -128,7 +128,7 @@ int traiteMessage(Socket arg)
                 traiteArretServeur(arg, buff);
                 fin_thread=1;
                 break;
-            case 53: /* Indiquation que l'on a envoyé des messages au mauvais destinataire sur la socket donc fermeture */
+            case 71: /* Indiquation que l'on a envoyé des messages au mauvais destinataire sur la socket donc fermeture */
                 fin_thread=1;
                 break;
             default: /* Un message géré par le réseau a bien été reçu mais inadapté donc la connexion
@@ -268,7 +268,7 @@ void traiteDemandeFichierClient(Socket s, char* mess)
 /* Message de la forme: "02 erreur nomDeFichier" */
         buff=malloc(200*sizeof(char));
 
-        strcpy(buff, "12 erreur ");
+        strcpy(buff, "12 ");
         strcat(buff, var_nomDeFichier);
 
 /* Envoi du message sur la socket */
@@ -411,7 +411,7 @@ void traiteDemandeBlocClient(Socket s, char* mess)
 /* Message de la forme: "12 erreur nomDeFichier" */
         buff=malloc(200*sizeof(char));
 
-        strcpy(buff, "12 erreur ");
+        strcpy(buff, "12 ");
         strcat(buff, var_nomDeFichier);
 
 /* Envoi du message sur la socket */
@@ -605,7 +605,7 @@ void traiteArretServeur(Socket s, char* mess)
     var_adresseServeur=malloc(40*sizeof(char));
 
 /* On récupère le contenu du message */
-/* Doit être de la forme "52 arret idServeur adresseServeur portServeur" */
+/* Doit être de la forme "52 idServeur adresseServeur portServeur" */
     if (sscanf(mess, "%d %d %s %d", &type_message, &var_idServeur, var_adresseServeur, &var_portServeur) < 4)
     {
         fprintf(stderr, "Message invalide, impossible de l'utiliser.\n Contenu du message: %s \n", mess);
@@ -715,7 +715,7 @@ void traiteArretServeur(Socket s, char* mess)
 */
 void traiteMessageErr(Socket s, char* mess)
 {
-    ecritureSocket(s, "71 erreur mauvais destinataire", 200);
+    ecritureSocket(s, "71 mauvais destinataire", 200);
 }
 
 
