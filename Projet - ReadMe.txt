@@ -45,27 +45,29 @@ b) Client / serveur
 2] Structure de programmation
 a) Format des messages qui transitent sur le réseau
 	-> de l'annuaire vers le client
-		* Réponse favorable (pour chaque bloc) : 	1 bloc idFichier nomDeFichier nombreTotalDeBloc numeroDeBloc idServeur adresseServeur portServeur
-		* Réponse défavorable : 					2 erreur nomDeFichier
+		* Réponse favorable (pour chaque bloc) : 	11 idFichier nomDeFichier nombreTotalDeBloc numeroDeBloc idServeur adresseServeur portServeur
+		* Réponse défavorable : 					12 nomDeFichier
+		* message de fin de transmission :			13 fin communication
 	-> de l'annuaire vers le serveur
 		* aucun message
 	-> du client vers l'annuaire
-		* Demande d'un fichier : 					3 fichier nomDeFichier
-		* Demande d'un bloc : 					4 bloc idFichier nomDeFichier numeroDeBloc
-		* Indication de fin de requête client :		5 arret adresseClient 
+		* Demande d'un fichier : 					31 nomDeFichier
+		* Demande d'un bloc : 					32 idFichier nomDeFichier numeroDeBloc
+		* Indication de fin de requête client :		33 adresseClient
 	-> du client vers le serveur
-		* Demande d'un bloc : 					6 bloc idFichier nomDeFichier numeroDeBloc
-		* Déconnexion du client :					7 arret adresseClient
+		* Demande d'un bloc : 					41 idFichier nomDeFichier numeroDeBloc
+		* Déconnexion du client :					42 adresseClient
 	-> du serveur vers l'annuaire
-		* Disponibilité pour chaque bloc :			8 bloc idFichier nomDeFichier nombreTotalDeBloc numeroDeBloc idServeur adresseServeur portServeur
-		* Indication d'arrêt du serveur :			9 arret idServeur adresseServeur portServeur
-		* Indication de charge serveur :			10 charge (-) 1
+		* Disponibilité pour chaque bloc :			51 nomDeFichier nombreTotalDeBloc numeroDeBloc idServeur adresseServeur portServeur
+		* Indication d'arrêt du serveur :			52 idServeur adresseServeur portServeur
+		* Indication de charge serveur :			53 (-) 1
 	-> du serveur vers le client
-		* Envoi d'un bloc :						11 bloc idFichier nomDeFichier numeroDeBloc contenuDuBloc
-		* Bloc introuvable :						12 erreur idFichier nomDeFichier numeroDeBloc
-		* Déconnexion du serveur :				13 arret idServeur adresseServeur portServeur
+		* Envoi d'un bloc :						61 idFichier nomDeFichier numeroDeBloc
+											contenuDuBloc
+		* Bloc introuvable :						62 idFichier nomDeFichier numeroDeBloc
+		* Déconnexion du serveur :				63 idServeur adresseServeur portServeur
 	-> entre n'importe quelle source et destinataire
-		* Réponse à un message inconnu :			14 erreur mauvais destinataire
+		* Réponse à un message inconnu :			71 mauvais destinataire
 
 
 b) Annuaire
