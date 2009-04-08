@@ -98,7 +98,7 @@ int traiteMessage(Socket arg)
     while (!fin_thread)
     {
 /* on ecoute sur la socket arg */
-        ecouteSocket(arg, buff);
+        ecouteSocket(arg, buff, 200);
 
 /* on analyse le type du message reçu et on agit en conséquence */
         if (sscanf ( buff, "%d", &type_message) != 1 )
@@ -174,12 +174,12 @@ void traiteDemandeFichierClient(Socket s, char* mess)
     fichTrouve=0; /* On a pas encore trouvé le fichier */
 
 /* Allocations mémoire des chaines de caractère */
-    var_nomDeFichier=malloc(200*sizeof(char));
-    str_idFichier=malloc(20*sizeof(char));
-    str_idServeur=malloc(20*sizeof(char));
-    str_nbBlocs=malloc(20*sizeof(char));
-    str_numBloc=malloc(20*sizeof(char));
-    str_numPort=malloc(20*sizeof(char));
+    var_nomDeFichier=malloc(100*sizeof(char));
+    str_idFichier=malloc(10*sizeof(char));
+    str_idServeur=malloc(10*sizeof(char));
+    str_nbBlocs=malloc(10*sizeof(char));
+    str_numBloc=malloc(10*sizeof(char));
+    str_numPort=malloc(10*sizeof(char));
 
 /* On récupère le contenu du message */
 /* Doit être de la forme "3 nomDeFichier" */
@@ -321,12 +321,12 @@ void traiteDemandeBlocClient(Socket s, char* mess)
     fichTrouve=0;
 
 /* Allocations mémoire des chaines de caractère */
-    var_nomDeFichier=malloc(200*sizeof(char));
-    str_idFichier=malloc(20*sizeof(char));
-    str_idServeur=malloc(20*sizeof(char));
-    str_nbBlocs=malloc(20*sizeof(char));
-    str_numBloc=malloc(20*sizeof(char));
-    str_numPort=malloc(20*sizeof(char));
+    var_nomDeFichier=malloc(100*sizeof(char));
+    str_idFichier=malloc(10*sizeof(char));
+    str_idServeur=malloc(10*sizeof(char));
+    str_nbBlocs=malloc(10*sizeof(char));
+    str_numBloc=malloc(10*sizeof(char));
+    str_numPort=malloc(10*sizeof(char));
 
 /* On récupère le contenu du message */
 /* Doit être de la forme "4 idFichier nomDeFichier numeroDeBloc" */
@@ -477,8 +477,8 @@ void traiteBlocDisponibleServeur(Socket s, char* mess)
     servTrouve = 0;
 
 /* Allocations mémoire des chaines de caractère */
-    var_nomDeFichier=malloc(200*sizeof(char));
-    var_adresseServeur=malloc(200*sizeof(char));
+    var_nomDeFichier=malloc(100*sizeof(char));
+    var_adresseServeur=malloc(40*sizeof(char));
 
 /* On récupère le contenu du message */
 /* Doit être de la forme "8 idFichier nomDeFichier nombreTotalDeBloc numeroDeBloc idServeur adresseServeur portServeur" */
@@ -602,7 +602,7 @@ void traiteArretServeur(Socket s, char* mess)
     sourceExiste = 0;
 
 /* Allocations mémoire des chaines de caractère */
-    var_adresseServeur=malloc(200*sizeof(char));
+    var_adresseServeur=malloc(40*sizeof(char));
 
 /* On récupère le contenu du message */
 /* Doit être de la forme "9 arret idServeur adresseServeur portServeur" */

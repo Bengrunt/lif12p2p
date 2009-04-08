@@ -3,7 +3,7 @@
  * @project: lif12p2p
  * @author: Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
  * @since: 19/03/2009
- * @version: 26/03/2009
+ * @version: 8/04/2009
  */
 
 #include "socket.h"
@@ -11,10 +11,11 @@
 #define INVALID_SOCKET -1
 #define SOCKET_ERROR -1
 
-#define NOM_SERVEUR "localhost"
-#define PORT_SERVEUR 8888
-#define TAILLE_BUFF 100
 
+/**
+* @note procédure de création d'une socket.
+* @return la socket créée est retournée.
+*/
 Socket creationSocket()
 {
     #if defined (WIN32)
@@ -47,6 +48,12 @@ Socket creationSocket()
     return s;
 }
 
+
+/**
+* @note procédure de définition de nom d'une socket.
+* @param s : socket que l'on va lier à un numéro de port.
+* @param port : numéro de port auquel on va lier la socket s.
+*/
 void definitionNomSocket(Socket s, int port)
 {
     int sock_err; /* Une variable pour stocker les erreurs */
@@ -90,6 +97,12 @@ void definitionNomSocket(Socket s, int port)
     /* sans que le serveur les accepte ou les rejette */
 }
 
+
+/**
+* @note procédure d'acceptation d'une connexion.
+* @param s : socket sur laquelle on accepte la connexion.
+* @return renvoie la socket sur laquelle la connexion est acceptée.
+*/
 Socket acceptationConnexion(Socket s)
 {
     /* ######################################################
@@ -110,6 +123,14 @@ Socket acceptationConnexion(Socket s)
     return t;
 }
 
+
+/**
+* @note procédure de demande de connexion à une socket.
+* @param la socket passée en parametre essai de se connecter à un serveur distant.
+* @param nomServeur : le nom du serveur.
+* @param port : le numero de port du serveur.
+* @return renvoie 0 si tout se passe bien, 1 sinon.
+*/
 int demandeConnexionSocket(Socket s, char* nomServeur, int port)
 {
     struct hostent *hp;    /* Pour obtenir l'adresse du serveur à partir de son nom */
@@ -149,22 +170,35 @@ int demandeConnexionSocket(Socket s, char* nomServeur, int port)
     return 0;
 }
 
-void ecouteSocket(Socket s, char* buff)
+
+/**
+* @note procedure de capture de message sur une socket.
+* @param s : socket d'écoute.
+* @param buff : chaine de caractere stockant un message capturé.
+*/
+void ecouteSocket(Socket s, char* buff, int taille_buff)
 {
-    if( recv(s, buff, TAILLE_BUFF, 0) < 0)
+    if( recv(s, buff, taille_buff, 0) < 0)
     {
         perror("erreur à la réception");
     }
 }
 
-int ecritureSocket(Socket s, char* buff)
+
+/**
+* @note fonction d'envoi de message sur une socket.
+* @param s : socket sur laquelle on envoie le message.
+* @param buff : message que l'on veut envoyer.
+* @return retourne 0 si tout se passe bien, 1 sinon.
+*/
+int ecritureSocket(Socket s, char* buff, int taille_buff)
 {
     int sock_err; /* Une variable pour stocker les erreurs */
 
-    sock_err = send(s, (char*)buff, (strlen(buff)+1)*sizeof(char), MSG_NOSIGNAL);
+    sock_err = send(s, (char*)buff, taille_buff, MSG_NOSIGNAL);
         /* s le socket sur laquel on ecrit */
         /* buff le message écrit */
-        /* (strlen(buff)+1)*sizeof(char) la longueur du mesage */
+        /* taille_buff la longueur du mesage */
         /* MSG_NOSIGNAL lorsque la connexion est brisée, send renvoie une erreur et */
         /*              ne génère pas de signaux (que je n'ai pas envie de traiter) */
     if (sock_err < 0)
@@ -175,6 +209,11 @@ int ecritureSocket(Socket s, char* buff)
     return 0;
 }
 
+
+/**
+* @note procédure de fermeture d'une socket.
+* @param s : socket que l'on ferme.
+*/
 void clotureSocket(Socket s)
 {
     /* ######################################################
