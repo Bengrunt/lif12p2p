@@ -1,16 +1,23 @@
 /**
+<<<<<<< .mine
+ * @file socket.c
+ * @project lif12p2p
+ * @author Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
+ * @since 19/03/2009
+ * @version 09/04/2009
+=======
  * @file socket.c
  * @project lif12p2p
  * @author Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
  * @since 19/03/2009
  * @version 9/04/2009
+>>>>>>> .r51
  */
 
 #include "socket.h"
 
 #define INVALID_SOCKET -1
 #define SOCKET_ERROR -1
-
 
 /**
 * @note procédure de création d'une socket.
@@ -47,7 +54,6 @@ Socket creationSocket()
 
     return s;
 }
-
 
 /**
 * @note procédure de définition de nom d'une socket.
@@ -97,7 +103,6 @@ void definitionNomSocket(Socket s, int port)
     /* sans que le serveur les accepte ou les rejette */
 }
 
-
 /**
 * @note procédure d'acceptation d'une connexion.
 * @param s : socket sur laquelle on accepte la connexion.
@@ -122,7 +127,6 @@ Socket acceptationConnexion(Socket s)
     printf("Connection de %s sur le port %d\n", inet_ntoa (tadr.sin_addr), htons(tadr.sin_port));
     return t;
 }
-
 
 /**
 * @note procédure de demande de connexion à une socket.
@@ -170,7 +174,6 @@ int demandeConnexionSocket(Socket s, char* nomServeur, int port)
     return 0;
 }
 
-
 /**
 * @note procedure de capture de message sur une socket.
 * @param s : socket d'écoute.
@@ -183,7 +186,6 @@ void ecouteSocket(Socket s, char* buff, int taille_buff)
         perror("erreur à la réception");
     }
 }
-
 
 /**
 * @note fonction d'envoi de message sur une socket.
@@ -208,7 +210,6 @@ int ecritureSocket(Socket s, char* buff, int taille_buff)
     }
     return 0;
 }
-
 
 /**
 * @note procédure de fermeture d'une socket.
