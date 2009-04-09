@@ -51,10 +51,10 @@ typedef struct FileAttenteClients
 
 typedef struct StructureDisponibiliteBloc
 {
+    int idFichier;
     char* nomFichier;
     int numTotalBloc;
     int numeroBloc;
-    int idServeur;
 }StructureDisponibiliteBloc;
 
 /**
