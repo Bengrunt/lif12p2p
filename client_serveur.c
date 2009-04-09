@@ -96,7 +96,7 @@ int main()
     /* ecoute de la réponse de l'annuaire */
     ecouteSocket(socketAnnuaire, buff, TAILLE_BUFF);
     /* analyse de la réponse de l'annuaire */
-    if (sscanf(buff, "%d %s %d %d", tempCode, tempNomServeur, tempPortServ, idServeur) < 4)
+    if (sscanf(buff, "%d %s %d %d", &tempCode, tempNomServeur, &tempPortServ, &idServeur) < 4)
     {
         printf("Probleme à la création d'un IDServeur!! \n");
         exit(1);
@@ -186,10 +186,8 @@ int creationMessage(int code, void* structure, char* message)
             hp = gethostbyname("localhost");
             /* création du message */
             strcpy(message,"51 ");
-/*            sprintf(tempChaine, "%d", ((StructureDisponibiliteBloc*) structure)->idFichier);
+            sprintf(tempChaine, "%d", ((StructureDisponibiliteBloc*) structure)->idFichier);
             strcat(message, tempChaine);
-            strcat(message, " "); */
-            strcat(message, ((StructureDisponibiliteBloc*) structure)->nomFichier);
             strcat(message, " ");
             sprintf(tempChaine, "%d", ((StructureDisponibiliteBloc*) structure)->numTotalBloc);
             strcat(message, tempChaine);
@@ -197,26 +195,14 @@ int creationMessage(int code, void* structure, char* message)
             sprintf(tempChaine, "%d", ((StructureDisponibiliteBloc*) structure)->numeroBloc);
             strcat(message, tempChaine);
             strcat(message, " ");
-            sprintf(tempChaine, "%d", ((StructureDisponibiliteBloc*) structure)->idServeur);
+            sprintf(tempChaine, "%d", idServeur);
             strcat(message, tempChaine);
-            strcat(message, " ");
-            strcat(message, hp->h_addr_list[0]);
-            strcat(message, " ");
-            sprintf(tempChaine, "%d", portServeur);
-            strcat(message, tempChaine);
-    		break;
+            break;
     	case 52 :
     	/* message d'arret du serveur à l'annuaire */
-            /* récupération du nom et du port du serveur */
-            hp = gethostbyname("localhost");
             /* création du message */
             strcpy(message,"52 ");
             sprintf(tempChaine, "%d", idServeur);
-            strcat(message, tempChaine);
-            strcat(message, " ");
-            strcat(message, hp->h_addr_list[0]);
-            strcat(message, " ");
-            sprintf(tempChaine, "%d", portServeur);
             strcat(message, tempChaine);
             break;
     	case 53 :
@@ -238,14 +224,14 @@ int creationMessage(int code, void* structure, char* message)
             break;
         case 55 :
         /* message de demande d'IDFichier */
+            strcpy(message,"55 ");
+            strcat(message, (char*) structure);
             break;
     	case 61 :
     	/* envoi d'un bloc d'un serveur à un client */
             strcpy(message,"61 ");
             sprintf(tempChaine, "%d", ((Client*) structure)->idFichier);
             strcat(message, tempChaine);
-            strcat(message, " ");
-            strcat(message, ((Client*) structure)->nomFichier);
             strcat(message, " ");
             sprintf(tempChaine, "%d", ((Client*) structure)->numeroBloc);
             strcat(message, tempChaine);
@@ -256,8 +242,6 @@ int creationMessage(int code, void* structure, char* message)
             sprintf(tempChaine, "%d", ((Client*) structure)->idFichier);
             strcat(message, tempChaine);
             strcat(message, " ");
-            strcat(message, ((Client*) structure)->nomFichier);
-            strcat(message, " ");
             sprintf(tempChaine, "%d", ((Client*) structure)->numeroBloc);
             strcat(message, tempChaine);
     		break;
@@ -267,9 +251,9 @@ int creationMessage(int code, void* structure, char* message)
             hp = gethostbyname("localhost");
             /* création du message */
             strcpy(message,"63 ");
-/*            sprintf(tempChaine, "%d", *((int*) structure));
+            sprintf(tempChaine, "%d", idServeur);
             strcat(message, tempChaine);
-            strcat(message, " ");  */
+            strcat(message, " ");
             strcat(message, hp->h_addr_list[0]);
             strcat(message, " ");
             sprintf(tempChaine, "%d", portServeur);
@@ -296,8 +280,14 @@ void threadLectureClavier()
         printf("\n\nMenu :\n");
         printf("1- Mettre un fichier sur le reseau\n");
         printf("2- recuperer un fichier sur le reseau\n");
-        printf("3- Arreter le serveur\n");
-        printf("4- Arreter le client\n");
+        if (!finThreadServeur)
+        {
+            printf("3- Arreter le serveur\n");
+        }
+        if (!finThreadClient)
+        {
+            printf("4- Arreter le client\n");
+        }
         printf("5- Quitter\n");
         scanf("%d", &code);
         switch (code)
@@ -399,7 +389,7 @@ void signalisationFichierAnnuaire(char* nomFichier)
     char* lectureFichier;
 
     /* initialisation */
-    message = malloc(200* sizeof(char));
+    message = malloc(TAILLE_BUFF* sizeof(char));
     lectureFichier = malloc((TAILLE_BLOC)* sizeof(char));
     nbBloc = -1;
 
@@ -430,7 +420,6 @@ void signalisationFichierAnnuaire(char* nomFichier)
             StructureDisponibiliteBloc structurePourEnvoi;
             structurePourEnvoi.nomFichier = nomFichier;
             structurePourEnvoi.numTotalBloc = nbBloc + 1;
-/*            structurePourEnvoi.idServeur  */
             /* envoi d'un message pour chaque bloc lu */
             for (nbBloc = nbBloc; nbBloc > -1; nbBloc--)
             {
@@ -438,7 +427,7 @@ void signalisationFichierAnnuaire(char* nomFichier)
                 /* création du message */
                 creationMessage(51, (void*) &structurePourEnvoi, message);
                 /* envoi des données à l'annuaire */
-                ecritureSocket(socketAnnuaire, message, 200);
+                ecritureSocket(socketAnnuaire, message, TAILLE_BUFF);
             }
         }
     }
