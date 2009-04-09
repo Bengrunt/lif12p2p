@@ -65,7 +65,7 @@ a) Format des messages qui transitent sur le réseau
 		* demande ID serveur					54 adresseServeur portServeur
 		* demande ID fichier					55 nomFichier
 	-> du serveur vers le client
-		* Envoi d'un bloc :						61 idFichier numeroDeBloc tailleBloc
+		* Envoi d'un bloc :						61 idFichier nomFichier numeroDeBloc tailleBloc
 											contenuDuBloc
 		* Bloc introuvable :						62 idFichier numeroDeBloc
 		* Déconnexion du serveur :				63 idServeur adresseServeur portServeur
