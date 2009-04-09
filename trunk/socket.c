@@ -1,9 +1,9 @@
 /**
- * @file: socket.c
- * @project: lif12p2p
- * @author: Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
- * @since: 19/03/2009
- * @version: 8/04/2009
+ * @file socket.c
+ * @project lif12p2p
+ * @author Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
+ * @since 19/03/2009
+ * @version 9/04/2009
  */
 
 #include "socket.h"

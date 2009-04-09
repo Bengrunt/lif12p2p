@@ -1,9 +1,9 @@
 /**
- * @file: annuaire.h
- * @project: lif12p2p
- * @author: Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
- * @since: 16/03/2009
- * @version: 08/04/2009
+ * @file annuaire.h
+ * @project lif12p2p
+ * @author Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
+ * @since 16/03/2009
+ * @version 9/04/2009
  */
 
 #ifndef ANNUAIRE_H
@@ -72,7 +72,7 @@ typedef struct Bloc
 */
 typedef struct Fichier
 {
-    int idFichier;
+    unsigned int idFichier;
 	char * nomFichier;
 	int nbBlocs;
 	int capaTabBlocs;
@@ -112,7 +112,7 @@ typedef struct BddFichiers
 */
 typedef struct InfoServeurs
 {
-    int idServeur;
+    unsigned int idServeur;
 	int numPort;
 	char* adresseServeur;
 }InfoServeurs;
@@ -222,6 +222,24 @@ void traiteBlocDisponibleServeur(Socket s, char* mess);
 * @param mess : le message d'arret serveur a traiter.
 */
 void traiteArretServeur(Socket s, char* mess);
+
+
+/**
+* @note traitement d'un message de type demande d'ID serveur.
+* @param s : la socket sur laquelle le message de demande d'ID serveur a été émis.
+* @param mess  : le message de demande d'ID serveur à traiter.
+* @warning incrémente le generateur d'idServeur.
+*/
+void traiteDemandeIdServeur(Socket s, char* mess);
+
+
+/**
+* @note traitement d'un message de type demande d'ID fichier.
+* @param s : la socket sur laquelle le message de demande d'ID fichier a été émis.
+* @param mess  : le message de demande d'ID fichier à traiter.
+* @warning incrémente le generateur d'idFichier.
+*/
+void traiteDemandeIdFichier(Socket s, char* mess);
 
 
 /**
