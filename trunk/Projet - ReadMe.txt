@@ -59,15 +59,15 @@ a) Format des messages qui transitent sur le réseau
 		* Demande d'un bloc : 					41 idFichier nomDeFichier numeroDeBloc
 		* Déconnexion du client :					42 adresseClient
 	-> du serveur vers l'annuaire
-		* Disponibilité pour chaque bloc :			51 nomDeFichier nombreTotalDeBloc numeroDeBloc idServeur adresseServeur portServeur
-		* Indication d'arrêt du serveur :			52 idServeur adresseServeur portServeur
+		* Disponibilité pour chaque bloc :			51 idFichier nombreTotalDeBloc numeroDeBloc idServeur
+		* Indication d'arrêt du serveur :			52 idServeur
 		* Indication de charge serveur :			53 (-) 1
 		* demande ID serveur					54 adresseServeur portServeur
 		* demande ID fichier					55 nomFichier
 	-> du serveur vers le client
-		* Envoi d'un bloc :						61 idFichier nomDeFichier numeroDeBloc tailleBloc
+		* Envoi d'un bloc :						61 idFichier numeroDeBloc tailleBloc
 											contenuDuBloc
-		* Bloc introuvable :						62 idFichier nomDeFichier numeroDeBloc
+		* Bloc introuvable :						62 idFichier numeroDeBloc
 		* Déconnexion du serveur :				63 idServeur adresseServeur portServeur
 	-> entre n'importe quelle source et destinataire
 		* Réponse à un message inconnu :			71 mauvais destinataire
