@@ -8,7 +8,7 @@
 
 #include "client_serveur.h"
 #define NBTHREAD 10
-#define TAILLE_BUFF 100
+#define TAILLE_BUFF 200
 #define TAILLE_BLOC 65536
 
 /**
@@ -25,6 +25,7 @@ int nbThreadServeurLance;
 int nbThreadClientLance;
 ListeFichiers listeFichier;
 int arretApplication;
+int idServeur;
 
 /**
 * main et fonctions communes
@@ -37,6 +38,11 @@ int main()
     int portAnnuaire;           /* stocke le port de l'annuaire à utiliser */
     char* resultat;             /* stocke la frappe au clavier si la connexion a échoué */
     pthread_t variableThread;   /* variable pour lancer les threads "serveur" et "client" */
+    char* message;              /* chaine de caractère pour le message à envoyer à l'annuaire */
+    char* buff;                 /* chaine de caractère pour écouter la réponse de l'annuaire */
+    char* tempNomServeur;       /* variable temporaire pour récupérer la réponse de l'annuaire */
+    int tempCode;               /* variable temporaire pour récupérer la réponse de l'annuaire */
+    int tempPortServ;           /* variable temporaire pour récupérer la réponse de l'annuaire */
 
     /* initalisation */
     finThreadClient = 0;
@@ -44,6 +50,10 @@ int main()
     arretApplication = 0;
     resultat = malloc(2* sizeof(char));
     adresseAnnuaire = malloc(100* sizeof(char));
+    message = malloc(TAILLE_BUFF* sizeof(char));
+    buff = malloc(TAILLE_BUFF* sizeof(char));
+    tempNomServeur = malloc(100* sizeof(char));
+    idServeur = 0;
 
     /* demande de la socket de l'annuaire */
     do
@@ -80,7 +90,24 @@ int main()
     printf("Sur quel port voulez-vous lancer le serveur ?\n");
     scanf("%d", &portServeur);
 
-    /* La connexion à l'annuaire est établie : lancement de 2 threads : serveur et client */
+    /* demande d'un ID serveur a l'annuaire */
+    creationMessage(54, NULL, message);
+    ecritureSocket(socketAnnuaire, message, TAILLE_BUFF);
+    /* ecoute de la réponse de l'annuaire */
+    ecouteSocket(socketAnnuaire, buff, TAILLE_BUFF);
+    /* analyse de la réponse de l'annuaire */
+    if (sscanf(buff, "%d %s %d %d", tempCode, tempNomServeur, tempPortServ, idServeur) < 4)
+    {
+        printf("Probleme à la création d'un IDServeur!! \n");
+        exit(1);
+    }
+    if (idServeur == 0)
+    {
+        printf("Probleme à la création d'un IDServeur!! \n");
+        exit(1);
+    }
+
+    /* La connexion à l'annuaire est établie : lancement de 3 threads : serveur, client et un pour la lecture clavier */
     pthread_create(&variableThread, NULL, (void*(*)(void*))applicationServeur, NULL);
     pthread_create(&variableThread, NULL, (void*(*)(void*))applicationClient, NULL);
     pthread_create(&variableThread, NULL, (void*(*)(void*))threadLectureClavier, NULL);
@@ -184,7 +211,13 @@ int creationMessage(int code, void* structure, char* message)
             hp = gethostbyname("localhost");
             /* création du message */
             strcpy(message,"52 ");
+            sprintf(tempChaine, "%d", idServeur);
+            strcat(message, tempChaine);
+            strcat(message, " ");
             strcat(message, hp->h_addr_list[0]);
+            strcat(message, " ");
+            sprintf(tempChaine, "%d", portServeur);
+            strcat(message, tempChaine);
             break;
     	case 53 :
     	/* message de charge du serveur vers l'annuaire */
@@ -192,6 +225,20 @@ int creationMessage(int code, void* structure, char* message)
             sprintf(tempChaine, "%d", *((int*) structure));
             strcat(message, tempChaine);
     		break;
+        case 54 :
+    	/* message de demande d'IDServeur */
+            /* récupération du nom et du port du serveur */
+            hp = gethostbyname("localhost");
+            /* création du message */
+            strcpy(message,"54 ");
+            strcat(message, hp->h_addr_list[0]);
+            strcat(message, " ");
+            sprintf(tempChaine, "%d", portServeur);
+            strcat(message, tempChaine);
+            break;
+        case 55 :
+        /* message de demande d'IDFichier */
+            break;
     	case 61 :
     	/* envoi d'un bloc d'un serveur à un client */
             strcpy(message,"61 ");
