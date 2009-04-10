@@ -3,7 +3,7 @@
  * @project lif12p2p
  * @author Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
  * @since 16/03/2009
- * @version 9/04/2009
+ * @version 10/04/2009
  */
 
 #ifndef ANNUAIRE_H
@@ -36,63 +36,65 @@
 */
 
 /**
-* @note Structure "cellule" stockant le numéro du serveur possédant un bloc.
-* @param numServeur : numéro du serveur dans BddServeur.
-* @param serveurSuivant : pointeur sur le serveur suivant dans la liste des serveurs.
+* @note Structure stockant un pointeur vers le référencement du serveur possédant un bloc dans la BDD des serveurs.
+* @param infos : pointeur vers le serveur dans BddServeur.
 */
 typedef struct Serveur
 {
-	int numServeur;
-	struct Serveur* serveurSuivant;
+	struct InfoServeurs* infos;
 }Serveur;
 
 
 
 /**
-* @note structure stockant la liste des serveurs possédant le bloc.
-* @param listeServeurs : liste chainée de structures Serveur.
-* @param nbServeursDansListe : nombre de serveurs répétoriés dans la liste.
+* @note Structure stockant le tableau de pointeurs sur les serveurs possédant le bloc.
+* @param nbServeurs : nombre de serveurs répétoriés dans le tableau.
+* @param capaTabServeurs : capacité maximum du tableau tabServeurs.
+* @param tabServeurs : tableau dynamique de pointeurs sur structures Serveur.
+* @warning tabServeurs n'est pas forcément rempli de manière contigue et encore moins triée. Les éléments sont insérés et supprimés de façon à minimiser la taille du tableau.
 */
 typedef struct Bloc
 {
-	struct Serveur* listeServeurs;
-	int nbServeursDansListe;
+	unsigned int nbServeurs;
+	unsigned int capaTabServeurs;
+	Serveur** tabServeurs;
 }Bloc;
 
 
 
 /**
-* @note structure "cellule" stockant les informations sur les fichiers.
-* @param idFichier : identificateur.
+* @note structure stockant les informations sur les fichiers.
+* @param idFichier : identificateur de fichier.
 * @param nomFichier : nom du fichier.
 * @param nbBlocs : nombre de blocs du fichier.
 * @param capaTabBlocs : capacité max de tabBlocs.
-* @param tabBlocs : tableau de structures Bloc contenant les informations sur chaque bloc.
-* @param fichierSuivant : pointeur sur le fichier suivant.
+* @param tabBlocs : tableau de pointeurs sur structures Bloc contenant les informations sur chaque bloc.
+* @warning tabBloc est particulier car il ne peut (et ne doit) pas être modifié entre le moment de sa création et le moment de sa destruction. De ce fait ce n'est pas un tableau dynamique.
 */
 typedef struct Fichier
 {
     unsigned int idFichier;
 	char * nomFichier;
-	int nbBlocs;
-	int capaTabBlocs;
-	Bloc* tabBlocs;
-	struct Fichier* fichierSuivant;
+	unsigned int nbBlocs;
+	Bloc** tabBlocs;
 }Fichier;
 
 
 
 /**
-* @note gère la liste des fichiers référencés par l'annuaire.
+* @note tableau dynamique des fichiers référencés par l'annuaire.
 * @param nbFichiers : nombre de fichiers  référencés.
-* @param listeFichiers : liste chainée de structures Fichier.
+* @param capaTabFichiers : capacité maximum de tabFichiers.
+* @param tabFichiers : tableau dynamique de pointeurs sur structures Fichier.
+* @warning tabFichiers n'est pas forcément rempli de manière contigue et encore moins triée. Les éléments sont insérés et supprimés de façon à minimiser la taille du tableau.
 * @param verrou_bddfich_w : mutex de la BddFichiers en écriture.
 * @param verrou_bddfich_r : mutex de la BddServeurs en lecture.
 */
 typedef struct BddFichiers
 {
-	int nbFichiers;
-	Fichier* listeFichiers;
+	unsigned int nbFichiers;
+	unsigned int capaTabFichiers;
+	Fichier** tabFichiers;
 	pthread_mutex_t verrou_bddfich_w;
 	pthread_mutex_t verrou_bddfich_r;
 }BddFichiers;
@@ -120,18 +122,19 @@ typedef struct InfoServeurs
 
 
 /**
-* @note gère la liste des serveurs en contact avec l'annuaire.
-* @param nbServeurs : nombre de serveurs référencés dans la liste.
-* @param capaTabServeurs : capacité max de tabServeurs.
-* @param tabServeurs : tableau de pointeurs sur des structures de type InfoServeurs stockant les informations des serveurs référencés.
+* @note tableau dynamique des serveurs référencés par l'annuaire.
+* @param nbServeurs : nombre de serveurs référencés dans le tableau.
+* @param capaTabServeurs : capacité maximum de tabServeurs.
+* @param tabInfoServeurs : tableau de pointeurs sur structures InfoServeurs.
+* @warning tabInfoServeurs n'est pas forcément rempli de manière contigue et encore moins triée. Les éléments sont insérés et supprimés de façon à minimiser la taille du tableau.
 * @param verrou_bddserv_w : mutex de la BddServeurs en écriture.
 * @param verrou_bddserv_r : mutex de la BddServeurs en lecture.
 */
 typedef struct BddServeurs
 {
-	int nbServeurs;
-	int capaTabServeurs;
-	InfoServeurs** tabServeurs;
+	unsigned int nbInfoServeurs;
+	unsigned int capaTabInfoServeurs;
+	InfoServeurs** tabInfoServeurs;
 	pthread_mutex_t verrou_bddserv_w;
 	pthread_mutex_t verrou_bddserv_r;
 }BddServeurs;

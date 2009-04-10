@@ -1,17 +1,9 @@
 /**
-<<<<<<< .mine
  * @file socket.h
  * @project lif12p2p
  * @author Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
  * @since 19/03/2009
- * @version 09/04/2009
-=======
- * @file socket.h
- * @project lif12p2p
- * @author Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
- * @since 19/03/2009
- * @version 9/04/2009
->>>>>>> .r51
+ * @version 10/04/2009
  */
 
 #ifndef SOCKET_H
