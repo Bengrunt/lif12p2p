@@ -3,7 +3,7 @@
  * @project lif12p2p
  * @author Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
  * @since 20/03/2009
- * @version 9/04/2009
+ * @version 10/04/2009
  */
 
 #include "annuaire.h"
@@ -27,32 +27,33 @@ unsigned int generateurIdFichier; /* compteur de génération des idFichier */
 * @brief modifie le contenu des variables globales serveurs et fichiers.
 * @return renvoie 0 si tout se passe bien, -1 sinon.
 */
-int initialisationAnnuaire()
+int initialisationAnnuaire( )
 {
     /* Creation des bases de données de serveurs */
-    serveurs = malloc(sizeof(BddServeurs));
-    if (serveurs == NULL)
+    serveurs = malloc( sizeof( BddServeurs ) );
+    if ( serveurs == NULL )
     {
-        perror("Echec de l'allocation en mémoire de la base de donnée des serveurs.\n");
+        perror( "Echec de l'allocation en mémoire de la base de donnée des serveurs.\n" );
         return -1;
     }
-    serveurs->nbServeurs = 0;
-    serveurs->capaTabServeurs = 1;
-    serveurs->tabServeurs = malloc(serveurs->capaTabServeurs*sizeof(InfoServeurs*));
-    pthread_mutex_init(&serveurs->verrou_bddserv_r, NULL);
-    pthread_mutex_init(&serveurs->verrou_bddserv_w, NULL);
+    serveurs->nbInfoServeurs = 0;
+    serveurs->capaTabInfoServeurs = 1;
+    serveurs->tabInfoServeurs = malloc( serveurs->capaTabInfoServeurs * sizeof( InfoServeurs* ) );
+    pthread_mutex_init( &serveurs->verrou_bddserv_r, NULL );
+    pthread_mutex_init( &serveurs->verrou_bddserv_w, NULL );
 
     /* Creation des bases de données de fichiers */
-    fichiers = malloc(sizeof(BddFichiers));
-    if (fichiers == NULL)
+    fichiers = malloc( sizeof( BddFichiers ) );
+    if ( fichiers == NULL )
     {
-        perror("Echec de l'allocation en mémoire de la base de donnée des fichiers.\n");
+        perror( "Echec de l'allocation en mémoire de la base de donnée des fichiers.\n" );
         return -1;
     }
     fichiers->nbFichiers = 0;
-    fichiers->listeFichiers = NULL;
-    pthread_mutex_init(&fichiers->verrou_bddfich_r, NULL);
-    pthread_mutex_init(&fichiers->verrou_bddfich_w, NULL);
+    fichiers->capaTabFichiers = 1;
+    fichiers->tabFichiers = malloc( fichiers->capaTabFichiers * sizeof( Fichier* ) );
+    pthread_mutex_init( &fichiers->verrou_bddfich_r, NULL );
+    pthread_mutex_init( &fichiers->verrou_bddfich_w, NULL );
 
     /* Initialisation des générateurs d'identificateurs */
     generateurIdServeur = 0;
@@ -66,16 +67,16 @@ int initialisationAnnuaire()
 * @param portAnnuaire : numéro de port sur lequel on crée la socket d'écoute.
 * @return renvoie la socket créée.
 */
-Socket initialiseSocketEcouteAnnuaire(int portAnnuaire)
+Socket initialiseSocketEcouteAnnuaire( int portAnnuaire )
 {
     /* On déclare la socket pour l'annuaire */
     Socket socketEcouteAnnuaire;
 
     /* On la crée */
-    socketEcouteAnnuaire = creationSocket();
+    socketEcouteAnnuaire = creationSocket( );
 
     /* On lie la socket au numero de port portAnnuaire */
-    definitionNomSocket(socketEcouteAnnuaire,portAnnuaire);
+    definitionNomSocket( socketEcouteAnnuaire, portAnnuaire );
 
     return socketEcouteAnnuaire;
 }
@@ -86,7 +87,7 @@ Socket initialiseSocketEcouteAnnuaire(int portAnnuaire)
 * @param arg : socket sur laquelle le message est arrivé.
 * @return renvoie 0 si tout se passe bien, -1 sinon.
 */
-int traiteMessage(Socket arg)
+int traiteMessage( Socket arg )
 {
     /* variables */
     char* buff; /* Message lu sur la socket */
@@ -98,64 +99,63 @@ int traiteMessage(Socket arg)
     fin_thread = 0; /* booleen qui décide de l'arret du thread */
 
     /* Allocation mémoire des chaines de caracteres */
-    buff = malloc(200*sizeof(char));
+    buff = malloc( 200 * sizeof( char ) );
 
     /* boucle de traitement des messages */
-    while (!fin_thread)
+    while ( !fin_thread )
     {
         /* on ecoute sur la socket arg */
-        ecouteSocket(arg, buff, 200);
+        ecouteSocket( arg, buff, 200 );
 
         /* on analyse le type du message reçu et on agit en conséquence */
-        if (sscanf ( buff, "%d", &type_message) != 1 )
+        if (sscanf ( buff, "%d", &type_message ) != 1 )
         {
-            fprintf(stderr, "Message ignoré, impossible de l'analyser.\n Contenu du message: %s \n", buff);
+            fprintf( stderr, "Message ignoré, impossible de l'analyser.\n Contenu du message: %s \n", buff );
         }
         else
         {
-            printf("Message reçu.\n");
+            printf( "Message reçu.\n" );
             /* On lance l'action correspondant au type de message. */
-            switch (type_message)
+            switch ( type_message )
             {
             case 31: /* Demande d'un fichier */
-                traiteDemandeFichierClient(arg, buff);
+                traiteDemandeFichierClient( arg, buff );
                 break;
             case 32: /* Demande d'un bloc */
-                traiteDemandeBlocClient(arg, buff);
+                traiteDemandeBlocClient( arg, buff );
                 break;
             case 33: /* Arret d'échange d'un client */
-                traiteArretClient(arg, buff);
+                traiteArretClient( arg, buff );
                 fin_thread = 1;
                 break;
             case 51: /* Disponibilité d'un bloc */
-                traiteBlocDisponibleServeur(arg, buff);
+                traiteBlocDisponibleServeur( arg, buff );
                 break;
             case 52: /* Arret d'un serveur */
-                traiteArretServeur(arg, buff);
+                traiteArretServeur( arg, buff );
                 fin_thread = 1;
                 break;
             case 54: /* Demande IDServeur */
-                traiteDemandeIdServeur(arg, buff);
+                traiteDemandeIdServeur( arg, buff );
                 break;
             case 55: /* Demande IDFichier */
-                traiteDemandeIdFichier(arg, buff);
+                traiteDemandeIdFichier( arg, buff );
                 break;
             case 71: /* Indiquation que l'on a envoyé des messages au mauvais destinataire sur la socket donc fermeture */
                 fin_thread = 1;
                 break;
             default: /* Un message géré par le réseau a bien été reçu mais inadapté donc la connexion
                             doit être terminé car ce ne sont pas les bons interlocuteurs. */
-                traiteMessageErr(arg, buff);
+                traiteMessageErr( arg, buff );
                 fin_thread = 1;
             }
         }
     }
 
     /* Fermeture de la socket arg */
-    clotureSocket(arg);
+    clotureSocket( arg );
 
     return 0;
-
 }
 
 
@@ -164,12 +164,13 @@ int traiteMessage(Socket arg)
 * @param s : la socket sur laquelle la demande de fichier client a été émise.
 * @param mess : la demande de fichier client a traiter.
 */
-void traiteDemandeFichierClient(Socket s, char* mess)
+void traiteDemandeFichierClient( Socket s, char* mess )
 {
     /* Variables */
     int fichTrouve; /* Booléen indiquant si le fichier a été trouvé dans la BDD des fichiers */
     int type_message; /* type du message : ici 31 */
-    int i,j; /* itérateur */
+    unsigned int random; /* Valeur aléatoire */
+    unsigned int i,j,k,l; /* itérateurs */
 
     char* buff; /* tampon pour écriture du message */
     char* var_nomDeFichier; /* nom du fichier demandé */
@@ -179,128 +180,131 @@ void traiteDemandeFichierClient(Socket s, char* mess)
     char* str_idServeur; /* transformation de l'identificateur de serveur en chaine de caractères */
     char* str_numPort; /* transformation du numéro de port du serveur en chaine de caractères */
 
-    Fichier* ptBddFichiers; /* pointeur de travail pour se déplacer dans la BDD des fichiers */
-    Serveur* ptListeServeurs; /* pointeur de travail pour se déplacer dans la liste des serveurs d'un bloc */
-
     /* On initialise le booleen de réussite :p */
     fichTrouve = 0; /* On a pas encore trouvé le fichier */
 
     /* Allocations mémoire des chaines de caractère */
-    var_nomDeFichier = malloc(100*sizeof(char));
-    str_idFichier = malloc(10*sizeof(char));
-    str_idServeur = malloc(10*sizeof(char));
-    str_nbBlocs = malloc(10*sizeof(char));
-    str_numBloc = malloc(10*sizeof(char));
-    str_numPort = malloc(10*sizeof(char));
+    var_nomDeFichier = malloc( 100 * sizeof( char ) );
+    str_idFichier = malloc( 10 * sizeof( char ) );
+    str_idServeur = malloc( 10 * sizeof( char ) );
+    str_nbBlocs = malloc(10 * sizeof( char ) );
+    str_numBloc = malloc(10 * sizeof( char ) );
+    str_numPort = malloc(10 * sizeof( char ) );
 
     /* On récupère le contenu du message */
     /* Doit être de la forme "31 nomDeFichier" */
-    if (sscanf(mess, "%d %s", &type_message, var_nomDeFichier ) < 2)
+    if ( sscanf( mess, "%d %s", &type_message, var_nomDeFichier ) < 2 )
     {
-        fprintf(stderr, "Message invalide, impossible de l'utiliser.\n Contenu du message: %s \n", mess);
+        fprintf( stderr, "Message invalide, impossible de l'utiliser.\n Contenu du message: %s \n", mess );
     }
 
     /* On vérrouille en ecriture les BDD des fichiers et serveurs avant la lecture */
-    pthread_mutex_lock(&(fichiers->verrou_bddfich_w));
-    pthread_mutex_lock(&(serveurs->verrou_bddserv_w));
+    pthread_mutex_lock( &(fichiers->verrou_bddfich_w) );
+    pthread_mutex_lock( &(serveurs->verrou_bddserv_w) );
 
-    /* On recherche ans la BDD des fichiers si on possède celui qui est demandé */
-    ptBddFichiers = fichiers->listeFichiers;
-
-    while ( ptBddFichiers != NULL)
+    /* On recherche dans la BDD des fichiers si on possède celui qui est demandé */
+    for ( i = 0 ; i < fichiers->capaTabFichiers ; i++ ) /* On parcoure le tableau des fichiers */
     {
-        /******** Le fichier demandé est trouvé ********/
-        if ( strcmp( fichiers->listeFichiers->nomFichier, var_nomDeFichier ) == 0 )
+        if( fichiers->tabFichiers[i] != NULL ) /* Si il y a un pointeur dans la case du tableau on peut lancer le traitement */
         {
-            /* Pour chaque bloc constituant du fichier on envoie un message indiquant où le télécharger au client */
-            buff = malloc(200*sizeof(char));
-
-            for (i = ptBddFichiers->nbBlocs;i>0;i--)
+            /******** Le fichier demandé est trouvé ********/
+            if ( strcmp( fichiers->tabFichiers[i]->nomFichier, var_nomDeFichier ) == 0 )
             {
+                /* Pour chaque bloc constituant du fichier on envoie un message indiquant où le télécharger au client */
+                buff = malloc( 200 * sizeof( char ) );
 
-                /* On envoie pour chaque bloc un message indiquant au client où télécharger chaque bloc */
-                /* Message de la forme : "11 idFichier nomDeFichier nombreTotalDeBloc numeroDeBloc idServeur adresseServeur portServeur" */
-                strcpy(buff, "11 ");
-                sprintf(str_idFichier, "%u", ptBddFichiers->idFichier);
-                strcat(buff, str_idFichier);
-                strcat(buff, " ");
-                strcat(buff, ptBddFichiers->nomFichier);
-                strcat(buff, " ");
-                sprintf(str_nbBlocs, "%d", ptBddFichiers->nbBlocs);
-                strcat(buff, str_nbBlocs);
-                strcat(buff, " ");
-                sprintf(str_numBloc, "%d", i);
-                strcat(buff, str_numBloc);
-                strcat(buff, " ");
-
-                ptListeServeurs = ptBddFichiers->tabBlocs[i].listeServeurs;
-
-                /* On a des serveurs proposant ce bloc */
-                if (ptListeServeurs != NULL)
+                for ( j = 0 ; j < fichiers->tabFichiers[i]->nbBlocs ; j++ )
                 {
-                    /* On fait un rand parmi les serveurs pour répartir leur charge en attributan les requetes aléatoirement */
-                    for (j = rand()%ptBddFichiers->tabBlocs[i].nbServeursDansListe;j>=0;j--)
+                    if ( fichiers->tabFichiers[i]->tabBlocs[j] != NULL ) /* Si il y a un pointeur dans la case du tableau on peut lancer le traitement */
                     {
-                        ptListeServeurs = ptListeServeurs->serveurSuivant;
+                        /* On envoie pour chaque bloc un message indiquant au client où télécharger chaque bloc */
+                        /* Message de la forme : "11 idFichier nomDeFichier nombreTotalDeBloc numeroDeBloc idServeur adresseServeur portServeur" */
+                        strcpy( buff, "11 " );
+                        sprintf( str_idFichier, "%u", fichiers->tabFichiers[i]->idFichier );
+                        strcat( buff, str_idFichier );
+                        strcat( buff, " " );
+                        strcat( buff, fichiers->tabFichiers[i]->nomFichier );
+                        strcat( buff, " " );
+                        sprintf( str_nbBlocs, "%d", fichiers->tabFichiers[i]->nbBlocs );
+                        strcat( buff, str_nbBlocs );
+                        strcat( buff, " " );
+                        sprintf( str_numBloc, "%d", i );
+                        strcat( buff, str_numBloc );
+                        strcat( buff, " " );
+
+                        /* On a des serveurs proposant ce bloc */
+                        if ( fichiers->tabFichiers[i]->tabBlocs[j]->nbServeurs > 0 )
+                        {
+                            /* On fait un rand parmi les serveurs pour répartir leur charge en attribuant les requetes aléatoirement */
+                            random = ( unsigned int ) rand( ) % fichiers->tabFichiers[i]->tabBlocs[j]->nbServeurs; /* numero du serveur sur qui la requete sera envoyée par le client */
+                            k = 0;
+                            l = 1;
+
+                            while ( l <= random )
+                            {
+                                if( fichiers->tabFichiers[i]->tabBlocs[j]->tabServeurs[k] != NULL ) /* On saute les cases du tableau qui sont vides */
+                                {
+                                    l++; /* compteur de cases remplies */
+                                }
+
+                                k++; /* itérateur de déplacement dans le tableau */
+                            }
+
+                            sprintf( str_idServeur, "%u", fichiers->tabFichiers[i]->tabBlocs[j]->tabServeurs[k]->infos->idServeur );
+                            strcat( buff, str_idServeur );
+                            strcat( buff, " " );
+                            strcat( buff, fichiers->tabFichiers[i]->tabBlocs[j]->tabServeurs[k]->infos->adresseServeur );
+                            strcat( buff, " " );
+                            sprintf( str_numPort, "%d", fichiers->tabFichiers[i]->tabBlocs[j]->tabServeurs[k]->infos->numPort );
+                            strcat( buff, str_numPort );
+
+                        }
+                        /* On a pas de serveur proposant ce bloc, on envoie dans la réponse -1 -1 pour indiquer au client que des blocs sont manquants */
+                        else
+                        {
+                            strcat( buff, " -1 -1" );
+                        }
+
+                        /* Envoi du message sur la socket */
+                        ecritureSocket( s, buff, 200 );
                     }
-
-                    sprintf(str_idServeur, "%u", serveurs->tabServeurs[ptListeServeurs->numServeur]->idServeur);
-                    strcat(buff, str_idServeur);
-                    strcat(buff, " ");
-                    strcat(buff, serveurs->tabServeurs[ptListeServeurs->numServeur]->adresseServeur);
-                    strcat(buff, " ");
-                    sprintf(str_numPort, "%d", serveurs->tabServeurs[ptListeServeurs->numServeur]->numPort);
-                    strcat(buff, str_numPort);
-
                 }
-                /* On a pas de serveur proposant ce bloc, on envoie dans la réponse -1 -1 pour indiquer au client que des blocs sont manquants */
-                else
-                {
-                    strcat(buff, " -1 -1");
-                }
-
-                /* Envoi du message sur la socket */
-                ecritureSocket(s,buff,200);
+                /* Libération de la chaine après utilisation */
+                free( buff );
+                /* On a bien trouvé le fichier et envoyé les messages */
+                fichTrouve = 1;
             }
-            /* Libération de la chaine après utilisation */
-            free(buff);
-            /* On a bien trouvé le fichier et envoyé le message */
-            fichTrouve = 1;
-        }
-        /******** Le fichier n'a pas encore été trouvé, continue la recherche ********/
-        else
-        {
-            ptBddFichiers = ptBddFichiers->fichierSuivant;
         }
     }
+
+    /* On dévérouille en écriture les BDD des fichiers et serveurs après la lecture */
+    pthread_mutex_unlock( &(fichiers->verrou_bddfich_w) );
+    pthread_mutex_unlock( &(serveurs->verrou_bddserv_w) );
+
     /******** Le fichier n'est pas dans la BDD des fichiers, on envoie une réponse défavorable au client *********/
-    if (!fichTrouve)
+    if ( !fichTrouve )
     {
         /* On envoie un message de réponse défavorable au client */
         /* Message de la forme: "02 erreur nomDeFichier" */
-        buff = malloc(200*sizeof(char));
+        buff = malloc( 200 * sizeof( char ) );
 
-        strcpy(buff, "12 ");
-        strcat(buff, var_nomDeFichier);
+        strcpy( buff, "12 " );
+        strcat( buff, var_nomDeFichier );
 
         /* Envoi du message sur la socket */
-        ecritureSocket(s,buff,200);
+        ecritureSocket( s, buff, 200 );
 
         /* Libération de la chaine après utilisation */
-        free(buff);
+        free( buff );
     }
 
     /* Libérations mémoire de chaines de caractère */
-    free(var_nomDeFichier);
-    free(str_idFichier);
-    free(str_idServeur);
-    free(str_nbBlocs);
-    free(str_numBloc);
-    free(str_numPort);
-
-    /* On dévérouille en écriture les BDD des fichiers et serveurs après la lecture */
-    pthread_mutex_unlock(&(fichiers->verrou_bddfich_w));
-    pthread_mutex_unlock(&(serveurs->verrou_bddserv_w));
+    free( var_nomDeFichier );
+    free( str_idFichier );
+    free( str_idServeur );
+    free( str_nbBlocs );
+    free( str_numBloc );
+    free( str_numPort );
 }
 
 
@@ -309,13 +313,16 @@ void traiteDemandeFichierClient(Socket s, char* mess)
 * @param s : la socket sur laquelle la demande de bloc client a été émise.
 * @param mess : la demande de bloc client a traiter.
 */
-void traiteDemandeBlocClient(Socket s, char* mess)
+void traiteDemandeBlocClient( Socket s, char* mess )
 {
     /* Variables */
     int type_message; /* type du message : ici 32 */
     unsigned int var_idFichier; /* identificateur du fichier */
-    int var_numBloc; /* numero du bloc demandé */
-    int j; /* Itérateur */
+    unsigned int var_numBloc; /* numero du bloc demandé */
+    unsigned int random; /* Valeur aléatoire */
+    unsigned int i,j,k; /* Itérateurs */
+
+
     int fichTrouve; /* Booléen indiquant si le fichier a été trouvé dans la BDD des fichiers */
 
     char* buff; /* tampon pour écriture du message */
@@ -326,124 +333,125 @@ void traiteDemandeBlocClient(Socket s, char* mess)
     char* str_idServeur; /* transformation de l'identificateur de serveur en chaine de caractères */
     char* str_numPort; /* transformation du numéro de port du serveur en chaine de caractères */
 
-    Fichier* ptBddFichiers; /* pointeur de travail pour se déplacer dans la BDD des fichiers */
-    Serveur* ptListeServeurs; /* pointeur de travail pour se déplacer dans la liste des serveurs d'un bloc */
-
     /* Initialisation des booléens */
     fichTrouve = 0;
 
     /* Allocations mémoire des chaines de caractère */
-    var_nomDeFichier = malloc(100*sizeof(char));
-    str_idFichier = malloc(10*sizeof(char));
-    str_idServeur = malloc(10*sizeof(char));
-    str_nbBlocs = malloc(10*sizeof(char));
-    str_numBloc = malloc(10*sizeof(char));
-    str_numPort = malloc(10*sizeof(char));
+    var_nomDeFichier = malloc(100 * sizeof( char ) );
+    str_idFichier = malloc(10 * sizeof( char ) );
+    str_idServeur = malloc(10 * sizeof( char ) );
+    str_nbBlocs = malloc( 10 * sizeof( char ) );
+    str_numBloc = malloc( 10 * sizeof( char ) );
+    str_numPort = malloc( 10 * sizeof( char ) );
 
     /* On récupère le contenu du message */
     /* Doit être de la forme "32 idFichier nomDeFichier numeroDeBloc" */
-    if (sscanf(mess, "%d %u %s %d", &type_message, &var_idFichier, var_nomDeFichier, &var_numBloc ) < 4)
+    if ( sscanf( mess, "%d %u %s %u", &type_message, &var_idFichier, var_nomDeFichier, &var_numBloc ) < 4 )
     {
-        fprintf(stderr, "Message invalide, impossible de l'utiliser.\n Contenu du message: %s \n", mess);
-        exit(1);
+        fprintf( stderr, "Message invalide, impossible de l'utiliser.\n Contenu du message: %s \n", mess );
+        exit( 1 );
     }
 
     /* On vérrouille en ecriture les BDD des fichiers et serveurs avant la lecture */
-    pthread_mutex_lock(&(fichiers->verrou_bddfich_w));
-    pthread_mutex_lock(&(serveurs->verrou_bddserv_w));
+    pthread_mutex_lock( &(fichiers->verrou_bddfich_w) );
+    pthread_mutex_lock( &(serveurs->verrou_bddserv_w) );
 
     /* On recherche ans la BDD des fichiers si on possède celui qui est demandé */
-    ptBddFichiers = fichiers->listeFichiers;
-
-    while ( ptBddFichiers != NULL)
+    for ( i = 0 ; i < fichiers->capaTabFichiers ; i++ )
     {
-        /******** Le fichier demandé est trouvé ********/
-        if ( strcmp( fichiers->listeFichiers->nomFichier, var_nomDeFichier ) == 0 && var_idFichier == fichiers->listeFichiers->idFichier)
+        if ( fichiers->tabFichiers[i] != NULL ) /* Si il y a un pointeur dans la case du tableau on peut lancer le traitement */
         {
-            /* On envoie un message indiquant où télécharger le bloc demandé au client */
-            buff = malloc(200*sizeof(char));
-            /* On envoie pour chaque bloc un message indiquant au client où télécharger chaque bloc */
-            /* Message de la forme : "11 bloc idFichier nomDeFichier nombreTotalDeBloc numeroDeBloc idServeur adresseServeur portServeur" */
-            strcpy(buff, "11 ");
-            sprintf(str_idFichier, "%u", ptBddFichiers->idFichier);
-            strcat(buff, str_idFichier);
-            strcat(buff, " ");
-            strcat(buff, ptBddFichiers->nomFichier);
-            strcat(buff, " ");
-            sprintf(str_nbBlocs, "%d", ptBddFichiers->nbBlocs);
-            strcat(buff, str_nbBlocs);
-            strcat(buff, " ");
-            sprintf(str_numBloc, "%d", var_numBloc);
-            strcat(buff, str_numBloc);
-            strcat(buff, " ");
-
-            ptListeServeurs = ptBddFichiers->tabBlocs[var_numBloc].listeServeurs;
-
-            /* On a des serveurs proposant ce bloc */
-            if (ptListeServeurs != NULL)
+            /******** Le fichier demandé est trouvé ********/
+            if ( strcmp( fichiers->tabFichiers[i]->nomFichier, var_nomDeFichier ) == 0 && var_idFichier == fichiers->tabFichiers[i]->idFichier )
             {
-                /* On fait un rand parmi les serveurs pour répartir leur charge en attribuant les requetes aléatoirement */
-                for (j = rand()%ptBddFichiers->tabBlocs[var_numBloc].nbServeursDansListe;j>=0;j--)
+                /* On envoie un message indiquant où télécharger le bloc demandé au client */
+                buff = malloc( 200 * sizeof( char ) );
+
+                /* Message de la forme : "11 bloc idFichier nomDeFichier nombreTotalDeBloc numeroDeBloc idServeur adresseServeur portServeur" */
+                strcpy( buff, "11 " );
+                sprintf( str_idFichier, "%u", fichiers->tabFichiers[i]->idFichier );
+                strcat( buff, str_idFichier );
+                strcat( buff, " " );
+                strcat( buff, fichiers->tabFichiers[i]->nomFichier );
+                strcat( buff, " " );
+                sprintf( str_nbBlocs, "%u", fichiers->tabFichiers[i]->nbBlocs );
+                strcat( buff, str_nbBlocs );
+                strcat( buff, " " );
+                sprintf( str_numBloc, "%u", var_numBloc );
+                strcat( buff, str_numBloc );
+                strcat( buff, " " );
+
+                /* Si on a des serveurs proposant ce bloc */
+                if ( fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->nbServeurs > 0 )
                 {
-                    ptListeServeurs = ptListeServeurs->serveurSuivant;
+                    /* On fait un rand parmi les serveurs pour répartir leur charge en attribuant les requetes aléatoirement */
+                    random = ( unsigned int ) rand( ) % fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->nbServeurs; /* numero du serveur sur qui la requete sera envoyée par le client */
+                    j = 0;
+                    k = 1;
+
+                    while ( k <= random )
+                    {
+                        if( fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->tabServeurs[j] != NULL ) /* On saute les cases du tableau qui sont vides */
+                        {
+                            k++; /* compteur de cases remplies */
+                        }
+
+                        j++; /* itérateur de déplacement dans le tableau */
+                    }
+
+                    sprintf( str_idServeur, "%u", fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->tabServeurs[j]->infos->idServeur );
+                    strcat( buff, str_idServeur );
+                    strcat( buff, " " );
+                    strcat( buff, fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->tabServeurs[j]->infos->adresseServeur );
+                    strcat( buff, " " );
+                    sprintf( str_numPort, "%d", fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->tabServeurs[j]->infos->numPort );
+                    strcat( buff, str_numPort );
+
+                }
+                /* On a pas de serveur proposant ce bloc, on envoie dans la réponse -1 -1 pour indiquer au client que des blocs sont manquants */
+                else
+                {
+                    strcat( buff, " -1 -1" );
                 }
 
-                sprintf(str_idServeur, "%u", serveurs->tabServeurs[ptListeServeurs->numServeur]->idServeur);
-                strcat(buff, str_idServeur);
-                strcat(buff, " ");
-                strcat(buff, serveurs->tabServeurs[ptListeServeurs->numServeur]->adresseServeur);
-                strcat(buff, " ");
-                sprintf(str_numPort, "%d", serveurs->tabServeurs[ptListeServeurs->numServeur]->numPort);
-                strcat(buff, str_numPort);
-
+                /* Envoi du message sur la socket */
+                ecritureSocket( s, buff, 200 );
+                /* Libération de la chaine après utilisation */
+                free( buff );
+                /* On a bien trouvé le fichier et envoyé le message */
+                fichTrouve = 1;
             }
-            /* On a pas de serveur proposant ce bloc, on envoie dans la réponse -1 -1 pour indiquer au client que des blocs sont manquants */
-            else
-            {
-                strcat(buff, " -1 -1");
-            }
-
-            /* Envoi du message sur la socket */
-            ecritureSocket(s,buff,200);
-            /* Libération de la chaine après utilisation */
-            free(buff);
-            /* On a bien trouvé le fichier et envoyé le message */
-            fichTrouve = 1;
-        }
-        /******** Le fichier n'a pas encore été trouvé, continue la recherche ********/
-        else
-        {
-            ptBddFichiers = ptBddFichiers->fichierSuivant;
         }
     }
+
+    /* On dévérouille en écriture les BDD des fichiers et serveurs après la lecture */
+    pthread_mutex_unlock( &fichiers->verrou_bddfich_w );
+    pthread_mutex_unlock( &serveurs->verrou_bddserv_w );
+
     /******** Le fichier n'est pas dans la BDD des fichiers, on envoie une réponse défavorable au client *********/
-    if (!fichTrouve)
+    if ( !fichTrouve )
     {
         /* On envoie un message de réponse défavorable au client */
         /* Message de la forme: "12 erreur nomDeFichier" */
-        buff = malloc(200*sizeof(char));
+        buff = malloc( 200 * sizeof( char ) );
 
-        strcpy(buff, "12 ");
-        strcat(buff, var_nomDeFichier);
+        strcpy( buff, "12 " );
+        strcat( buff, var_nomDeFichier );
 
         /* Envoi du message sur la socket */
-        ecritureSocket(s,buff,200);
+        ecritureSocket( s, buff, 200 );
 
         /* Libération de la chaine après utilisation */
-        free(buff);
+        free( buff );
     }
 
     /* Libérations mémoire de chaines de caractère */
-    free(var_nomDeFichier);
-    free(str_idFichier);
-    free(str_idServeur);
-    free(str_nbBlocs);
-    free(str_numBloc);
-    free(str_numPort);
-
-    /* On dévérouille en écriture les BDD des fichiers et serveurs après la lecture */
-    pthread_mutex_unlock(&fichiers->verrou_bddfich_w);
-    pthread_mutex_unlock(&serveurs->verrou_bddserv_w);
+    free( var_nomDeFichier );
+    free( str_idFichier );
+    free( str_idServeur );
+    free( str_nbBlocs );
+    free( str_numBloc );
+    free( str_numPort );
 }
 
 
@@ -452,7 +460,7 @@ void traiteDemandeBlocClient(Socket s, char* mess)
 * @param s : la socket sur laquelle le message d'arret client a été émis.
 * @param mess : le message d'arret client a traiter.
 */
-void traiteArretClient(Socket s, char* mess)
+void traiteArretClient( Socket s, char* mess )
 {
 
 }
@@ -463,96 +471,180 @@ void traiteArretClient(Socket s, char* mess)
 * @param s : la socket sur laquelle le message de nouveau bloc disponible sur serveur a été émis.
 * @param mess : le message de nouveau bloc disponible a traiter.
 */
-void traiteBlocDisponibleServeur(Socket s, char* mess)
+void traiteBlocDisponibleServeur( Socket s, char* mess )
 {
     /* Variables */
     int type_message; /* Type du message : ici 51 */
     unsigned int var_idFichier; /* identificateur du fichier */
-    int var_nbBlocs; /*  nombre de blocs du fichier */
-    int var_numBloc; /* numero de bloc */
+    unsigned int var_nbBlocs; /*  nombre de blocs du fichier */
+    unsigned int var_numBloc; /* numero de bloc */
     unsigned int var_idServeur; /* identificateur du serveur */
     int var_portServeur; /* port du serveur */
+    unsigned int i,j,k,l; /* Itérateurs */
 
-    int fichTrouve; /* booléen */
-    int servTrouve; /* booléen */
+    int servTrouve; /* Booléen */
 
     char* var_nomDeFichier; /* nom du fichier */
     char* var_adresseServeur; /* adresse du serveur */
 
-    Fichier* ptListeFichiers; /* pointeur de travail sur une liste de fichiers */
-    Serveur* ptListeServeurs; /* pointeur de travail sur une liste de serveurs */
+    Serveur** tempTabServeurs; /* pointeur temporaire pour l'extension de tabServeurs */
 
     /* Initialisation des booléens */
-    fichTrouve = 0;
     servTrouve = 0;
 
     /* Allocations mémoire des chaines de caractère */
-    var_nomDeFichier = malloc(100*sizeof(char));
-    var_adresseServeur = malloc(40*sizeof(char));
+    var_nomDeFichier = malloc( 100 * sizeof( char ) );
+    var_adresseServeur = malloc( 40 * sizeof( char ) );
 
     /* On récupère le contenu du message */
     /* Doit être de la forme "51 idFichier nomDeFichier nombreTotalDeBloc numeroDeBloc idServeur adresseServeur portServeur" */
-    if (sscanf(mess, "%d %u %s %d %d %u %s %d", &type_message, &var_idFichier, var_nomDeFichier, &var_nbBlocs, &var_numBloc, &var_idServeur, var_adresseServeur, &var_portServeur ) < 6)
+    if ( sscanf( mess, "%d %u %s %u %u %u %s %d", &type_message, &var_idFichier, var_nomDeFichier, &var_nbBlocs, &var_numBloc, &var_idServeur, var_adresseServeur, &var_portServeur ) < 6 )
     {
-        fprintf(stderr, "Message invalide, impossible de l'utiliser.\n Contenu du message: %s \n", mess);
+        fprintf( stderr, "Message invalide, impossible de l'utiliser.\n Contenu du message: %s \n", mess );
     }
 
     /* On vérouille les BDD des fichiers et serveurs en lecture et en écriture avant l'écriture des nouvelles données */
-    pthread_mutex_lock(&fichiers->verrou_bddfich_r);
-    pthread_mutex_lock(&fichiers->verrou_bddfich_w);
-    pthread_mutex_lock(&serveurs->verrou_bddserv_r);
-    pthread_mutex_lock(&serveurs->verrou_bddserv_w);
+    pthread_mutex_lock( &fichiers->verrou_bddfich_r );
+    pthread_mutex_lock( &fichiers->verrou_bddfich_w );
+    pthread_mutex_lock( &serveurs->verrou_bddserv_r );
+    pthread_mutex_lock( &serveurs->verrou_bddserv_w );
 
-    /* Mise à jour de la BDD des fichiers avec les nouvelles informations */
-    ptListeFichiers = fichiers->listeFichiers;
+    /* Mise à jour des BDD des fichiers et des serveurs avec les nouvelles informations */
 
-    /* On parcourre la liste des fichiers pour trouver celui auquel on ajoute une nouvelle reference de bloc */
-    while (ptListeFichiers != NULL && fichTrouve) /* Tant qu'on est pas au bout de la liste et qu'on a pas trouvé le fichier */
+    /* On parcoure le tableau des fichiers pour trouver celui auquel on doit ajouter une nouvelle reference de serveur ayant un de ses blocs */
+    i = 0;
+    while ( fichiers->tabFichiers[i]->idFichier != var_idFichier ) /* Tant qu'on a pas trouvé le fichier */
     {
-        if ( strcmp(ptListeFichiers->nomFichier, var_nomDeFichier) == 0 && ptListeFichiers->idFichier == var_idFichier )
+        i++;
+    }
+
+    if ( fichiers->tabFichiers[i]->idFichier != var_idFichier ) /* /!\ LA BASE DE DONNEES DES FICHIERS EST CORROMPUE */
+    {
+        fprintf( stderr, "BASE DE DONNEES DES FICHIERS CORROMPUE!\n ARRET DU SERVEUR ANNUAIRE...\n");
+        exit( 1 );
+    }
+
+    if ( fichiers->tabFichiers[i]->tabBlocs != NULL ) /* Si le fichier est déjà référencé au niveau de ses blocs */
+    {
+        if ( fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->nbServeurs > 0 ) /* Il y a déjà au moins une source pour le bloc ajouté */
         {
-            fichTrouve = 1;
-            ptListeServeurs = ptListeFichiers->tabBlocs[var_numBloc].listeServeurs;
-
-            while (ptListeServeurs != NULL && servTrouve) /* Tant qu'on arrive pas au bout de la liste des serveurs ou qu'on trouve le serveur déjà référencé */
+            /* On cherche si le serveur est déjà référencé comme source pour ce bloc */
+            for ( j = 0 ; j < fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->capaTabServeurs ; j++ )
             {
-                if () /* Cas où la liste des serveurs est vide */
+                if ( fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->tabServeurs[j]->infos->idServeur == var_idServeur )
                 {
-
-                }
-                else if (serveurs->tabServeurs[ptListeServeurs->numServeur]->idServeur == var_idServeur) /* Si on trouve le serveur pas besoin de le rajouter */
-                {
-                    servTrouve = 1;
-                }
-                else if ()
-                {
-
-                }
-                else  /* Sinon on continue */
-                {
-                    ptListeServeurs = ptListeServeurs->serveurSuivant;
+                    servTrouve = 1; /* On a trouvé le serveur, pas besoin de le rajouter une fois de plus */
+                    break;
                 }
             }
         }
-        else if () /* Cas général */
-        {
 
-        }
-        else /* Sinon on continue */
+        if( !servTrouve ) /* Il faut référencer le serveur de ce nouveau bloc car on ne l'a pas trouvé */
         {
-            ptListeFichiers = ptListeFichiers->fichierSuivant;
+            if( fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->nbServeurs == 0 ) /* Cas où il y a aucun autre serveur référencé pour ce bloc */
+            {
+                fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->nbServeurs = 0;
+                fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->capaTabServeurs = 1;
+                fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->tabServeurs = malloc( fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->capaTabServeurs * sizeof( Serveur* ) );
+
+                for ( k = 0 ; k < serveurs->capaTabInfoServeurs ; k++ ) /* On cherche où est référencé ce serveur dans la BDD des serveurs */
+                {
+                    if ( serveurs->tabInfoServeurs[k]->idServeur == var_idServeur )
+                        break;
+                }
+
+                fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->tabServeurs[0] = malloc( sizeof( Serveur ) );
+                fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->tabServeurs[0]->infos = serveurs->tabInfoServeurs[k];
+                fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->nbServeurs++;
+                strcpy( serveurs->tabInfoServeurs[k]->adresseServeur, var_adresseServeur );
+                serveurs->tabInfoServeurs[k]->numPort = var_portServeur;
+            }
+            else /* Cas où il y a déjà d'autres serveurs référencés */
+            {
+                for ( k = 0 ; k < serveurs->capaTabInfoServeurs ; k++ ) /* On cherche où est référencé ce serveur dans la BDD des serveurs */
+                {
+                    if ( serveurs->tabInfoServeurs[k]->idServeur == var_idServeur )
+                        break;
+                }
+
+                if ( fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->nbServeurs >= fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->capaTabServeurs ) /* Si tabServeurs est plein on l'agrandit */
+                {
+                    tempTabServeurs = fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->tabServeurs;
+                    fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->tabServeurs = malloc( ( 20 + fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->capaTabServeurs ) * sizeof( Serveur* ) );
+
+                    for( l = 0; l < fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->capaTabServeurs ; l++ )
+                    {
+                        fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->tabServeurs[l] = tempTabServeurs[l];
+                    }
+
+                    free( tempTabServeurs );
+
+                    fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->capaTabServeurs = fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->capaTabServeurs + 20;
+                    fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->tabServeurs[fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->nbServeurs] = malloc( sizeof( Serveur ) );
+                    fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->tabServeurs[fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->nbServeurs]->infos = serveurs->tabInfoServeurs[k];
+                    fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->nbServeurs++;
+                    strcpy( serveurs->tabInfoServeurs[k]->adresseServeur, var_adresseServeur );
+                    serveurs->tabInfoServeurs[k]->numPort = var_portServeur;
+
+
+                }
+                else /* Sinon on ajoute la nouvelle référence dans la premiere case vide que l'on trouve */
+                {
+                    l = 0;
+                    while ( l < fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->capaTabServeurs )
+                    {
+                        if ( fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->tabServeurs[l] == NULL ) /* Si on trouve une case vide on y référence le serveur */
+                        {
+                            fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->capaTabServeurs = fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->capaTabServeurs + 20;
+                            fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->tabServeurs[l] = malloc( sizeof( Serveur ) );
+                            fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->tabServeurs[l]->infos = serveurs->tabInfoServeurs[k];
+                            fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->nbServeurs++;
+                            strcpy( serveurs->tabInfoServeurs[k]->adresseServeur, var_adresseServeur );
+                            serveurs->tabInfoServeurs[k]->numPort = var_portServeur;
+                            break;
+                        }
+
+                        l++;
+                    }
+                }
+            }
         }
+    }
+    else /* C'est le premier référencement de bloc pour ce fichier il faut donc mettre en place le tableau */
+    {
+        fichiers->tabFichiers[i]->nbBlocs = var_nbBlocs;
+        strcpy( fichiers->tabFichiers[i]->nomFichier, var_nomDeFichier );
+        fichiers->tabFichiers[i]->tabBlocs = malloc( var_nbBlocs * sizeof( Bloc* ) );
+
+        for ( j = 0 ; j < var_nbBlocs ; j++ ) /* Pour chaque bloc du fichier on réserve l'emplacement mémoire pour les informations qui arriveront plus tard */
+        {
+            fichiers->tabFichiers[i]->tabBlocs[j] = malloc( sizeof( Bloc ) );
+            fichiers->tabFichiers[i]->tabBlocs[j]->nbServeurs = 0;
+            fichiers->tabFichiers[i]->tabBlocs[j]->capaTabServeurs = 1;
+            fichiers->tabFichiers[i]->tabBlocs[j]->tabServeurs = malloc( fichiers->tabFichiers[i]->tabBlocs[j]->capaTabServeurs * sizeof( Serveur* ) );
+        }
+
+        for ( k = 0 ; k < serveurs->capaTabInfoServeurs ; k++ ) /* On cherche où est référencé ce serveur dans la BDD des serveurs */
+        {
+            if ( serveurs->tabInfoServeurs[k]->idServeur == var_idServeur )
+                break;
+        }
+
+        fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->tabServeurs[0]->infos = serveurs->tabInfoServeurs[k];
+        fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->nbServeurs++;
+        strcpy( serveurs->tabInfoServeurs[k]->adresseServeur, var_adresseServeur );
+        serveurs->tabInfoServeurs[k]->numPort = var_portServeur;
     }
 
     /* Libérations mémoire de chaines de caractère */
-    free(var_nomDeFichier);
-    free(var_adresseServeur);
+    free( var_nomDeFichier );
+    free( var_adresseServeur );
 
     /* On dévérouille la BDD des fichiers en lecture et en écriture */
-    pthread_mutex_unlock(&fichiers->verrou_bddfich_r);
-    pthread_mutex_unlock(&fichiers->verrou_bddfich_w);
-    pthread_mutex_unlock(&serveurs->verrou_bddserv_r);
-    pthread_mutex_unlock(&serveurs->verrou_bddserv_w);
+    pthread_mutex_unlock( &fichiers->verrou_bddfich_r );
+    pthread_mutex_unlock( &fichiers->verrou_bddfich_w );
+    pthread_mutex_unlock( &serveurs->verrou_bddserv_r );
+    pthread_mutex_unlock( &serveurs->verrou_bddserv_w );
 }
 
 
@@ -561,135 +653,107 @@ void traiteBlocDisponibleServeur(Socket s, char* mess)
 * @param s : la socket sur laquelle le message d'arret de serveur a été emis.
 * @param mess : le message d'arret serveur a traiter.
 */
-void traiteArretServeur(Socket s, char* mess)
+void traiteArretServeur( Socket s, char* mess )
 {
     /* Variables */
     int type_message; /* type du message reçu : ici 52 */
     unsigned int var_idServeur; /* identificateur du serveur */
     int var_portServeur; /* port du serveur */
 
-    int i,j; /* itérateur */
+    unsigned int i,j,k; /* Itérateurs */
 
     int sourceExiste; /* booléen */
 
     char* var_adresseServeur; /* adresse du serveur */
 
-    Fichier* ptListeFichiers; /* pointeur de travail sur la liste des fichiers de la BDD */
-    Fichier* ptRetListeFichiers; /* pointeur de travail sur la liste des fichiers de la BDD */
-
-    Serveur* ptListeServeurs; /* pointeur de travail sur la liste des serveurs de la BDD */
-    Serveur* ptRetListeServeurs; /* pointeur de travail sur la liste des serveurs de la BDD */
-
-    Serveur* ptTempServeur; /* pointeur de travail sur un Serveur */
-    Fichier* ptTempFichier; /* pointeur de travail sur un Fichier */
-
     /* Initialisation des booléens */
     sourceExiste = 0;
 
     /* Allocations mémoire des chaines de caractère */
-    var_adresseServeur = malloc(40*sizeof(char));
+    var_adresseServeur = malloc( 40 * sizeof( char ) );
 
     /* On récupère le contenu du message */
     /* Doit être de la forme "52 idServeur adresseServeur portServeur" */
-    if (sscanf(mess, "%d %u %s %d", &type_message, &var_idServeur, var_adresseServeur, &var_portServeur) < 4)
+    if ( sscanf( mess, "%d %u %s %d", &type_message, &var_idServeur, var_adresseServeur, &var_portServeur ) < 4 )
     {
-        fprintf(stderr, "Message invalide, impossible de l'utiliser.\n Contenu du message: %s \n", mess);
+        fprintf( stderr, "Message invalide, impossible de l'utiliser.\n Contenu du message: %s \n", mess );
     }
 
     /* On vérouille la BDD des fichiers en lecture et en écriture avant l'écriture des nouvelles données */
-    pthread_mutex_lock(&fichiers->verrou_bddfich_r);
-    pthread_mutex_lock(&fichiers->verrou_bddfich_w);
-    pthread_mutex_lock(&serveurs->verrou_bddserv_r);
-    pthread_mutex_lock(&serveurs->verrou_bddserv_w);
+    pthread_mutex_lock( &fichiers->verrou_bddfich_r );
+    pthread_mutex_lock( &fichiers->verrou_bddfich_w );
+    pthread_mutex_lock( &serveurs->verrou_bddserv_r );
+    pthread_mutex_lock( &serveurs->verrou_bddserv_w );
 
     /* On supprime de la BDD des fichiers les informations relatives au serveur qui s'arrete */
-    ptListeFichiers = fichiers->listeFichiers;
-    ptRetListeFichiers = ptListeFichiers;
-    ptTempFichier = ptListeFichiers;
-
-    while (ptListeFichiers != NULL) /* Tant que l'on a pas parcouru toute la liste des fichiers */
+    for ( i = 0 ; i < fichiers->capaTabFichiers ; i++ ) /* Pour chaque fichier de la BDD des fichiers */
     {
-        for (i = ptListeFichiers->nbBlocs;i>0;i--) /* Pour chaque bloc du fichier */
+        if ( fichiers->tabFichiers[i] != NULL ) /* Si la case n'est pas vide on lance le traitement */
         {
-            ptListeServeurs = ptListeFichiers->tabBlocs[i].listeServeurs;
-            ptRetListeServeurs = NULL;
-
-            while (ptListeServeurs != NULL) /* Tant que l'on a pas parcouru toute la liste des serveurs */
+            for ( j = 0 ; j < fichiers->tabFichiers[i]->nbBlocs ; j++ ) /* Pour chaque bloc du fichier */
             {
-                if (serveurs->tabServeurs[ptListeServeurs->numServeur]->idServeur == var_idServeur) /* Si on trouve le serveur à supprimer */
+                for ( k = 0 ; k < fichiers->tabFichiers[i]->tabBlocs[j]->nbServeurs ; k++ ) /* Pour chaque serveur du bloc */
                 {
-                    if ( ptListeFichiers->tabBlocs[i].nbServeursDansListe == 1) /* Si il est le seul de la liste */
+                    if ( fichiers->tabFichiers[i]->tabBlocs[j]->tabServeurs[k] != NULL ) /* Si la case n'est pas vide on lance le traitement */
                     {
-                        ptTempServeur = ptListeServeurs;
-                        free(ptTempServeur);
-
-                        ptListeFichiers->tabBlocs[i].listeServeurs = NULL;
-                        ptListeFichiers->tabBlocs[i].nbServeursDansListe = 0;
-                        break;
-                    }
-                    else /* Sinon il restera au moins un serveur dans la liste donc inutile de mettre NULL */
-                    {
-                        ptTempServeur = ptListeServeurs;
-                        ptRetListeServeurs->serveurSuivant = ptListeServeurs->serveurSuivant;
-                        ptListeServeurs = ptListeServeurs->serveurSuivant;
-                        free(ptTempServeur);
-                        break;
+                        if ( fichiers->tabFichiers[i]->tabBlocs[j]->tabServeurs[k]->infos->idServeur == var_idServeur ) /* Si on trouve le serveur on le supprime */
+                        {
+                            free( fichiers->tabFichiers[i]->tabBlocs[j]->tabServeurs[k]->infos );
+                            free( fichiers->tabFichiers[i]->tabBlocs[j]->tabServeurs[k] );
+                            fichiers->tabFichiers[i]->tabBlocs[j]->nbServeurs--;
+                        }
                     }
                 }
-                else /* Sinon on n'a pas encore trouvé le serveur à supprimer donc on continue à parcourir la liste des serveurs */
+
+                if ( fichiers->tabFichiers[i]->tabBlocs[j]->nbServeurs == 0 ) /* Si ce bloc n'a plus de serveurs référencés on détruit tabServeurs */
                 {
-                    ptRetListeServeurs = ptListeServeurs;
-                    ptListeServeurs = ptListeServeurs->serveurSuivant;
+                    free( fichiers->tabFichiers[i]->tabBlocs[j]->tabServeurs );
+                    free( fichiers->tabFichiers[i]->tabBlocs[j] );
                 }
             }
-        }
 
-        for (i = ptListeFichiers->nbBlocs;i>0;i--) /* On vérifie qu'il reste encore au moins un bloc disponible pour le fichier */
-        {
-            if (ptListeFichiers->tabBlocs[i].listeServeurs != NULL)
+            for ( j = 0 ; j < fichiers->tabFichiers[i]->nbBlocs ; j++ ) /* Si ce fichier n'a plus de blocs référencés on détruit tabBlocs puis on supprime le fichier de la BDD des fichiers*/
             {
-                sourceExiste = 1; /* On a trouvé encore au moins un bloc pour le fichier */
-                break;
+                if ( fichiers->tabFichiers[i]->tabBlocs[j] != NULL ) /* Si on trouve une seule source pour un seul bloc on doit garder le fichier référencé */
+                {
+                    sourceExiste = 1;
+                    break;
+                }
             }
-        }
 
-        if (!sourceExiste) /* Auquel cas on le supprime de la BDD des fichiers */
-        {
-            ptTempFichier = ptListeFichiers;
-            ptRetListeFichiers->fichierSuivant = ptListeFichiers->fichierSuivant;
-            ptListeFichiers = ptListeFichiers->fichierSuivant;
-            free(ptTempFichier);
-        }
-        else /* Sinon on passe au fichier suivant */
-        {
-            ptRetListeFichiers = ptListeFichiers;
-            ptListeFichiers = ptListeFichiers->fichierSuivant;
+            if ( !sourceExiste ) /* Si il n y a pas de raison de conserver le fichier on le supprime */
+            {
+                free( fichiers->tabFichiers[i]->tabBlocs );
+                free( fichiers->tabFichiers[i]->nomFichier );
+                free( fichiers->tabFichiers[i] );
+                fichiers->nbFichiers--;
+            }
         }
     }
 
     /* On peut maintenant supprimer de la BDD des serveurs le serveur qui s'arrete */
-    for (i = serveurs->nbServeurs;i>0;i--)
+    for ( i = 0 ; i < serveurs->nbInfoServeurs ; i++ )
     {
-        if (serveurs->tabServeurs[i]->idServeur == var_idServeur) /* Si on trouve le serveur on le supprime */
+        if ( serveurs->tabInfoServeurs[i] != NULL ) /* Si la case n'est pas vide on lance le traitement */
         {
-            free(serveurs->tabServeurs[i]);
-            for (j = i;j<serveurs->nbServeurs;j++)
+            if ( serveurs->tabInfoServeurs[i]->idServeur == var_idServeur ) /* Si on trouve le serveur on le supprime */
             {
-                serveurs->tabServeurs[j] = serveurs->tabServeurs[j+1];
+                free( serveurs->tabInfoServeurs[i]->adresseServeur );
+                free( serveurs->tabInfoServeurs[i] );
+                serveurs->nbInfoServeurs--;
+                break;
             }
-            serveurs->nbServeurs--;
-            break;
         }
     }
 
     /* Libérations mémoire de chaines de caractère */
-    free(var_adresseServeur);
+    free( var_adresseServeur );
 
     /* On dévérouille la BDD des fichiers en lecture et en écriture */
-    pthread_mutex_unlock(&fichiers->verrou_bddfich_r);
-    pthread_mutex_unlock(&fichiers->verrou_bddfich_w);
-    pthread_mutex_unlock(&serveurs->verrou_bddserv_r);
-    pthread_mutex_unlock(&serveurs->verrou_bddserv_w);
+    pthread_mutex_unlock( &fichiers->verrou_bddfich_r );
+    pthread_mutex_unlock( &fichiers->verrou_bddfich_w );
+    pthread_mutex_unlock( &serveurs->verrou_bddserv_r );
+    pthread_mutex_unlock( &serveurs->verrou_bddserv_w );
 }
 
 
@@ -699,86 +763,94 @@ void traiteArretServeur(Socket s, char* mess)
 * @param mess  : le message de demande d'ID serveur à traiter.
 * @warning incrémente le generateur d'idServeur.
 */
-void traiteDemandeIdServeur(Socket s, char* mess)
+void traiteDemandeIdServeur( Socket s, char* mess )
 {
     /* Variables */
     int type_message; /* type du message reçu : ici 54 */
     int var_portServeur; /* port du serveur */
 
-    int i; /* itérateur */
+    unsigned int i,j; /* Itérateurs */
 
     char* buff; /* tampon pour écriture du message */
     char* var_adresseServeur; /* adresse du serveur */
     char* str_portServeur; /* transformation du port du serveur en chaine de caractères */
     char* str_idServeur; /* transformation de l'identificateur du serveur en chaine de caractères */
-    InfoServeurs** temp; /* pointeur de travail sur un tableau de pointeurs sur InfoServeurs */
+    InfoServeurs** tempTabInfoServeurs; /* pointeur de travail sur un tableau de pointeurs sur InfoServeurs */
 
     /* Allocations mémoire des chaines de caractère */
-    buff = malloc(200*sizeof(char));
-    var_adresseServeur = malloc(40*sizeof(char));
-    str_portServeur = malloc(10*sizeof(char));
-    str_idServeur = malloc(10*sizeof(char));
+    buff = malloc( 200 * sizeof( char ) );
+    var_adresseServeur = malloc( 40 * sizeof( char ) );
+    str_portServeur = malloc( 10 * sizeof( char ) );
+    str_idServeur = malloc( 10 * sizeof( char ) );
 
     /* On récupère le contenu du message */
     /* Doit être de la forme "54 adresseServeur portServeur" */
-    if (sscanf(mess, "%d %s %d", &type_message, var_adresseServeur, &var_portServeur) < 3)
+    if ( sscanf( mess, "%d %s %d", &type_message, var_adresseServeur, &var_portServeur ) < 3 )
     {
-        fprintf(stderr, "Message invalide, impossible de l'utiliser.\n Contenu du message: %s \n", mess);
+        fprintf( stderr, "Message invalide, impossible de l'utiliser.\n Contenu du message: %s \n", mess );
     }
 
     /* On vérouille la BDD des fichiers en lecture et en écriture avant l'écriture des nouvelles données */
-    pthread_mutex_lock(&fichiers->verrou_bddfich_r);
-    pthread_mutex_lock(&fichiers->verrou_bddfich_w);
-    pthread_mutex_lock(&serveurs->verrou_bddserv_r);
-    pthread_mutex_lock(&serveurs->verrou_bddserv_w);
+    pthread_mutex_lock( &fichiers->verrou_bddfich_r );
+    pthread_mutex_lock( &fichiers->verrou_bddfich_w );
+    pthread_mutex_lock( &serveurs->verrou_bddserv_r );
+    pthread_mutex_lock( &serveurs->verrou_bddserv_w );
 
     /* On référence le nouveau serveur dans la BDD des serveurs */
-    if (serveurs->capaTabServeurs <= serveurs->nbServeurs) /* Si il n y a pas assez de place dans la tableau dynamique, on l'agrandit */
+    if ( serveurs->capaTabInfoServeurs <= serveurs->nbInfoServeurs ) /* Si il n y a pas assez de place dans la tableau dynamique, on l'agrandit */
     {
-        temp = serveurs->tabServeurs;
-        serveurs->tabServeurs = malloc(2*serveurs->capaTabServeurs*sizeof(InfoServeurs*));
+        tempTabInfoServeurs = serveurs->tabInfoServeurs;
+        serveurs->tabInfoServeurs = malloc( ( 20 + serveurs->capaTabInfoServeurs ) * sizeof( InfoServeurs* ) );
 
-        for (i = serveurs->nbServeurs;i>0;i--)
+        for ( i = 0 ; i < serveurs->nbInfoServeurs ; i-- )
         {
-            serveurs->tabServeurs[i] = temp[i];
+            serveurs->tabInfoServeurs[i] = tempTabInfoServeurs[i];
         }
+
+        free( tempTabInfoServeurs );
     }
 
     /* On génère un nouvel idServeur */
     generateurIdServeur++;
 
     /* Création du nouveau serveur dans la BDD des serveurs */
-    serveurs->tabServeurs[serveurs->nbServeurs] = malloc(sizeof(InfoServeurs));
-    serveurs->tabServeurs[serveurs->nbServeurs]->adresseServeur = var_adresseServeur;
-    serveurs->tabServeurs[serveurs->nbServeurs]->numPort = var_portServeur;
-    serveurs->tabServeurs[serveurs->nbServeurs]->idServeur = generateurIdServeur;
-    serveurs->nbServeurs++;
+    for ( j = 0 ; j < serveurs->capaTabInfoServeurs ; j++ )
+    {
+        if ( serveurs->tabInfoServeurs[j] == NULL )
+            break;
+    }
+
+    serveurs->tabInfoServeurs[j] = malloc( sizeof( InfoServeurs ) );
+    serveurs->tabInfoServeurs[j]->adresseServeur = var_adresseServeur;
+    serveurs->tabInfoServeurs[j]->numPort = var_portServeur;
+    serveurs->tabInfoServeurs[j]->idServeur = generateurIdServeur;
+    serveurs->nbInfoServeurs++;
 
     /* On envoie un message au serveur pour lui donner son idServeur qui sera utilisé */
     /* Message de la forme : "21 adresseServeur portServeur idServeur" */
-    strcpy(buff, "21 ");
-    strcat(buff, var_adresseServeur);
-    strcat(buff, " ");
-    sprintf(str_portServeur, "%d", var_portServeur);
-    strcat(buff, str_portServeur);
-    strcat(buff, " ");
-    sprintf(str_idServeur, "%u", generateurIdServeur);
-    strcat(buff, str_idServeur);
+    strcpy( buff, "21 " );
+    strcat( buff, var_adresseServeur );
+    strcat( buff, " " );
+    sprintf( str_portServeur, "%d", var_portServeur );
+    strcat( buff, str_portServeur );
+    strcat( buff, " " );
+    sprintf( str_idServeur, "%u", generateurIdServeur );
+    strcat( buff, str_idServeur );
 
     /* Envoi du message sur la socket */
-    ecritureSocket(s,buff,200);
+    ecritureSocket( s, buff, 200 );
 
     /* Libérations mémoire de chaines de caractère */
-    free(buff);
-    free(var_adresseServeur);
-    free(str_portServeur);
-    free(str_idServeur);
+    free( buff );
+    free( var_adresseServeur );
+    free( str_portServeur );
+    free( str_idServeur );
 
     /* On dévérouille la BDD des fichiers en lecture et en écriture */
-    pthread_mutex_unlock(&fichiers->verrou_bddfich_r);
-    pthread_mutex_unlock(&fichiers->verrou_bddfich_w);
-    pthread_mutex_unlock(&serveurs->verrou_bddserv_r);
-    pthread_mutex_unlock(&serveurs->verrou_bddserv_w);
+    pthread_mutex_unlock( &fichiers->verrou_bddfich_r );
+    pthread_mutex_unlock( &fichiers->verrou_bddfich_w );
+    pthread_mutex_unlock( &serveurs->verrou_bddserv_r );
+    pthread_mutex_unlock( &serveurs->verrou_bddserv_w );
 }
 
 
@@ -788,81 +860,71 @@ void traiteDemandeIdServeur(Socket s, char* mess)
 * @param mess  : le message de demande d'ID fichier à traiter.
 * @warning incrémente le generateur d'idFichier.
 */
-void traiteDemandeIdFichier(Socket s, char* mess)
+void traiteDemandeIdFichier( Socket s, char* mess )
 {
     /* Variables */
     int type_message; /* type du message reçu : ici 55 */
+    unsigned int i; /* Iterateur */
 
     char* buff; /* tampon pour écriture du message */
     char* var_nomFichier; /* nom du fichier */
     char* str_idFichier; /* transformation de l'identificateur du serveur en chaine de caractères */
 
-    Fichier* ptListeFichiers; /* pointeur de travail sur la liste des fichiers de la BDD */
-    Fichier* ptRetListeFichiers; /* pointeur de travail sur la liste des fichiers de la BDD */
-
     /* Allocations mémoire des chaines de caractère */
-    buff = malloc(200*sizeof(char));
-    var_nomFichier = malloc(40*sizeof(char));
-    str_idFichier = malloc(10*sizeof(char));
+    buff = malloc( 200 * sizeof( char ) );
+    var_nomFichier = malloc( 40 * sizeof( char ) );
+    str_idFichier = malloc( 10 * sizeof( char ) );
 
     /* On récupère le contenu du message */
     /* Doit être de la forme "55 nomFichier" */
-    if (sscanf(mess, "%d %s", &type_message, var_nomFichier) < 2)
+    if ( sscanf( mess, "%d %s", &type_message, var_nomFichier ) < 2 )
     {
-        fprintf(stderr, "Message invalide, impossible de l'utiliser.\n Contenu du message: %s \n", mess);
+        fprintf( stderr, "Message invalide, impossible de l'utiliser.\n Contenu du message: %s \n", mess );
     }
 
     /* On vérouille la BDD des fichiers en lecture et en écriture avant l'écriture des nouvelles données */
-    pthread_mutex_lock(&fichiers->verrou_bddfich_r);
-    pthread_mutex_lock(&fichiers->verrou_bddfich_w);
-    pthread_mutex_lock(&serveurs->verrou_bddserv_r);
-    pthread_mutex_lock(&serveurs->verrou_bddserv_w);
+    pthread_mutex_lock( &fichiers->verrou_bddfich_r );
+    pthread_mutex_lock( &fichiers->verrou_bddfich_w );
+    pthread_mutex_lock( &serveurs->verrou_bddserv_r );
+    pthread_mutex_lock( &serveurs->verrou_bddserv_w );
 
     /* On référence le nouveau fichier dans la BDD des fichiers */
     /* On génère un nouvel idFichier */
     generateurIdFichier++;
 
     /* Création du nouveau fichier dans la BDD des fichiers */
-    ptListeFichiers = fichiers->listeFichiers;
-    ptRetListeFichiers = ptListeFichiers;
-
-    /* On parcourre la liste des fichiers jusqu'au bout pour ajouter la nouvelle référence */
-    while(ptListeFichiers != NULL)
+    /* On parcoure la liste pour trouver une case vide dans le tableau des fichiers */
+    for ( i = 0 ; i < fichiers->capaTabFichiers ; i++ )
     {
-        ptRetListeFichiers = ptListeFichiers;
-        ptListeFichiers = ptListeFichiers->fichierSuivant;
+        if ( fichiers->tabFichiers[i] == NULL )
+            break;
     }
 
-    ptRetListeFichiers->fichierSuivant = malloc(sizeof(Fichier));
-    ptRetListeFichiers->fichierSuivant->idFichier = generateurIdFichier;
-    strcpy(ptRetListeFichiers->fichierSuivant->nomFichier, var_nomFichier);
-    ptRetListeFichiers->fichierSuivant->nbBlocs = 0;
-    ptRetListeFichiers->fichierSuivant->tabBlocs = NULL;
-    ptRetListeFichiers->fichierSuivant->capaTabBlocs = 0;
-    ptRetListeFichiers->fichierSuivant->fichierSuivant = NULL;
-
+    fichiers->tabFichiers[i] = malloc( sizeof( Fichier* ) );
+    fichiers->tabFichiers[i]->idFichier = generateurIdFichier;
+    strcpy( fichiers->tabFichiers[i]->nomFichier, var_nomFichier );
 
     /* On envoie un message au serveur pour lui donner son idServeur qui sera utilisé */
     /* Message de la forme : "22 nomFichier idFichier" */
-    strcpy(buff, "22 ");
-    strcat(buff, var_nomFichier);
-    strcat(buff, " ");
-    sprintf(str_idFichier, "%u", generateurIdFichier);
-    strcat(buff, str_idFichier);
+    strcpy( buff, "22 " );
+    strcat( buff, var_nomFichier );
+    strcat( buff, " " );
+    sprintf( str_idFichier, "%u", generateurIdFichier );
+    strcat( buff, str_idFichier );
 
     /* Envoi du message sur la socket */
-    ecritureSocket(s,buff,200);
+    ecritureSocket( s, buff, 200 );
 
     /* Libérations mémoire de chaines de caractère */
-    free(buff);
-    free(var_nomFichier);
-    free(str_idFichier);
+    free( buff );
+    free( var_nomFichier );
+    free( str_idFichier );
 
     /* On dévérouille la BDD des fichiers en lecture et en écriture */
-    pthread_mutex_unlock(&fichiers->verrou_bddfich_r);
-    pthread_mutex_unlock(&fichiers->verrou_bddfich_w);
-    pthread_mutex_unlock(&serveurs->verrou_bddserv_r);
-    pthread_mutex_unlock(&serveurs->verrou_bddserv_w);
+    pthread_mutex_unlock( &fichiers->verrou_bddfich_r );
+    pthread_mutex_unlock( &fichiers->verrou_bddfich_w );
+    pthread_mutex_unlock( &serveurs->verrou_bddserv_r );
+    pthread_mutex_unlock( &serveurs->verrou_bddserv_w );
 }
 
 
@@ -871,9 +933,9 @@ void traiteDemandeIdFichier(Socket s, char* mess)
 * @param s : la socket sur laquelle le message inattendu a été émis.
 * @param mess : le message en question.
 */
-void traiteMessageErr(Socket s, char* mess)
+void traiteMessageErr( Socket s, char* mess )
 {
-    ecritureSocket(s, "71 mauvais destinataire", 200);
+    ecritureSocket( s, "71 mauvais destinataire", 200 );
 }
 
 
@@ -881,54 +943,57 @@ void traiteMessageErr(Socket s, char* mess)
 * @note procédure de fermeture de l'annuaire de façon propre.
 * @brief modifie le contenu des variables globales serveurs et fichiers.
 */
-void fermetureAnnuaire()
+void fermetureAnnuaire( )
 {
-    /* Variables locales */
-    int i,j;
-    Fichier* temp_fichier;
-    Serveur* temp_serveur;
+    /* Variables */
+    unsigned int i,j,k; /* Itérateurs */
 
     /* Destruction des listes de serveurs */
-    for (j = serveurs->nbServeurs;j>0;j--)
+    for ( i = serveurs->nbInfoServeurs ; i > 0 ; i-- )
     {
-        free(serveurs->tabServeurs[j]->adresseServeur);
-        free(serveurs->tabServeurs[j]);
+        free( serveurs->tabInfoServeurs[i]->adresseServeur );
+        free( serveurs->tabInfoServeurs[i] );
     }
-    free(serveurs->tabServeurs);
+    free( serveurs->tabInfoServeurs );
 
-    pthread_mutex_destroy(&serveurs->verrou_bddserv_r);
-    pthread_mutex_destroy(&serveurs->verrou_bddserv_w);
+    pthread_mutex_destroy( &serveurs->verrou_bddserv_r );
+    pthread_mutex_destroy( &serveurs->verrou_bddserv_w );
 
-    free(serveurs);
+    free( serveurs );
 
     /* Destruction des listes de fichiers */
-    while (fichiers->listeFichiers != NULL)
+    for ( i = 0 ; i < fichiers->capaTabFichiers ; i++ )
     {
-        for (i = fichiers->listeFichiers->nbBlocs;i>0;i--)
+        if ( fichiers->tabFichiers[i] != NULL )
         {
-            while ((fichiers->listeFichiers->tabBlocs[i]).listeServeurs != NULL)
+            for ( j = 0 ; i < fichiers->tabFichiers[i]->nbBlocs ; i++ )
             {
-                temp_serveur = (fichiers->listeFichiers->tabBlocs[i]).listeServeurs;
-                (fichiers->listeFichiers->tabBlocs[i]).listeServeurs = temp_serveur->serveurSuivant;
-                free(temp_serveur);
-            }
-        }
-        free(fichiers->listeFichiers->tabBlocs);
-        free(fichiers->listeFichiers->nomFichier);
+                for ( k = 0 ; k < fichiers->tabFichiers[i]->tabBlocs[j]->capaTabServeurs ; k++ )
+                {
+                    if ( fichiers->tabFichiers[i]->tabBlocs[j]->tabServeurs[k] != NULL )
+                    {
+                        free( fichiers->tabFichiers[i]->tabBlocs[j]->tabServeurs[k]->infos );
+                    }
+                }
 
-        temp_fichier = fichiers->listeFichiers;
-        fichiers->listeFichiers = temp_fichier->fichierSuivant;
-        free(temp_fichier);
+                free( fichiers->tabFichiers[i]->tabBlocs[j]->tabServeurs );
+            }
+
+            free( fichiers->tabFichiers[i]->nomFichier );
+            free( fichiers->tabFichiers[i]->tabBlocs );
+        }
     }
 
-    pthread_mutex_destroy(&fichiers->verrou_bddfich_r);
-    pthread_mutex_destroy(&fichiers->verrou_bddfich_w);
+    free( fichiers->tabFichiers );
 
-    free(fichiers);
+    pthread_mutex_destroy( &fichiers->verrou_bddfich_r );
+    pthread_mutex_destroy( &fichiers->verrou_bddfich_w );
+
+    free( fichiers );
 }
 
 
-int main(void)
+int main( void )
 {
     /* Variables */
     int portEcouteAnnuaire; /* port d'écoute de l'annuaire */
@@ -943,49 +1008,49 @@ int main(void)
 
 
     /* Initialisation de la graine pour utiliser le rand() */
-    srand(time(NULL));
+    srand( time( NULL ) );
 
     /* Initialisation de l'annuaire */
-    printf("Bienvenue sur le programme lif12p2p.\n");
-    printf("Initialisation des bases de données de l'annuaire...\n");
-    if (initialisationAnnuaire() < 0)
+    printf( "Bienvenue sur le programme lif12p2p.\n" );
+    printf( "Initialisation des bases de données de l'annuaire...\n" );
+    if ( initialisationAnnuaire( ) < 0 )
     {
-        perror("Problème lors de l'initialisation des bases de données de l'annuaire. \n Fermeture du programme.\n");
-        exit(1);
+        perror( "Problème lors de l'initialisation des bases de données de l'annuaire. \n Fermeture du programme.\n" );
+        exit( 1 );
     }
-    printf("Bases de données de l'annuaire initialisées.\n");
+    printf( "Bases de données de l'annuaire initialisées.\n" );
 
     /* Initialisation de la socket d'écoute de l'annuaire */
-    printf("Sur quel port souhaitez vous lancer le serveur annuaire?\n");
-    scanf("%d", &portEcouteAnnuaire);
-    printf("Vous avez choisi le port numero %d.\n", portEcouteAnnuaire);
+    printf( "Sur quel port souhaitez vous lancer le serveur annuaire?\n" );
+    scanf( "%d", &portEcouteAnnuaire );
+    printf( "Vous avez choisi le port numero %d.\n", portEcouteAnnuaire );
 
-    printf("Initialisation de la socket d'écoute de l'annuaire...\n");
-    socketEcouteAnnuaire = initialiseSocketEcouteAnnuaire(portEcouteAnnuaire);
-    printf("Socket d'écoute de l'annuaire initialisée.\n");
+    printf( "Initialisation de la socket d'écoute de l'annuaire...\n" );
+    socketEcouteAnnuaire = initialiseSocketEcouteAnnuaire( portEcouteAnnuaire );
+    printf( "Socket d'écoute de l'annuaire initialisée.\n" );
 
     /* Menu */
     quitter = 0;
     nbthreads = 0;
-    while (!quitter)
+    while ( !quitter )
     {
-        socketDemandeConnexion = acceptationConnexion(socketEcouteAnnuaire);
+        socketDemandeConnexion = acceptationConnexion( socketEcouteAnnuaire );
 
-        if (pthread_create(&th_client, NULL, (void* (*)(void*))traiteMessage, (void*)socketDemandeConnexion ) == 0)
+        if ( pthread_create( &th_client, NULL, ( void* ( * )( void* ) ) traiteMessage, ( void* ) socketDemandeConnexion ) == 0 )
         {
             nbthreads++;
-            printf("Il y a actuellement %d thread(s) de discussion ouvert(s).\n", nbthreads);
+            printf( "Il y a actuellement %d thread(s) de discussion ouvert(s).\n", nbthreads );
         }
         else
         {
-            perror("Un thread de traitement de message n'a pas pu être créé. Message ignoré.\n");
+            perror( "Un thread de traitement de message n'a pas pu être créé. Message ignoré.\n" );
         }
     }
 
     /* Fermeture de l'annuaire */
-    printf("Destruction des bases de données de l'annuaire...\n");
-    fermetureAnnuaire();
-    printf("Destruction des bases de données de l'annuaire terminée.\n");
+    printf( "Destruction des bases de données de l'annuaire...\n" );
+    fermetureAnnuaire( );
+    printf( "Destruction des bases de données de l'annuaire terminée.\n" );
 
     return 0;
 }
