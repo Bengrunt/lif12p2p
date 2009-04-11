@@ -1,43 +1,33 @@
-/**
+/*********************************************************************
  * @file annuaire.h
  * @project lif12p2p
  * @author Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
  * @since 16/03/2009
- * @version 10/04/2009
- */
+ * @version 11/04/2009
+ ********************************************************************/
 
 #ifndef ANNUAIRE_H
 #define ANNUAIRE_H
+
+
+/****************************
+* Fichiers d'en-tête inclus
+****************************/
+
 #include "socket.h"
 
-/*#include <error.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>*/
 
-/* Une partie nécessaire pour utiliser les sockets sous linux et windows */
-/*#if defined (WIN32)
-    #include <winsock2.h>
-#elif defined (linux)
-    #include <sys/types.h>
-    #include <sys/socket.h>
-    #include <netinet/in.h>
-    #include <arpa/inet.h>
-    #include <netdb.h>
-#endif
-*/
-/******************************************
+/************************
 * Structures de données
-******************************************/
+************************/
 
 /**
 * Gestion de la base de données des fichiers.
 */
 
 /**
-* @note Structure stockant un pointeur vers le référencement du serveur possédant un bloc dans la BDD des serveurs.
-* @param infos : pointeur vers le serveur dans BddServeur.
+* \note Structure stockant un pointeur vers le référencement du serveur possédant un bloc dans la BDD des serveurs.
+* \param infos : pointeur vers le serveur dans BddServeur.
 */
 typedef struct Serveur
 {
@@ -159,9 +149,9 @@ typedef struct BddClients
 
 
 
-/***********************************
+/**************************
 * Fonctions et procédures
-***********************************/
+**************************/
 
 /**
 * @note procédure d'initialisation de l'annuaire :  les listes de clients, de serveurs, de fichiers.
@@ -261,6 +251,7 @@ void fermetureAnnuaire();
 
 
 #endif
+
 /***************************
  * Fin du fichier
  **************************/
