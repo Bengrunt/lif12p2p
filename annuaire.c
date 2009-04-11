@@ -1,26 +1,39 @@
-/**
- * @file annuaire.c
- * @project lif12p2p
- * @author Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
- * @since 20/03/2009
- * @version 10/04/2009
- */
+/**********************************************************************
+* @file annuaire.c
+* @project lif12p2p
+* @author Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
+* @since 20/03/2009
+* @version 11/04/2009
+**********************************************************************/
+
+/****************************
+* Fichiers d'en-tête inclus
+****************************/
 
 #include "annuaire.h"
 
-/**
-* Variables Globales
-*/
+/***********************************
+* Variables Globales et constantes
+***********************************/
 
-BddServeurs* serveurs; /* pointeur sur la liste des serveurs connus */
-BddFichiers* fichiers; /* pointeur sur la liste des fichiers connus */
+#define TAILLE_BUFF         200                 /* Taille de buffer standard */
+#define TAILLE_BUFF_LAR     TAILLE_BUFF/2       /* Taille de buffer large */
+#define TAILLE_BUFF_MED     TAILLE_BUFF/5       /* Taille de buffer medium */
+#define TAILLE_BUFF_SM      TAILLE_BUFF/10      /* Taille de buffer small */
+#define TAILLE_BUFF_VSM     TAILLE_BUFF/20      /* Taille de buffer very small */
 
-unsigned int generateurIdServeur; /* compteur de génération des idServeur */
-unsigned int generateurIdFichier; /* compteur de génération des idFichier */
+#define TABDYN_AUGM_VAL     20                  /* Taux d'augmentation de la taille des tableaux dynamiques */
 
-/**
+BddServeurs* serveurs;                          /* pointeur sur la liste des serveurs connus */
+BddFichiers* fichiers;                          /* pointeur sur la liste des fichiers connus */
+
+unsigned int generateurIdServeur;               /* compteur de génération des idServeur */
+unsigned int generateurIdFichier;               /* compteur de génération des idFichier */
+
+
+/************************************
 * Fonctions et procédures du module
-*/
+************************************/
 
 /**
 * @note procédure d'initialisation de l'annuaire :  les listes de clients, de serveurs, de fichiers.
@@ -58,6 +71,7 @@ int initialisationAnnuaire( )
     /* Initialisation des générateurs d'identificateurs */
     generateurIdServeur = 0;
     generateurIdFichier = 0;
+
     return 0;
 }
 
@@ -99,16 +113,16 @@ int traiteMessage( Socket arg )
     fin_thread = 0; /* booleen qui décide de l'arret du thread */
 
     /* Allocation mémoire des chaines de caracteres */
-    buff = malloc( 200 * sizeof( char ) );
+    buff = malloc( TAILLE_BUFF * sizeof( char ) );
 
     /* boucle de traitement des messages */
     while ( !fin_thread )
     {
         /* on ecoute sur la socket arg */
-        ecouteSocket( arg, buff, 200 );
+        ecouteSocket( arg, buff, TAILLE_BUFF );
 
         /* on analyse le type du message reçu et on agit en conséquence */
-        if (sscanf ( buff, "%d", &type_message ) != 1 )
+        if ( sscanf ( buff, "%d", &type_message ) != 1 )
         {
             fprintf( stderr, "Message ignoré, impossible de l'analyser.\n Contenu du message: %s \n", buff );
         }
@@ -118,36 +132,36 @@ int traiteMessage( Socket arg )
             /* On lance l'action correspondant au type de message. */
             switch ( type_message )
             {
-            case 31: /* Demande d'un fichier */
-                traiteDemandeFichierClient( arg, buff );
-                break;
-            case 32: /* Demande d'un bloc */
-                traiteDemandeBlocClient( arg, buff );
-                break;
-            case 33: /* Arret d'échange d'un client */
-                traiteArretClient( arg, buff );
-                fin_thread = 1;
-                break;
-            case 51: /* Disponibilité d'un bloc */
-                traiteBlocDisponibleServeur( arg, buff );
-                break;
-            case 52: /* Arret d'un serveur */
-                traiteArretServeur( arg, buff );
-                fin_thread = 1;
-                break;
-            case 54: /* Demande IDServeur */
-                traiteDemandeIdServeur( arg, buff );
-                break;
-            case 55: /* Demande IDFichier */
-                traiteDemandeIdFichier( arg, buff );
-                break;
-            case 71: /* Indiquation que l'on a envoyé des messages au mauvais destinataire sur la socket donc fermeture */
-                fin_thread = 1;
-                break;
-            default: /* Un message géré par le réseau a bien été reçu mais inadapté donc la connexion
-                            doit être terminé car ce ne sont pas les bons interlocuteurs. */
-                traiteMessageErr( arg, buff );
-                fin_thread = 1;
+                case 31: /* Demande d'un fichier */
+                    traiteDemandeFichierClient( arg, buff );
+                    break;
+                case 32: /* Demande d'un bloc */
+                    traiteDemandeBlocClient( arg, buff );
+                    break;
+                case 33: /* Arret d'échange d'un client */
+                    traiteArretClient( arg, buff );
+                    fin_thread = 1;
+                    break;
+                case 51: /* Disponibilité d'un bloc */
+                    traiteBlocDisponibleServeur( arg, buff );
+                    break;
+                case 52: /* Arret d'un serveur */
+                    traiteArretServeur( arg, buff );
+                    fin_thread = 1;
+                    break;
+                case 54: /* Demande IDServeur */
+                    traiteDemandeIdServeur( arg, buff );
+                    break;
+                case 55: /* Demande IDFichier */
+                    traiteDemandeIdFichier( arg, buff );
+                    break;
+                case 71: /* Indiquation que l'on a envoyé des messages au mauvais destinataire sur la socket donc fermeture */
+                    fin_thread = 1;
+                    break;
+                default: /* Un message géré par le réseau a bien été reçu mais inadapté donc la connexion
+                                doit être terminé car ce ne sont pas les bons interlocuteurs. */
+                    traiteMessageErr( arg, buff );
+                    fin_thread = 1;
             }
         }
     }
@@ -184,12 +198,12 @@ void traiteDemandeFichierClient( Socket s, char* mess )
     fichTrouve = 0; /* On a pas encore trouvé le fichier */
 
     /* Allocations mémoire des chaines de caractère */
-    var_nomDeFichier = malloc( 100 * sizeof( char ) );
-    str_idFichier = malloc( 10 * sizeof( char ) );
-    str_idServeur = malloc( 10 * sizeof( char ) );
-    str_nbBlocs = malloc(10 * sizeof( char ) );
-    str_numBloc = malloc(10 * sizeof( char ) );
-    str_numPort = malloc(10 * sizeof( char ) );
+    var_nomDeFichier = malloc( TAILLE_BUFF_LAR * sizeof( char ) );
+    str_idFichier = malloc( TAILLE_BUFF_VSM * sizeof( char ) );
+    str_idServeur = malloc( TAILLE_BUFF_VSM * sizeof( char ) );
+    str_nbBlocs = malloc(TAILLE_BUFF_VSM * sizeof( char ) );
+    str_numBloc = malloc(TAILLE_BUFF_VSM * sizeof( char ) );
+    str_numPort = malloc(TAILLE_BUFF_VSM * sizeof( char ) );
 
     /* On récupère le contenu du message */
     /* Doit être de la forme "31 nomDeFichier" */
@@ -211,7 +225,7 @@ void traiteDemandeFichierClient( Socket s, char* mess )
             if ( strcmp( fichiers->tabFichiers[i]->nomFichier, var_nomDeFichier ) == 0 )
             {
                 /* Pour chaque bloc constituant du fichier on envoie un message indiquant où le télécharger au client */
-                buff = malloc( 200 * sizeof( char ) );
+                buff = malloc( TAILLE_BUFF * sizeof( char ) );
 
                 for ( j = 0 ; j < fichiers->tabFichiers[i]->nbBlocs ; j++ )
                 {
@@ -266,7 +280,7 @@ void traiteDemandeFichierClient( Socket s, char* mess )
                         }
 
                         /* Envoi du message sur la socket */
-                        ecritureSocket( s, buff, 200 );
+                        ecritureSocket( s, buff, TAILLE_BUFF );
                     }
                 }
                 /* Libération de la chaine après utilisation */
@@ -286,13 +300,13 @@ void traiteDemandeFichierClient( Socket s, char* mess )
     {
         /* On envoie un message de réponse défavorable au client */
         /* Message de la forme: "02 erreur nomDeFichier" */
-        buff = malloc( 200 * sizeof( char ) );
+        buff = malloc( TAILLE_BUFF * sizeof( char ) );
 
         strcpy( buff, "12 " );
         strcat( buff, var_nomDeFichier );
 
         /* Envoi du message sur la socket */
-        ecritureSocket( s, buff, 200 );
+        ecritureSocket( s, buff, TAILLE_BUFF );
 
         /* Libération de la chaine après utilisation */
         free( buff );
@@ -337,12 +351,12 @@ void traiteDemandeBlocClient( Socket s, char* mess )
     fichTrouve = 0;
 
     /* Allocations mémoire des chaines de caractère */
-    var_nomDeFichier = malloc(100 * sizeof( char ) );
-    str_idFichier = malloc(10 * sizeof( char ) );
-    str_idServeur = malloc(10 * sizeof( char ) );
-    str_nbBlocs = malloc( 10 * sizeof( char ) );
-    str_numBloc = malloc( 10 * sizeof( char ) );
-    str_numPort = malloc( 10 * sizeof( char ) );
+    var_nomDeFichier = malloc( TAILLE_BUFF_LAR * sizeof( char ) );
+    str_idFichier = malloc( TAILLE_BUFF_VSM * sizeof( char ) );
+    str_idServeur = malloc( TAILLE_BUFF_VSM * sizeof( char ) );
+    str_nbBlocs = malloc( TAILLE_BUFF_VSM * sizeof( char ) );
+    str_numBloc = malloc( TAILLE_BUFF_VSM * sizeof( char ) );
+    str_numPort = malloc( TAILLE_BUFF_VSM * sizeof( char ) );
 
     /* On récupère le contenu du message */
     /* Doit être de la forme "32 idFichier nomDeFichier numeroDeBloc" */
@@ -365,7 +379,7 @@ void traiteDemandeBlocClient( Socket s, char* mess )
             if ( strcmp( fichiers->tabFichiers[i]->nomFichier, var_nomDeFichier ) == 0 && var_idFichier == fichiers->tabFichiers[i]->idFichier )
             {
                 /* On envoie un message indiquant où télécharger le bloc demandé au client */
-                buff = malloc( 200 * sizeof( char ) );
+                buff = malloc( TAILLE_BUFF * sizeof( char ) );
 
                 /* Message de la forme : "11 bloc idFichier nomDeFichier nombreTotalDeBloc numeroDeBloc idServeur adresseServeur portServeur" */
                 strcpy( buff, "11 " );
@@ -415,7 +429,7 @@ void traiteDemandeBlocClient( Socket s, char* mess )
                 }
 
                 /* Envoi du message sur la socket */
-                ecritureSocket( s, buff, 200 );
+                ecritureSocket( s, buff, TAILLE_BUFF );
                 /* Libération de la chaine après utilisation */
                 free( buff );
                 /* On a bien trouvé le fichier et envoyé le message */
@@ -433,13 +447,13 @@ void traiteDemandeBlocClient( Socket s, char* mess )
     {
         /* On envoie un message de réponse défavorable au client */
         /* Message de la forme: "12 erreur nomDeFichier" */
-        buff = malloc( 200 * sizeof( char ) );
+        buff = malloc( TAILLE_BUFF * sizeof( char ) );
 
         strcpy( buff, "12 " );
         strcat( buff, var_nomDeFichier );
 
         /* Envoi du message sur la socket */
-        ecritureSocket( s, buff, 200 );
+        ecritureSocket( s, buff, TAILLE_BUFF );
 
         /* Libération de la chaine après utilisation */
         free( buff );
@@ -493,8 +507,8 @@ void traiteBlocDisponibleServeur( Socket s, char* mess )
     servTrouve = 0;
 
     /* Allocations mémoire des chaines de caractère */
-    var_nomDeFichier = malloc( 100 * sizeof( char ) );
-    var_adresseServeur = malloc( 40 * sizeof( char ) );
+    var_nomDeFichier = malloc( TAILLE_BUFF_LAR * sizeof( char ) );
+    var_adresseServeur = malloc( TAILLE_BUFF_MED * sizeof( char ) );
 
     /* On récupère le contenu du message */
     /* Doit être de la forme "51 idFichier nomDeFichier nombreTotalDeBloc numeroDeBloc idServeur adresseServeur portServeur" */
@@ -570,7 +584,7 @@ void traiteBlocDisponibleServeur( Socket s, char* mess )
                 if ( fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->nbServeurs >= fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->capaTabServeurs ) /* Si tabServeurs est plein on l'agrandit */
                 {
                     tempTabServeurs = fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->tabServeurs;
-                    fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->tabServeurs = malloc( ( 20 + fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->capaTabServeurs ) * sizeof( Serveur* ) );
+                    fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->tabServeurs = malloc( ( TABDYN_AUGM_VAL + fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->capaTabServeurs ) * sizeof( Serveur* ) );
 
                     for( l = 0; l < fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->capaTabServeurs ; l++ )
                     {
@@ -579,7 +593,7 @@ void traiteBlocDisponibleServeur( Socket s, char* mess )
 
                     free( tempTabServeurs );
 
-                    fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->capaTabServeurs = fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->capaTabServeurs + 20;
+                    fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->capaTabServeurs = fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->capaTabServeurs + TABDYN_AUGM_VAL;
                     fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->tabServeurs[fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->nbServeurs] = malloc( sizeof( Serveur ) );
                     fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->tabServeurs[fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->nbServeurs]->infos = serveurs->tabInfoServeurs[k];
                     fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->nbServeurs++;
@@ -595,7 +609,7 @@ void traiteBlocDisponibleServeur( Socket s, char* mess )
                     {
                         if ( fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->tabServeurs[l] == NULL ) /* Si on trouve une case vide on y référence le serveur */
                         {
-                            fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->capaTabServeurs = fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->capaTabServeurs + 20;
+                            fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->capaTabServeurs = fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->capaTabServeurs + TABDYN_AUGM_VAL;
                             fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->tabServeurs[l] = malloc( sizeof( Serveur ) );
                             fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->tabServeurs[l]->infos = serveurs->tabInfoServeurs[k];
                             fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->nbServeurs++;
@@ -670,7 +684,7 @@ void traiteArretServeur( Socket s, char* mess )
     sourceExiste = 0;
 
     /* Allocations mémoire des chaines de caractère */
-    var_adresseServeur = malloc( 40 * sizeof( char ) );
+    var_adresseServeur = malloc( TAILLE_BUFF_MED * sizeof( char ) );
 
     /* On récupère le contenu du message */
     /* Doit être de la forme "52 idServeur adresseServeur portServeur" */
@@ -778,10 +792,10 @@ void traiteDemandeIdServeur( Socket s, char* mess )
     InfoServeurs** tempTabInfoServeurs; /* pointeur de travail sur un tableau de pointeurs sur InfoServeurs */
 
     /* Allocations mémoire des chaines de caractère */
-    buff = malloc( 200 * sizeof( char ) );
-    var_adresseServeur = malloc( 40 * sizeof( char ) );
-    str_portServeur = malloc( 10 * sizeof( char ) );
-    str_idServeur = malloc( 10 * sizeof( char ) );
+    buff = malloc( TAILLE_BUFF * sizeof( char ) );
+    var_adresseServeur = malloc( TAILLE_BUFF_MED * sizeof( char ) );
+    str_portServeur = malloc( TAILLE_BUFF_VSM * sizeof( char ) );
+    str_idServeur = malloc( TAILLE_BUFF_VSM * sizeof( char ) );
 
     /* On récupère le contenu du message */
     /* Doit être de la forme "54 adresseServeur portServeur" */
@@ -800,7 +814,7 @@ void traiteDemandeIdServeur( Socket s, char* mess )
     if ( serveurs->capaTabInfoServeurs <= serveurs->nbInfoServeurs ) /* Si il n y a pas assez de place dans la tableau dynamique, on l'agrandit */
     {
         tempTabInfoServeurs = serveurs->tabInfoServeurs;
-        serveurs->tabInfoServeurs = malloc( ( 20 + serveurs->capaTabInfoServeurs ) * sizeof( InfoServeurs* ) );
+        serveurs->tabInfoServeurs = malloc( ( TABDYN_AUGM_VAL + serveurs->capaTabInfoServeurs ) * sizeof( InfoServeurs* ) );
 
         for ( i = 0 ; i < serveurs->nbInfoServeurs ; i-- )
         {
@@ -838,7 +852,7 @@ void traiteDemandeIdServeur( Socket s, char* mess )
     strcat( buff, str_idServeur );
 
     /* Envoi du message sur la socket */
-    ecritureSocket( s, buff, 200 );
+    ecritureSocket( s, buff, TAILLE_BUFF );
 
     /* Libérations mémoire de chaines de caractère */
     free( buff );
@@ -871,9 +885,9 @@ void traiteDemandeIdFichier( Socket s, char* mess )
     char* str_idFichier; /* transformation de l'identificateur du serveur en chaine de caractères */
 
     /* Allocations mémoire des chaines de caractère */
-    buff = malloc( 200 * sizeof( char ) );
-    var_nomFichier = malloc( 40 * sizeof( char ) );
-    str_idFichier = malloc( 10 * sizeof( char ) );
+    buff = malloc( TAILLE_BUFF * sizeof( char ) );
+    var_nomFichier = malloc( TAILLE_BUFF_MED * sizeof( char ) );
+    str_idFichier = malloc( TAILLE_BUFF_VSM * sizeof( char ) );
 
     /* On récupère le contenu du message */
     /* Doit être de la forme "55 nomFichier" */
@@ -900,7 +914,7 @@ void traiteDemandeIdFichier( Socket s, char* mess )
             break;
     }
 
-    fichiers->tabFichiers[i] = malloc( sizeof( Fichier* ) );
+    fichiers->tabFichiers[i] = malloc( sizeof( Fichier ) );
     fichiers->tabFichiers[i]->idFichier = generateurIdFichier;
     strcpy( fichiers->tabFichiers[i]->nomFichier, var_nomFichier );
 
@@ -913,7 +927,7 @@ void traiteDemandeIdFichier( Socket s, char* mess )
     strcat( buff, str_idFichier );
 
     /* Envoi du message sur la socket */
-    ecritureSocket( s, buff, 200 );
+    ecritureSocket( s, buff, TAILLE_BUFF );
 
     /* Libérations mémoire de chaines de caractère */
     free( buff );
@@ -935,7 +949,7 @@ void traiteDemandeIdFichier( Socket s, char* mess )
 */
 void traiteMessageErr( Socket s, char* mess )
 {
-    ecritureSocket( s, "71 mauvais destinataire", 200 );
+    ecritureSocket( s, "71 mauvais destinataire", TAILLE_BUFF );
 }
 
 
@@ -1005,7 +1019,6 @@ int main( void )
     int quitter; /* Booléen pour savoir si on quitte ou pas */
 
     pthread_t th_client; /* Thread pour gerer les connexions clients */
-
 
     /* Initialisation de la graine pour utiliser le rand() */
     srand( time( NULL ) );
