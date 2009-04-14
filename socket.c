@@ -177,6 +177,7 @@ void ecouteSocket( Socket s, char* buff, int taille_buff )
     {
         perror( "erreur à la réception" );
     }
+    printf("numero socket : %d\nmessage reçu : %s\n", s, buff);
 }
 
 /**
@@ -189,7 +190,7 @@ int ecritureSocket( Socket s, char* buff, int taille_buff )
 {
     int sock_err; /* Une variable pour stocker les erreurs */
 
-    sock_err = send( s, ( char* ) buff, taille_buff, MSG_NOSIGNAL );
+    sock_err = send( s, buff, taille_buff, MSG_NOSIGNAL );
             /* s la socket sur laquelle on ecrit */
             /* buff le message écrit */
             /* taille_buff la longueur du mesage */
@@ -200,6 +201,7 @@ int ecritureSocket( Socket s, char* buff, int taille_buff )
         perror( "erreur dans le send" );
         return 1;
     }
+        printf("numero socket : %d\nmessage emis : %s\n", s, buff);
     return 0;
 }
 
