@@ -42,6 +42,9 @@ unsigned int generateurIdFichier;               /* compteur de génération des 
 */
 int initialisationAnnuaire( )
 {
+    /* Variables */
+    unsigned int i,j; /* Itérateurs */
+
     /* Creation des bases de données de serveurs */
     serveurs = malloc( sizeof( BddServeurs ) );
     if ( serveurs == NULL )
@@ -52,6 +55,10 @@ int initialisationAnnuaire( )
     serveurs->nbInfoServeurs = 0;
     serveurs->capaTabInfoServeurs = 1;
     serveurs->tabInfoServeurs = malloc( serveurs->capaTabInfoServeurs * sizeof( InfoServeurs* ) );
+    for ( i = 0 ; i < serveurs->capaTabInfoServeurs ; i++ )
+    {
+    	serveurs->tabInfoServeurs[i] = NULL;
+    }
     pthread_mutex_init( &serveurs->verrou_bddserv_r, NULL );
     pthread_mutex_init( &serveurs->verrou_bddserv_w, NULL );
 
@@ -65,6 +72,10 @@ int initialisationAnnuaire( )
     fichiers->nbFichiers = 0;
     fichiers->capaTabFichiers = 1;
     fichiers->tabFichiers = malloc( fichiers->capaTabFichiers * sizeof( Fichier* ) );
+    for ( j = 0 ; j < fichiers->capaTabFichiers ; j++ )
+    {
+        fichiers->tabFichiers[j] = NULL;
+    }
     pthread_mutex_init( &fichiers->verrou_bddfich_r, NULL );
     pthread_mutex_init( &fichiers->verrou_bddfich_w, NULL );
 
@@ -165,6 +176,9 @@ int traiteMessage( Socket arg )
             }
         }
     }
+
+    /* Libération des chaines de caractères */
+    free( buff );
 
     /* Fermeture de la socket arg */
     clotureSocket( arg );
@@ -672,23 +686,17 @@ void traiteArretServeur( Socket s, char* mess )
     /* Variables */
     int type_message; /* type du message reçu : ici 52 */
     unsigned int var_idServeur; /* identificateur du serveur */
-    int var_portServeur; /* port du serveur */
-
     unsigned int i,j,k; /* Itérateurs */
 
     int sourceExiste; /* booléen */
 
-    char* var_adresseServeur; /* adresse du serveur */
-
     /* Initialisation des booléens */
     sourceExiste = 0;
 
-    /* Allocations mémoire des chaines de caractère */
-    var_adresseServeur = malloc( TAILLE_BUFF_MED * sizeof( char ) );
 
     /* On récupère le contenu du message */
-    /* Doit être de la forme "52 idServeur adresseServeur portServeur" */
-    if ( sscanf( mess, "%d %u %s %d", &type_message, &var_idServeur, var_adresseServeur, &var_portServeur ) < 4 )
+    /* Doit être de la forme "52 idServeur" */
+    if ( sscanf( mess, "%d %u", &type_message, &var_idServeur ) < 2 )
     {
         fprintf( stderr, "Message invalide, impossible de l'utiliser.\n Contenu du message: %s \n", mess );
     }
@@ -759,9 +767,6 @@ void traiteArretServeur( Socket s, char* mess )
             }
         }
     }
-
-    /* Libérations mémoire de chaines de caractère */
-    free( var_adresseServeur );
 
     /* On dévérouille la BDD des fichiers en lecture et en écriture */
     pthread_mutex_unlock( &fichiers->verrou_bddfich_r );
