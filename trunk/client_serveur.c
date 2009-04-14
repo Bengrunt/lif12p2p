@@ -177,7 +177,7 @@ int creationMessage(int code, void* structure, char* message)
         hp = gethostbyname("localhost");
         /* création du message */
         strcpy(message,"33 ");
-        strcat(message, hp->h_addr_list[0]);
+        strcat(message, hp->h_addr);
         break;
     case 41 :
         /* message de demande de bloc à un serveur */
@@ -196,13 +196,10 @@ int creationMessage(int code, void* structure, char* message)
         hp = gethostbyname("localhost");
         /* création du message */
         strcpy(message, "42 ");
-        strcat(message, hp->h_addr_list[0]);
+        strcat(message, hp->h_addr);
         break;
     case 51 :
         /* message de disponibilité d'un bloc à l'annuaire */
-        /* récupération du nom et du port du serveur */
-        hp = gethostbyname("localhost");
-        /* création du message */
         strcpy(message,"51 ");
         sprintf(tempChaine, "%d", ((StructureDisponibiliteBloc*) structure)->idFichier);
         strcat(message, tempChaine);
@@ -218,7 +215,6 @@ int creationMessage(int code, void* structure, char* message)
         break;
     case 52 :
         /* message d'arret du serveur à l'annuaire */
-        /* création du message */
         strcpy(message,"52 ");
         sprintf(tempChaine, "%u", idServeur);
         strcat(message, tempChaine);
@@ -235,7 +231,7 @@ int creationMessage(int code, void* structure, char* message)
         hp = gethostbyname("localhost");
         /* création du message */
         strcpy(message,"54 ");
-        strcat(message, hp->h_addr_list[0]);
+        strcat(message, hp->h_addr);
         strcat(message, " ");
         sprintf(tempChaine, "%d", portServeur);
         strcat(message, tempChaine);
@@ -274,7 +270,7 @@ int creationMessage(int code, void* structure, char* message)
         sprintf(tempChaine, "%u", idServeur);
         strcat(message, tempChaine);
         strcat(message, " ");
-        strcat(message, hp->h_addr_list[0]);
+        strcat(message, hp->h_addr);
         strcat(message, " ");
         sprintf(tempChaine, "%d", portServeur);
         strcat(message, tempChaine);
@@ -343,8 +339,9 @@ void threadLectureClavier()
             break;
         }
     }
-    while ((finThreadClient == 0) && (finThreadServeur == 0));
+    while ((finThreadClient == 0) || (finThreadServeur == 0));
     arretApplication++;
+    printf("lecture clavier : %u\n", arretApplication);
 }
 
 /**
@@ -402,7 +399,7 @@ void applicationServeur()
     while (1)
     {
         /* on boucle tant qu'il y a au moins un thread lancé */
-        if (nbThreadServeurLance != 0)
+        if (nbThreadServeurLance == 0)
         {
             break;
         }
@@ -445,8 +442,9 @@ void signalisationFichierAnnuaire(char* nomFichier)
     sscanf(buff, "%d %s %u", &code, nomFich, &idFichier);
 
     /* récupération du chemin du fichier */
-    strcpy(cheminFichier, "partage\\");
+    strcpy(cheminFichier, "partage/");
     strcat(cheminFichier, nomFichier);
+    printf("%s", cheminFichier);
     /* ouverture du fichier */
     if ((fichierADecouper = fopen(cheminFichier, "r")) == NULL)
     {
@@ -870,7 +868,7 @@ void envoiMessage(Client* client)
     strTailleLu = malloc(10* sizeof(char));
 
     /* récupéation du chemin du fichier */
-    strcpy(cheminFichier, "partage\\");
+    strcpy(cheminFichier, "partage/");
     strcat(cheminFichier, client->nomFichier);
     /* ouverture du fichier */
     if ( (fichierALire = fopen(cheminFichier, "r")) != NULL)
@@ -942,6 +940,7 @@ void arretServeur()
     pthread_mutex_destroy(&(listeAttenteClient.mutexListeAttenteServeur));
 
     arretApplication++;
+    printf("arret serveur : %u\n", arretApplication);
 }
 
 /************************************************
@@ -977,7 +976,7 @@ void applicationClient()
     while (1)
     {
         /* on boucle tant qu'il y a au moins un thread lancé */
-        if (nbThreadClientLance != 0)
+        if (nbThreadClientLance == 0)
         {
             break;
         }
@@ -1231,6 +1230,7 @@ void threadRecuperationBloc()
 
     /** libération du mutex liste d'attente (écriture) */
     pthread_mutex_unlock(&(listeAttenteTelechargement.mutexListeAttenteClient));
+    nbThreadClientLance--;
 }
 
 /**
@@ -1602,6 +1602,8 @@ void arretClient()
     pthread_mutex_destroy(&(listeFichier.mutexListeFichierLecture));
 
     arretApplication++;
+        printf("arret serveur : %u\n", arretApplication);
+
 }
 
 /*****************
