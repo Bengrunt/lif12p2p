@@ -162,6 +162,11 @@ int initialisationAnnuaire();
 
 
 /**
+* @note procedure de lecture du clavier.
+*/
+void lectureClavier();
+
+/**
 * @note fonction d'initialisation de la socket d'écoute de l'annuaire.
 * @param portAnnuaire : numéro de port sur lequel on crée la socket d'écoute.
 * @return renvoie la socket créée.

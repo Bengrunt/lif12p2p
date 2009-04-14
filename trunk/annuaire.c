@@ -30,6 +30,9 @@ BddFichiers* fichiers;                          /* pointeur sur la liste des fic
 unsigned int generateurIdServeur;               /* compteur de génération des idServeur */
 unsigned int generateurIdFichier;               /* compteur de génération des idFichier */
 
+unsigned int global_nbthreads;                  /* nombre de threads gérés par l'annuaire */
+int global_exit;                                /* booléen pour quitter le programme */
+
 
 /************************************
 * Fonctions et procédures du module
@@ -83,6 +86,10 @@ int initialisationAnnuaire( )
     generateurIdServeur = 0;
     generateurIdFichier = 0;
 
+    /* Initialisation des variables globales d'utilisation */
+    global_nbthreads = 0;
+    global_exit = 0;
+
     return 0;
 }
 
@@ -106,6 +113,30 @@ Socket initialiseSocketEcouteAnnuaire( int portAnnuaire )
     return socketEcouteAnnuaire;
 }
 
+
+/**
+* @note procedure de lecture du clavier.
+*/
+void lectureClavier(  )
+{
+    /* Variables */
+    char* buff;
+
+    /* Allocation mémoire de la chaine de caractères */
+    buff = malloc( TAILLE_BUFF * sizeof( char ) );
+
+    do
+    {
+        printf("Pour arrêter l'annuaire, tapez à tout moment \"quit\" dans le terminal.\n");
+        scanf( "%s", buff );
+    }while( strcmp( buff, "quit" ) != 0 );
+
+    global_exit = 1;
+
+    /* Libération mémoire de la chaine de caractères */
+    free( buff );
+
+}
 
 /**
 * @note fonction globale de traitement d'un message reçu.
@@ -132,47 +163,51 @@ int traiteMessage( Socket arg )
         /* on ecoute sur la socket arg */
         ecouteSocket( arg, buff, TAILLE_BUFF );
 
-        /* on analyse le type du message reçu et on agit en conséquence */
-        if ( sscanf ( buff, "%d", &type_message ) != 1 )
+        if ( strcmp( buff, "") != 0 ) /* Si on lit quelquechose sur la socket */
         {
-            fprintf( stderr, "Message ignoré, impossible de l'analyser.\n Contenu du message: %s \n", buff );
-        }
-        else
-        {
-            printf( "Message reçu.\n" );
-            /* On lance l'action correspondant au type de message. */
-            switch ( type_message )
+
+            /* on analyse le type du message reçu et on agit en conséquence */
+            if ( sscanf ( buff, "%d", &type_message ) != 1 )
             {
-                case 31: /* Demande d'un fichier */
-                    traiteDemandeFichierClient( arg, buff );
-                    break;
-                case 32: /* Demande d'un bloc */
-                    traiteDemandeBlocClient( arg, buff );
-                    break;
-                case 33: /* Arret d'échange d'un client */
-                    traiteArretClient( arg, buff );
-                    fin_thread = 1;
-                    break;
-                case 51: /* Disponibilité d'un bloc */
-                    traiteBlocDisponibleServeur( arg, buff );
-                    break;
-                case 52: /* Arret d'un serveur */
-                    traiteArretServeur( arg, buff );
-                    fin_thread = 1;
-                    break;
-                case 54: /* Demande IDServeur */
-                    traiteDemandeIdServeur( arg, buff );
-                    break;
-                case 55: /* Demande IDFichier */
-                    traiteDemandeIdFichier( arg, buff );
-                    break;
-                case 71: /* Indiquation que l'on a envoyé des messages au mauvais destinataire sur la socket donc fermeture */
-                    fin_thread = 1;
-                    break;
-                default: /* Un message géré par le réseau a bien été reçu mais inadapté donc la connexion
-                                doit être terminé car ce ne sont pas les bons interlocuteurs. */
-                    traiteMessageErr( arg, buff );
-                    fin_thread = 1;
+                fprintf( stderr, "Message ignoré, impossible de l'analyser.\n Contenu du message: %s \n", buff );
+            }
+            else
+            {
+                printf( "Message reçu.\n" );
+                /* On lance l'action correspondant au type de message. */
+                switch ( type_message )
+                {
+                    case 31: /* Demande d'un fichier */
+                        traiteDemandeFichierClient( arg, buff );
+                        break;
+                    case 32: /* Demande d'un bloc */
+                        traiteDemandeBlocClient( arg, buff );
+                        break;
+                    case 33: /* Arret d'échange d'un client */
+                        traiteArretClient( arg, buff );
+                        fin_thread = 1;
+                        break;
+                    case 51: /* Disponibilité d'un bloc */
+                        traiteBlocDisponibleServeur( arg, buff );
+                        break;
+                    case 52: /* Arret d'un serveur */
+                        traiteArretServeur( arg, buff );
+                        fin_thread = 1;
+                        break;
+                    case 54: /* Demande IDServeur */
+                        traiteDemandeIdServeur( arg, buff );
+                        break;
+                    case 55: /* Demande IDFichier */
+                        traiteDemandeIdFichier( arg, buff );
+                        break;
+                    case 71: /* Indiquation que l'on a envoyé des messages au mauvais destinataire sur la socket donc fermeture */
+                        fin_thread = 1;
+                        break;
+                    default: /* Un message géré par le réseau a bien été reçu mais inadapté donc la connexion
+                                    doit être terminé car ce ne sont pas les bons interlocuteurs. */
+                        traiteMessageErr( arg, buff );
+                        fin_thread = 1;
+                }
             }
         }
     }
@@ -182,6 +217,9 @@ int traiteMessage( Socket arg )
 
     /* Fermeture de la socket arg */
     clotureSocket( arg );
+
+    global_nbthreads--;
+    printf( "Il y a actuellement %u thread(s) de discussion ouvert(s).\n", global_nbthreads );
 
     return 0;
 }
@@ -507,26 +545,18 @@ void traiteBlocDisponibleServeur( Socket s, char* mess )
     unsigned int var_nbBlocs; /*  nombre de blocs du fichier */
     unsigned int var_numBloc; /* numero de bloc */
     unsigned int var_idServeur; /* identificateur du serveur */
-    int var_portServeur; /* port du serveur */
     unsigned int i,j,k,l; /* Itérateurs */
 
     int servTrouve; /* Booléen */
-
-    char* var_nomDeFichier; /* nom du fichier */
-    char* var_adresseServeur; /* adresse du serveur */
 
     Serveur** tempTabServeurs; /* pointeur temporaire pour l'extension de tabServeurs */
 
     /* Initialisation des booléens */
     servTrouve = 0;
 
-    /* Allocations mémoire des chaines de caractère */
-    var_nomDeFichier = malloc( TAILLE_BUFF_LAR * sizeof( char ) );
-    var_adresseServeur = malloc( TAILLE_BUFF_MED * sizeof( char ) );
-
     /* On récupère le contenu du message */
-    /* Doit être de la forme "51 idFichier nomDeFichier nombreTotalDeBloc numeroDeBloc idServeur adresseServeur portServeur" */
-    if ( sscanf( mess, "%d %u %s %u %u %u %s %d", &type_message, &var_idFichier, var_nomDeFichier, &var_nbBlocs, &var_numBloc, &var_idServeur, var_adresseServeur, &var_portServeur ) < 6 )
+    /* Doit être de la forme "51 idFichier nombreTotalDeBloc numeroDeBloc idServeur" */
+    if ( sscanf( mess, "%d %u %u %u %u", &type_message, &var_idFichier, &var_nbBlocs, &var_numBloc, &var_idServeur ) < 5 )
     {
         fprintf( stderr, "Message invalide, impossible de l'utiliser.\n Contenu du message: %s \n", mess );
     }
@@ -541,7 +571,7 @@ void traiteBlocDisponibleServeur( Socket s, char* mess )
 
     /* On parcoure le tableau des fichiers pour trouver celui auquel on doit ajouter une nouvelle reference de serveur ayant un de ses blocs */
     i = 0;
-    while ( fichiers->tabFichiers[i]->idFichier != var_idFichier ) /* Tant qu'on a pas trouvé le fichier */
+    while ( fichiers->tabFichiers[i]->idFichier != var_idFichier && i < fichiers->capaTabFichiers ) /* Tant qu'on a pas trouvé le fichier */
     {
         i++;
     }
@@ -584,8 +614,6 @@ void traiteBlocDisponibleServeur( Socket s, char* mess )
                 fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->tabServeurs[0] = malloc( sizeof( Serveur ) );
                 fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->tabServeurs[0]->infos = serveurs->tabInfoServeurs[k];
                 fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->nbServeurs++;
-                strcpy( serveurs->tabInfoServeurs[k]->adresseServeur, var_adresseServeur );
-                serveurs->tabInfoServeurs[k]->numPort = var_portServeur;
             }
             else /* Cas où il y a déjà d'autres serveurs référencés */
             {
@@ -611,10 +639,6 @@ void traiteBlocDisponibleServeur( Socket s, char* mess )
                     fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->tabServeurs[fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->nbServeurs] = malloc( sizeof( Serveur ) );
                     fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->tabServeurs[fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->nbServeurs]->infos = serveurs->tabInfoServeurs[k];
                     fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->nbServeurs++;
-                    strcpy( serveurs->tabInfoServeurs[k]->adresseServeur, var_adresseServeur );
-                    serveurs->tabInfoServeurs[k]->numPort = var_portServeur;
-
-
                 }
                 else /* Sinon on ajoute la nouvelle référence dans la premiere case vide que l'on trouve */
                 {
@@ -627,8 +651,6 @@ void traiteBlocDisponibleServeur( Socket s, char* mess )
                             fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->tabServeurs[l] = malloc( sizeof( Serveur ) );
                             fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->tabServeurs[l]->infos = serveurs->tabInfoServeurs[k];
                             fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->nbServeurs++;
-                            strcpy( serveurs->tabInfoServeurs[k]->adresseServeur, var_adresseServeur );
-                            serveurs->tabInfoServeurs[k]->numPort = var_portServeur;
                             break;
                         }
 
@@ -641,7 +663,6 @@ void traiteBlocDisponibleServeur( Socket s, char* mess )
     else /* C'est le premier référencement de bloc pour ce fichier il faut donc mettre en place le tableau */
     {
         fichiers->tabFichiers[i]->nbBlocs = var_nbBlocs;
-        strcpy( fichiers->tabFichiers[i]->nomFichier, var_nomDeFichier );
         fichiers->tabFichiers[i]->tabBlocs = malloc( var_nbBlocs * sizeof( Bloc* ) );
 
         for ( j = 0 ; j < var_nbBlocs ; j++ ) /* Pour chaque bloc du fichier on réserve l'emplacement mémoire pour les informations qui arriveront plus tard */
@@ -660,13 +681,8 @@ void traiteBlocDisponibleServeur( Socket s, char* mess )
 
         fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->tabServeurs[0]->infos = serveurs->tabInfoServeurs[k];
         fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->nbServeurs++;
-        strcpy( serveurs->tabInfoServeurs[k]->adresseServeur, var_adresseServeur );
-        serveurs->tabInfoServeurs[k]->numPort = var_portServeur;
-    }
 
-    /* Libérations mémoire de chaines de caractère */
-    free( var_nomDeFichier );
-    free( var_adresseServeur );
+    }
 
     /* On dévérouille la BDD des fichiers en lecture et en écriture */
     pthread_mutex_unlock( &fichiers->verrou_bddfich_r );
@@ -921,7 +937,9 @@ void traiteDemandeIdFichier( Socket s, char* mess )
 
     fichiers->tabFichiers[i] = malloc( sizeof( Fichier ) );
     fichiers->tabFichiers[i]->idFichier = generateurIdFichier;
+    fichiers->tabFichiers[i]->nomFichier = malloc( TAILLE_BUFF_LAR * sizeof( char ) );
     strcpy( fichiers->tabFichiers[i]->nomFichier, var_nomFichier );
+    printf("==> fichiers->tabFichiers[i]->nomFichier = %s \n", fichiers->tabFichiers[i]->nomFichier );
 
     /* On envoie un message au serveur pour lui donner son idServeur qui sera utilisé */
     /* Message de la forme : "22 nomFichier idFichier" */
@@ -1016,14 +1034,12 @@ int main( void )
 {
     /* Variables */
     int portEcouteAnnuaire; /* port d'écoute de l'annuaire */
-    int nbthreads; /* nombres de threads clients gérés actuellement */
 
     Socket socketEcouteAnnuaire; /* Socket d'écoute de l'annuaire */
     Socket socketDemandeConnexion; /* Socket ouverte par un client */
 
-    int quitter; /* Booléen pour savoir si on quitte ou pas */
-
     pthread_t th_client; /* Thread pour gerer les connexions clients */
+    pthread_t th_io; /* Thread de lecture clavier */
 
     /* Initialisation de la graine pour utiliser le rand() */
     srand( time( NULL ) );
@@ -1047,21 +1063,23 @@ int main( void )
     socketEcouteAnnuaire = initialiseSocketEcouteAnnuaire( portEcouteAnnuaire );
     printf( "Socket d'écoute de l'annuaire initialisée.\n" );
 
+    pthread_create( &th_io, NULL, ( void* ( * )( void* ) ) lectureClavier, NULL );
+
     /* Menu */
-    quitter = 0;
-    nbthreads = 0;
-    while ( !quitter )
+    while ( !global_exit )
     {
         socketDemandeConnexion = acceptationConnexion( socketEcouteAnnuaire );
-
-        if ( pthread_create( &th_client, NULL, ( void* ( * )( void* ) ) traiteMessage, ( void* ) socketDemandeConnexion ) == 0 )
+        if ( socketDemandeConnexion > 0 ) /* Si on a une connexion sur la socket */
         {
-            nbthreads++;
-            printf( "Il y a actuellement %d thread(s) de discussion ouvert(s).\n", nbthreads );
-        }
-        else
-        {
-            perror( "Un thread de traitement de message n'a pas pu être créé. Message ignoré.\n" );
+            if ( pthread_create( &th_client, NULL, ( void* ( * )( void* ) ) traiteMessage, ( void* ) socketDemandeConnexion ) == 0 )
+            {
+                global_nbthreads++;
+                printf( "Il y a actuellement %d thread(s) de discussion ouvert(s).\n", global_nbthreads );
+            }
+            else
+            {
+                perror( "Un thread de traitement de message n'a pas pu être créé. Message ignoré.\n" );
+            }
         }
     }
 
