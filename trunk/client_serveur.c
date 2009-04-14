@@ -332,7 +332,6 @@ void threadLectureClavier()
     }
     while ((finThreadClient == 0) || (finThreadServeur == 0));
     arretApplication++;
-    printf("lecture clavier : %u\n", arretApplication);
 }
 
 /**
@@ -398,7 +397,6 @@ void applicationServeur()
     }
     /* suppression de la liste d'attente */
     arretServeur();
-
 }
 
 /**
@@ -937,7 +935,6 @@ void arretServeur()
     pthread_mutex_destroy(&(listeAttenteClient.mutexListeAttenteServeur));
 
     arretApplication++;
-    printf("arret serveur : %u\n", arretApplication);
 }
 
 /************************************************
@@ -1600,8 +1597,6 @@ void arretClient()
     pthread_mutex_destroy(&(listeFichier.mutexListeFichierLecture));
 
     arretApplication++;
-        printf("arret client : %u\n", arretApplication);
-
 }
 
 /*****************
