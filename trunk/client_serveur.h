@@ -75,8 +75,8 @@ typedef struct StructureDisponibiliteBloc
 */
 typedef struct Telechargement
 {
-    int numeroBloc;
-    int idFichier;
+    unsigned int numeroBloc;
+    unsigned int idFichier;
     char* nomFichier;
     char* adresseServeur;
     int numPortServeur;
@@ -113,8 +113,8 @@ typedef struct Fichier
     pthread_mutex_t mutexFichierEcriture;
     int longueurDernierBloc;
     int tailleFichier;
-    int nbBlocs;
-    int idFichier;
+    unsigned int nbBlocs;
+    unsigned int idFichier;
     char* nomFichier;
     int* statutBlocs;
     struct Fichier* fichierSuivant;
