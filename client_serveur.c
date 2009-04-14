@@ -519,15 +519,19 @@ void threadDialogueClient()
     /* crée une socket et affectation de la socket (pour écouter les connexion client) */
     socketEcouteServeur = creationSocket();
     definitionNomSocket(socketEcouteServeur, portServeur);
-
     /* écoute les demandes de connexion */
     while (!finThreadServeur)
     {
         /* récupération des sockets de dialogue */
         socketDemandeConnexion = acceptationConnexion(socketEcouteServeur);
 
-        /* création d'un thread pour dialoguer avec chaque client */
-        pthread_create(&variableThread, NULL, (void*(*)(void*))dialogueClient, (void*)socketDemandeConnexion);
+        /* test si la connexion a échoué */
+        if (socketDemandeConnexion > 0)
+        {
+            /* création d'un thread pour dialoguer avec chaque client */
+            pthread_create(&variableThread, NULL, (void*(*)(void*))dialogueClient, (void*)socketDemandeConnexion);
+        }
+        /* sinon, boucle tant qu'il faut */
     }
     /* On sort de la boucle quand on recoit le signal "fin thread" : décrémentation du nombre de thread */
     nbThreadServeurLance--;
@@ -1564,6 +1568,7 @@ void arretClient()
         exit(1);
     }
     /* envoi du message à l'annuaire */
+
     ecritureSocket(socketAnnuaire, message, TAILLE_BUFF);
     /* libération de l'espace mémoire */
     free(message);
@@ -1602,7 +1607,7 @@ void arretClient()
     pthread_mutex_destroy(&(listeFichier.mutexListeFichierLecture));
 
     arretApplication++;
-        printf("arret serveur : %u\n", arretApplication);
+        printf("arret client : %u\n", arretApplication);
 
 }
 

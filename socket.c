@@ -104,6 +104,9 @@ void definitionNomSocket( Socket s, int port )
         exit( 1 );
     }
     /* listen ne bloque pas, à partir de là 5 demandes de conexion peuvent arriver sans que le serveur les accepte ou ne les rejette */
+    /* changement de statut de la socket en non bloquante */
+    fcntl(s, F_SETFL, O_NONBLOCK);
+
 }
 
 /**
@@ -123,8 +126,10 @@ Socket acceptationConnexion( Socket s )
                                                         /* tadr : la structure où on va stocker les infos sur le client */
                                                         /* recsize : donnée: la taille de tadr (pour éviter les dépassements) */
                                                         /*           resultat: la taille de ce qui est réellement mis dans tadr */
-
-    printf( "Connection de %s sur le port %d\n", inet_ntoa( tadr.sin_addr ), htons( tadr.sin_port ) );
+    if (t > 0)
+    {
+        printf( "Connection de %s sur le port %d\n", inet_ntoa( tadr.sin_addr ), htons( tadr.sin_port ) );
+    }
     return t;
 }
 

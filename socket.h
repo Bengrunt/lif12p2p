@@ -22,6 +22,7 @@
 #include "stdlib.h"
 #include "unistd.h"
 #include "pthread.h"
+#include "fcntl.h"
 
 /* Une partie nécessaire pour utiliser les sockets sous linux et windows */
 /* #if defined (WIN32)
