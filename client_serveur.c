@@ -22,6 +22,7 @@ int finThreadServeur;                                   /* variable indiquant qu
 int finThreadClient;                                    /* variable indiquant que l'arret du client est demandé */
 Socket socketAnnuaire;                                  /* socket de dialogue avec l'annuaire */
 int portServeur;                                        /* entier contenant le port du serveur */
+char* adresseServeur;
 int nbThreadServeurLance;                               /* entier comptant le nombre de threads lancés coté serveur */
 int nbThreadClientLance;                                /* entier comptant le nombre de threads lancés coté client */
 ListeFichiers listeFichier;                             /* liste des fichiers en cours de téléchargement du coté client */
@@ -54,6 +55,7 @@ int main()
     message = malloc(TAILLE_BUFF* sizeof(char));
     buff = malloc(TAILLE_BUFF* sizeof(char));
     tempNomServeur = malloc(100* sizeof(char));
+    adresseServeur = malloc(100* sizeof(char));
     idServeur = 0;
 
     /* demande de la socket de l'annuaire */
@@ -88,7 +90,9 @@ int main()
     }
     while (strcmp(resultat,"O") == 0 || strcmp(resultat,"o") == 0);
 
-    /* demande du port du serveur */
+    /* demande de l'adresse et du port du serveur */
+    printf("Quel est le nom du serveur utiliser ?\n");
+    scanf("%s", adresseServeur);
     printf("Sur quel port voulez-vous lancer le serveur ?\n");
     scanf("%d", &portServeur);
 
@@ -147,7 +151,6 @@ int main()
 int creationMessage(int code, void* structure, char* message)
 {
     /* variables */
-    struct hostent *hp;         /* structure récupérant le nom du client */
     char* tempChaine;           /* chaine de caractère temporaire pour passer les entiers en chaine */
 
     /* initialisation */
@@ -173,11 +176,8 @@ int creationMessage(int code, void* structure, char* message)
         break;
     case 33 :
         /* message d'arret du client à l'annuaire */
-        /* récupération du nom et du port du serveur */
-        hp = gethostbyname("localhost");
-        /* création du message */
         strcpy(message,"33 ");
-        strcat(message, hp->h_addr);
+        strcat(message, adresseServeur);
         break;
     case 41 :
         /* message de demande de bloc à un serveur */
@@ -192,11 +192,8 @@ int creationMessage(int code, void* structure, char* message)
         break;
     case 42 :
         /* message d'arret du client aux serveurs */
-        /* récupération du nom et du port du serveur */
-        hp = gethostbyname("localhost");
-        /* création du message */
         strcpy(message, "42 ");
-        strcat(message, hp->h_addr);
+        strcat(message, adresseServeur);
         break;
     case 51 :
         /* message de disponibilité d'un bloc à l'annuaire */
@@ -227,11 +224,8 @@ int creationMessage(int code, void* structure, char* message)
         break;
     case 54 :
         /* message de demande d'IDServeur */
-        /* récupération du nom et du port du serveur */
-        hp = gethostbyname("localhost");
-        /* création du message */
         strcpy(message,"54 ");
-        strcat(message, hp->h_addr);
+        strcat(message, adresseServeur);
         strcat(message, " ");
         sprintf(tempChaine, "%d", portServeur);
         strcat(message, tempChaine);
@@ -263,14 +257,11 @@ int creationMessage(int code, void* structure, char* message)
         break;
     case 63 :
         /* message de déconnexion du serveur vers les clients */
-        /* récupération du nom et du port du serveur */
-        hp = gethostbyname("localhost");
-        /* création du message */
         strcpy(message,"63 ");
         sprintf(tempChaine, "%u", idServeur);
         strcat(message, tempChaine);
         strcat(message, " ");
-        strcat(message, hp->h_addr);
+        strcat(message, adresseServeur);
         strcat(message, " ");
         sprintf(tempChaine, "%d", portServeur);
         strcat(message, tempChaine);
@@ -418,7 +409,7 @@ void signalisationFichierAnnuaire(char* nomFichier)
 {
     /* variables */
     FILE* fichierADecouper; /* descripteur de fichier vers le fichier a découper */
-    int nbBloc;             /* entier comptant le nombre de bloc */
+    unsigned int nbBloc;    /* entier comptant le nombre de bloc */
     char* message;          /* chaine de caractère contenant le message vers l'annuaire */
     char* lectureFichier;   /* chaine de caractère pour la lecture fichier */
     char* buff;             /* chaine de caractère pour la réception d'un message */
@@ -433,7 +424,7 @@ void signalisationFichierAnnuaire(char* nomFichier)
     lectureFichier = malloc((TAILLE_BLOC)* sizeof(char));
     nomFich = malloc(100* sizeof(char));
     cheminFichier = malloc(100* sizeof(char));
-    nbBloc = -1;
+    nbBloc = 0;
 
     /* demande d'un IDFichier */
     creationMessage(55, (void*) nomFichier, message);
@@ -462,7 +453,7 @@ void signalisationFichierAnnuaire(char* nomFichier)
         /* libération de l'espace mémoire */
         fclose(fichierADecouper);
         /* test si le fichier fait 0 octet */
-        if (nbBloc == -1)
+        if (nbBloc == 0)
         {
             /* le fichier fait 0 octet */
             printf("Le fichier fait 0 octet, il ne peut pas etre partagé.\n");
@@ -472,12 +463,12 @@ void signalisationFichierAnnuaire(char* nomFichier)
             /* initialisation de la structure */
             StructureDisponibiliteBloc structurePourEnvoi;
             structurePourEnvoi.nomFichier = nomFichier;
-            structurePourEnvoi.numTotalBloc = nbBloc + 1;
+            structurePourEnvoi.numTotalBloc = nbBloc;
             structurePourEnvoi.idFichier = idFichier;
             /* envoi d'un message pour chaque bloc lu */
-            for (nbBloc = nbBloc; nbBloc > -1; nbBloc--)
+            for (nbBloc = nbBloc; nbBloc > 0; nbBloc--)
             {
-                structurePourEnvoi.numeroBloc = nbBloc;
+                structurePourEnvoi.numeroBloc = nbBloc - 1;
                 /* création du message */
                 creationMessage(51, (void*) &structurePourEnvoi, message);
                 /* envoi des données à l'annuaire */
@@ -558,43 +549,45 @@ void dialogueClient(Socket socketDialogue)
     {
         /* récupération du prochain message sur la socket */
         ecouteSocket(socketDialogue, buff, TAILLE_BUFF);
-
-        /* récupération du code en début de message */
-        if (sscanf(buff, "%d", &code) == 1)
+        if (strcmp(buff, "") != 0)
         {
-            /* analyse du code :
-               6 - message d'un client demandant un bloc
-               7 - message d'arrêt d'un client
-               14- fermeture du thread
-               autre - message non destiné au serveur */
-            switch (code)
+            /* récupération du code en début de message */
+            if (sscanf(buff, "%d", &code) == 1)
             {
-            case 6:
-                /* message de demande de bloc d'un client */
-                traitementMessageBloc(socketDialogue, buff);
-                break;
-            case 7:
-                /* message d'arret du client */
-                traitementMessageArret(socketDialogue);
-                finDialogue = 1;
-                break;
-            case 14:
-                /* le message que l'on vient d'envoyer est inconnu : fermeture du thread  */
-                finDialogue = 1;
-                break;
-            default:
-                /* code inconnu */
-                traitementMessageErreur(socketDialogue);
-                finDialogue = 1;
-                break;
+                /* analyse du code :
+                   6 - message d'un client demandant un bloc
+                   7 - message d'arrêt d'un client
+                   14- fermeture du thread
+                   autre - message non destiné au serveur */
+                switch (code)
+                {
+                case 6:
+                    /* message de demande de bloc d'un client */
+                    traitementMessageBloc(socketDialogue, buff);
+                    break;
+                case 7:
+                    /* message d'arret du client */
+                    traitementMessageArret(socketDialogue);
+                    finDialogue = 1;
+                    break;
+                case 14:
+                    /* le message que l'on vient d'envoyer est inconnu : fermeture du thread  */
+                    finDialogue = 1;
+                    break;
+                default:
+                    /* code inconnu */
+                    traitementMessageErreur(socketDialogue);
+                    finDialogue = 1;
+                    break;
+                }
             }
-        }
-        else
-        {
-            /* le code au début du message reçu n'a pas été reconnu */
-            /* message ignoré */
-            perror("Le message suivant non reconnu a été reçu : ");
-            perror(buff);
+            else
+            {
+                /* le code au début du message reçu n'a pas été reconnu */
+                /* message ignoré */
+                perror("Le message suivant non reconnu a été reçu : ");
+                perror(buff);
+            }
         }
     }
 
@@ -1020,8 +1013,8 @@ void demandeFichier(char* nomFichier)
     char* messageEnvoi; /* chaine de caractère stockant le message à envoyer */
     char* message;      /* chaine de caractère stockant le message reçu */
     int code;           /* entier stockant le code du message */
-    int nbBlocTotal;    /* entier stockant le nombre total de message (1 par bloc) attendu */
-    int compteur;       /* compteur sur le nombre de message reçu */
+    unsigned int nbBlocTotal;    /* entier stockant le nombre total de message (1 par bloc) attendu */
+    unsigned int compteur;       /* compteur sur le nombre de message reçu */
 
     /* initialisation */
     finDialogue = 0;
@@ -1089,9 +1082,9 @@ int traitementMessagePositif(char* buff)
     int code;                       /* entier correspondant au code du message */
     Telechargement* blocAAjouter;   /* structure Telechargement à rajouter à la fin de la liste d'attente */
     Fichier* fichierAAjouter;       /* structure Fichier à rajouter à la fin de la liste (si besoin) */
-    int nbTotalBloc;                /* entier stockant le nombre total de bloc du fichier */
+    unsigned int nbTotalBloc;       /* entier stockant le nombre total de bloc du fichier */
     Fichier* tempFichier;           /* structure Fichier temporaire pour la recherche */
-    int i;                          /* compteur pour incrémenter une boucle */
+    unsigned int i;                          /* compteur pour incrémenter une boucle */
     unsigned int tempIdServeur;     /* entier pour récupérer l'IDServeur */
 
     /* initialisation des variables */
@@ -1100,7 +1093,7 @@ int traitementMessagePositif(char* buff)
     blocAAjouter->adresseServeur = malloc(100* sizeof(char));
 
     /* récupération des champs du message */
-    if (sscanf(buff, "%d %d %s %d %d %u %s %d", &code, &(blocAAjouter->idFichier), blocAAjouter->nomFichier, &nbTotalBloc,
+    if (sscanf(buff, "%d %u %s %u %u %u %s %d", &code, &(blocAAjouter->idFichier), blocAAjouter->nomFichier, &nbTotalBloc,
                &(blocAAjouter->numeroBloc), &tempIdServeur, blocAAjouter->adresseServeur, &(blocAAjouter->numPortServeur)) == 8)
     {
         /* recherche si le fichier est déja dans la liste des fichiers */
@@ -1318,9 +1311,9 @@ void traitementMessageReceptionBloc(Socket socketDialogue, char* buff)
     /* variables */
     FILE* fichierAEcrire;   /* fichier de destination pour le bloc */
     int code;               /* entier correspondant au code du message */
-    int idFichier;          /* entier pour l'IDFichier */
+    unsigned int idFichier;          /* entier pour l'IDFichier */
     char* nomFichier;       /* chaine de caractère récupérant le nom du fichier */
-    int numeroBloc;         /* entier corerspondant au numéro du bloc reçu */
+    unsigned int numeroBloc;         /* entier corerspondant au numéro du bloc reçu */
     char* contenuBloc;      /* chaine de caractère avec le contenu du bloc */
     int tailleLu;           /* taille du bloc attendu dans le message suivant */
     Fichier* tempFichier;   /* pointeur pour parcourir la liste des fichiers */
@@ -1332,7 +1325,7 @@ void traitementMessageReceptionBloc(Socket socketDialogue, char* buff)
     cheminFichier = malloc(100* sizeof(char));
 
     /* récupération de la partie de fichier */
-    sscanf(buff, "%d %d %s %d %d", &code, &idFichier, nomFichier, &numeroBloc, &tailleLu);
+    sscanf(buff, "%d %u %s %u %d", &code, &idFichier, nomFichier, &numeroBloc, &tailleLu);
     ecouteSocket(socketDialogue, contenuBloc, tailleLu);
     /* modification du nom de fichier en fichier ".temp" */
     strcat(nomFichier, ".temp");
@@ -1398,7 +1391,7 @@ int traitementMessageBlocIntrouvable(Telechargement* telechargementATraiter)
     char* message;              /* chaine de caractère pour le message à envoyer */
     Telechargement* donneeRecu; /* structure pour stocker les données recu */
     int code;                   /* entier pour récupérer le code du message reçu */
-    int nbTotalBloc;            /* entier pour récupérer le nombre total de bloc */
+    unsigned int nbTotalBloc;   /* entier pour récupérer le nombre total de bloc */
     unsigned int tempIdServeur; /* entier pour récupérer l'idServeur */
 
     /* initialisation */
@@ -1421,7 +1414,7 @@ int traitementMessageBlocIntrouvable(Telechargement* telechargementATraiter)
             donneeRecu->adresseServeur = malloc(100* sizeof(char));
             donneeRecu->nomFichier = malloc(100* sizeof(char));
             /* comparaison des données du serveur avec l'ancien */
-            if (sscanf(buff, "%d %d %s %d %d %u %s %d", &code, &(donneeRecu->idFichier), donneeRecu->nomFichier, &nbTotalBloc,
+            if (sscanf(buff, "%d %u %s %u %u %u %s %d", &code, &(donneeRecu->idFichier), donneeRecu->nomFichier, &nbTotalBloc,
                        &(donneeRecu->numeroBloc), &tempIdServeur, donneeRecu->adresseServeur, &(donneeRecu->numPortServeur)) == 8)
             {
                 /* si le serveur renvoyé par l'annuaire est différent du serveur actuel */
@@ -1457,7 +1450,7 @@ int traitementMessageBlocIntrouvable(Telechargement* telechargementATraiter)
 void finalisationFichier(Fichier* pointeurFichier)
 {
     /* variables */
-    int compteur;               /* entier pour parcourir les blocs */
+    unsigned int compteur;               /* entier pour parcourir les blocs */
     FILE* fichierDestination;   /* fichier de destination pour la recopie */
     FILE* fichierSource;        /* fichier source pour la recopie */
     char* nomFichierTemp;       /* chaine de caractère pour le nom de fichier temporaire */
