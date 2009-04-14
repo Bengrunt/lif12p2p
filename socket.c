@@ -190,7 +190,7 @@ int ecritureSocket( Socket s, char* buff, int taille_buff )
 {
     int sock_err; /* Une variable pour stocker les erreurs */
 
-    sock_err = send( s, buff, taille_buff, MSG_NOSIGNAL );
+    sock_err = send( s, ( void* ) buff, taille_buff, MSG_NOSIGNAL );
             /* s la socket sur laquelle on ecrit */
             /* buff le message écrit */
             /* taille_buff la longueur du mesage */
