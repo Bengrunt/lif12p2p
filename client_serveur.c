@@ -58,6 +58,14 @@ int main()
     adresseServeur = malloc(100* sizeof(char));
     idServeur = 0;
 
+    /* création des dossiers source et destination :
+        493 correspond a 755 en octal
+        => l'utilisateur a tous les droits
+        => le groupe a les droits de lecture et d'executuon
+        => les autre utilisateurs ont les droits de lecture et d'executuon */
+    mkdir("./partage", 493);
+    mkdir("./reception", 493);
+
     /* demande de la socket de l'annuaire */
     do
     {
@@ -1192,6 +1200,8 @@ void threadRecuperationBloc()
     /* variables */
     Telechargement* telechargementATraiter;     /* pointeur sur le téléchargement à récupérer */
 
+    printf("\ndébut thread téléchargement bloc\n");
+
     /** verrou mutex liste d'attente (écriture) */
     pthread_mutex_lock(&(listeAttenteTelechargement.mutexListeAttenteClient));
     /* récupération du premier élément en liste d'attente */
@@ -1225,6 +1235,9 @@ void threadRecuperationBloc()
     /** libération du mutex liste d'attente (écriture) */
     pthread_mutex_unlock(&(listeAttenteTelechargement.mutexListeAttenteClient));
     nbThreadClientLance--;
+
+        printf("\nfin thread téléchargement bloc\n");
+
 }
 
 /**
@@ -1238,6 +1251,8 @@ void telechargementBloc(Telechargement* telechargementATraiter)
     char* buff;             /* chaine de caractère récupérant la réponse du serveur */
     int code;               /* entier correspondant au code du message reçu */
     int finDialogue;        /* booléen indiquant l'arret du dialogue */
+
+    printf("\ndébut fonction téélchargement bloc\n");
 
     /* initialisation */
     message = malloc(TAILLE_BUFF* sizeof(char));
