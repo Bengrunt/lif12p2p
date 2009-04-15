@@ -31,7 +31,7 @@ typedef struct Client
 {
     Socket socketClient;
     int numeroBloc;
-    int idFichier;
+    unsigned int idFichier;
     char* nomFichier;
     struct Client* clientSuivant;
 }Client;

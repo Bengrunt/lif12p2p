@@ -265,7 +265,7 @@ int creationMessage(int code, void* structure, char* message)
     case 61 :
         /* envoi d'un bloc d'un serveur à un client */
         strcpy(message,"61 ");
-        sprintf(tempChaine, "%d", ((Client*) structure)->idFichier);
+        sprintf(tempChaine, "%u", ((Client*) structure)->idFichier);
         strcat(message, tempChaine);
         strcat(message, " ");
         strcat(message, ((Client*) structure)->nomFichier);
@@ -276,7 +276,7 @@ int creationMessage(int code, void* structure, char* message)
     case 62 :
         /* envoi d'un bloc d'un serveur à un client */
         strcpy(message,"62 ");
-        sprintf(tempChaine, "%d", ((Client*) structure)->idFichier);
+        sprintf(tempChaine, "%u", ((Client*) structure)->idFichier);
         strcat(message, tempChaine);
         strcat(message, " ");
         sprintf(tempChaine, "%d", ((Client*) structure)->numeroBloc);
@@ -654,7 +654,8 @@ void traitementMessageBloc(Socket socketDialogue, char* buff)
     clientAAjouter->nomFichier = malloc(100 * sizeof(char));
 
     /* récupération du nom du fichier, et du numéro de bloc à partir du message reçu */
-    if (sscanf(buff, "%d %s %d", &code, clientAAjouter->nomFichier, &(clientAAjouter->numeroBloc)) == 3)
+    if (sscanf(buff, "%d %u %s %d", &code, &(clientAAjouter->idFichier),
+                clientAAjouter->nomFichier, &(clientAAjouter->numeroBloc)) == 4)
     {
         /* si la lecture s'est bien passée */
         clientAAjouter->socketClient = socketDialogue;
