@@ -10,6 +10,7 @@
 #define CLIENT_SERVEUR_H
 
 #include "socket.h"
+#include "sys/stat.h"
 
 /******************************************
 * Structures de données
