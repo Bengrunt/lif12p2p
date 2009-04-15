@@ -6,6 +6,11 @@
  * @version 09/04/2009
  */
 
+
+
+/******   bug ligne 1377 : erreur fichier n'est pas dans la liste   */
+
+
 #include "client_serveur.h"
 
 #define NBTHREAD 10
@@ -1375,6 +1380,8 @@ printf("reception message \n");
         tempFichier = tempFichier->fichierSuivant;
     }
     /** libération du mutex en écriture sur la liste de fichier */
+    pthread_mutex_unlock(&(listeFichier.mutexListeFichierLecture));
+
     if (tempFichier == NULL)
     {
         /* le fichier n'est pas dans la liste des fichiers : erreur */
