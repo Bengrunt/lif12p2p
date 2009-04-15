@@ -274,7 +274,7 @@ int creationMessage(int code, void* structure, char* message)
         strcat(message, tempChaine);
         break;
     case 62 :
-        /* envoi d'un bloc d'un serveur à un client */
+        /* bloc introuvable */
         strcpy(message,"62 ");
         sprintf(tempChaine, "%u", ((Client*) structure)->idFichier);
         strcat(message, tempChaine);
@@ -1350,6 +1350,10 @@ void traitementMessageReceptionBloc(Socket socketDialogue, char* buff)
     Fichier* tempFichier;   /* pointeur pour parcourir la liste des fichiers */
     char* cheminFichier;    /*  */
 
+printf("Debut reception message \n");
+
+
+
     /* initialisation */
     nomFichier = malloc(TAILLE_BUFF* sizeof(char));
     contenuBloc = malloc(TAILLE_BLOC* sizeof(char));
@@ -1360,7 +1364,7 @@ void traitementMessageReceptionBloc(Socket socketDialogue, char* buff)
     ecouteSocket(socketDialogue, contenuBloc, tailleLu);
     /* modification du nom de fichier en fichier ".temp" */
     strcat(nomFichier, ".temp");
-
+printf("reception message \n");
     /** blocage du mutex en écriture sur la liste de fichier */
     pthread_mutex_lock(&(listeFichier.mutexListeFichierLecture));
     /* initialisation */
