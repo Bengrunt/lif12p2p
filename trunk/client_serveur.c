@@ -1157,8 +1157,17 @@ printf("fin traitement fichier\n");
         pthread_mutex_lock(&(listeAttenteTelechargement.mutexListeAttenteClient));
         /* incrémentation du nombre de téléchargement */
         listeAttenteTelechargement.nbTelechargements++;
-        /* rajout du bloc à la suite du dernier bloc actuel */
-        (listeAttenteTelechargement.dernierTelechargement)->telechargementSuivant = blocAAjouter;
+
+        if (listeAttenteTelechargement.dernierTelechargement == NULL)
+        {
+            /* cas où il n'y a pas encore de bloc en liste d'attente */
+            listeAttenteTelechargement.dernierTelechargement = blocAAjouter;
+        }
+        else
+        {
+            /* rajout du bloc à la suite du dernier bloc actuel */
+            (listeAttenteTelechargement.dernierTelechargement)->telechargementSuivant = blocAAjouter;
+        }
         /* affectation du nouveau dernier bloc */
         listeAttenteTelechargement.dernierTelechargement = blocAAjouter;
         /** libération du mutex liste d'attente (écriture) */
