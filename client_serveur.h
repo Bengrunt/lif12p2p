@@ -267,7 +267,7 @@ void demandeFichier(char* nomFichier);
 * @param buff : chaine de caractère à traiter
 * @return la fonction retourne le nombre de bloc total du fichier
 */
-int traitementMessagePositif(char* buff);
+void traitementMessagePositif(char* buff);
 
 /**
 * @note procédure qui analyse la réponse négative de l'annuaire

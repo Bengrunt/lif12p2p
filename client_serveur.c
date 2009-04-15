@@ -135,8 +135,6 @@ int main()
     pthread_create(&variableThread, NULL, (void*(*)(void*))applicationClient, NULL);
     pthread_create(&variableThread, NULL, (void*(*)(void*))threadLectureClavier, NULL);
 
-    /* libération de l'espace mémoire */
-    free(adresseAnnuaire);
     /* boucle tant que les applications client et serveur ne sont pas terminées */
     while (1)
     {
@@ -145,6 +143,26 @@ int main()
             break;
         }
     }
+
+/** envoi du message d'arret à l'annuaire */
+    /* création du message */
+    if (creationMessage(33, NULL, message) == 1)
+    {
+        printf("Erreur inconnu !!!\n");
+        exit(1);
+    }
+    /* envoi du message à l'annuaire */
+    ecritureSocket(socketAnnuaire, message, TAILLE_BUFF);
+
+    /* libération de l'espace mémoire */
+    free(resultat);
+    free(buff);
+    free(tempNomServeur);
+    free(adresseServeur);
+    free(message);
+    free(adresseAnnuaire);
+    clotureSocket(socketAnnuaire);
+
     printf("Applisation arrété\n");
     return 0;
 }
@@ -185,7 +203,8 @@ int creationMessage(int code, void* structure, char* message)
     case 33 :
         /* message d'arret du client à l'annuaire */
         strcpy(message,"33 ");
-        strcat(message, adresseServeur);
+        sprintf(tempChaine, "%u", idServeur);
+        strcat(message, tempChaine);
         break;
     case 41 :
         /* message de demande de bloc à un serveur */
@@ -1018,12 +1037,9 @@ void demandeFichier(char* nomFichier)
     char* messageEnvoi; /* chaine de caractère stockant le message à envoyer */
     char* message;      /* chaine de caractère stockant le message reçu */
     int code;           /* entier stockant le code du message */
-    unsigned int nbBlocTotal;    /* entier stockant le nombre total de message (1 par bloc) attendu */
-    unsigned int compteur;       /* compteur sur le nombre de message reçu */
 
     /* initialisation */
     finDialogue = 0;
-    compteur = 0;
     message = malloc(TAILLE_BUFF* sizeof(char));
     messageEnvoi = malloc(TAILLE_BUFF* sizeof(char));
     /* demande à l'annuaire */
@@ -1038,23 +1054,22 @@ void demandeFichier(char* nomFichier)
         if (sscanf(message, "%d", &code) == 1)
         {
             /* analyse du code :
-               1 - réponse positive de l'annuaire
-               2 - réponse négative de l'annuaire
+               11 - réponse positive de l'annuaire
+               12 - réponse négative de l'annuaire
+               13 - fin de communication de l'annuaire
                autre - message non destiné au client */
             switch (code)
             {
             case 11:
                 /* réponse positive de l'annuaire */
-                compteur++;
-                nbBlocTotal = traitementMessagePositif(message);
-                if (compteur == nbBlocTotal)
-                {
-                    finDialogue = 1;
-                }
+                traitementMessagePositif(message);
                 break;
             case 12:
                 /* réponse négative de l'annuaire */
                 traitementMessageNegatif(message);
+                break;
+            case 13:
+                /* réponse négative de l'annuaire */
                 finDialogue = 1;
                 break;
             default:
@@ -1079,9 +1094,8 @@ void demandeFichier(char* nomFichier)
 /**
 * @note procédure qui analyse la réponse positive de l'annuaire
 * @param buff : chaine de caractère à traiter
-* @return la fonction retourne le nombre de bloc total du fichier
 */
-int traitementMessagePositif(char* buff)
+void traitementMessagePositif(char* buff)
 {
     /* variables */
     int code;                       /* entier correspondant au code du message */
@@ -1092,6 +1106,8 @@ int traitementMessagePositif(char* buff)
     unsigned int i;                          /* compteur pour incrémenter une boucle */
     unsigned int tempIdServeur;     /* entier pour récupérer l'IDServeur */
 
+    printf("début traitement message positif\n");
+
     /* initialisation des variables */
     blocAAjouter = malloc(sizeof(Telechargement));
     blocAAjouter->nomFichier = malloc(100* sizeof(char));
@@ -1101,6 +1117,7 @@ int traitementMessagePositif(char* buff)
     if (sscanf(buff, "%d %u %s %u %u %u %s %d", &code, &(blocAAjouter->idFichier), blocAAjouter->nomFichier, &nbTotalBloc,
                &(blocAAjouter->numeroBloc), &tempIdServeur, blocAAjouter->adresseServeur, &(blocAAjouter->numPortServeur)) == 8)
     {
+        printf("récupération des champs OK\n");
         /* recherche si le fichier est déja dans la liste des fichiers */
         /** verrou des mutex sur la liste des fichiers (lecture et écriture) */
         pthread_mutex_lock(&(listeFichier.mutexListeFichierLecture));
@@ -1112,9 +1129,11 @@ int traitementMessagePositif(char* buff)
             /* tant que le fichier pointé n'est pas celui recherché, on avance dans la liste */
             tempFichier = tempFichier->fichierSuivant;
         }
+        printf("recherche du fichier dans la liste  OK\n");
         /* si le pointeur est égal à NULL, alors le fichier n'existe pas encore */
         if (tempFichier == NULL)
         {
+            printf("création du fichier \n");
             /* allocation de la structure */
             fichierAAjouter = malloc(sizeof(Fichier));
             fichierAAjouter->nomFichier = malloc(100* sizeof(char));
@@ -1132,7 +1151,7 @@ int traitementMessagePositif(char* buff)
         /** libération des mutex (écriture et lecture) */
         pthread_mutex_unlock(&(listeFichier.mutexListeFichierLecture));
         pthread_mutex_unlock(&(listeFichier.mutexListeFichierEcriture));
-
+printf("fin traitement fichier\n");
         /* ajout du bloc du fichier dans la liste d'attente */
         /** verrou mutex liste d'attente (écriture) */
         pthread_mutex_lock(&(listeAttenteTelechargement.mutexListeAttenteClient));
@@ -1146,7 +1165,7 @@ int traitementMessagePositif(char* buff)
         pthread_mutex_unlock(&(listeAttenteTelechargement.mutexListeAttenteClient));
 
     }
-    return nbTotalBloc;
+    printf("fin fonction traitement message positif");
 }
 
 /**
@@ -1559,24 +1578,8 @@ void finalisationFichier(Fichier* pointeurFichier)
 void arretClient()
 {
     /* variables */
-    char* message;              /* chaine de caractère pour le message à envoyer */
     Telechargement* tempBloc;   /* pointeur temporaire pour supprimer la liste d'attente */
     Fichier* tempFichier;       /* pointeur temporaire pour supprimer la liste de fichiers */
-
-    /** envoi du message d'arret à l'annuaire */
-    /* iniitalisation des variables */
-    message = malloc(TAILLE_BUFF* sizeof(char));
-    /* création du message */
-    if (creationMessage(33, NULL, message) == 1)
-    {
-        printf("Erreur inconnu !!!\n");
-        exit(1);
-    }
-    /* envoi du message à l'annuaire */
-
-    ecritureSocket(socketAnnuaire, message, TAILLE_BUFF);
-    /* libération de l'espace mémoire */
-    free(message);
 
     /** vidage de la liste d'attente */
     tempBloc = listeAttenteTelechargement.premierTelechargement;
