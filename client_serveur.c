@@ -586,16 +586,16 @@ void dialogueClient(Socket socketDialogue)
                    autre - message non destiné au serveur */
                 switch (code)
                 {
-                case 6:
+                case 41:
                     /* message de demande de bloc d'un client */
                     traitementMessageBloc(socketDialogue, buff);
                     break;
-                case 7:
+                case 42:
                     /* message d'arret du client */
                     traitementMessageArret(socketDialogue);
                     finDialogue = 1;
                     break;
-                case 14:
+                case 71:
                     /* le message que l'on vient d'envoyer est inconnu : fermeture du thread  */
                     finDialogue = 1;
                     break;
@@ -1106,18 +1106,16 @@ void traitementMessagePositif(char* buff)
     unsigned int i;                          /* compteur pour incrémenter une boucle */
     unsigned int tempIdServeur;     /* entier pour récupérer l'IDServeur */
 
-    printf("début traitement message positif\n");
-
     /* initialisation des variables */
     blocAAjouter = malloc(sizeof(Telechargement));
     blocAAjouter->nomFichier = malloc(100* sizeof(char));
     blocAAjouter->adresseServeur = malloc(100* sizeof(char));
+    blocAAjouter->telechargementSuivant = NULL;
 
     /* récupération des champs du message */
     if (sscanf(buff, "%d %u %s %u %u %u %s %d", &code, &(blocAAjouter->idFichier), blocAAjouter->nomFichier, &nbTotalBloc,
                &(blocAAjouter->numeroBloc), &tempIdServeur, blocAAjouter->adresseServeur, &(blocAAjouter->numPortServeur)) == 8)
     {
-        printf("récupération des champs OK\n");
         /* recherche si le fichier est déja dans la liste des fichiers */
         /** verrou des mutex sur la liste des fichiers (lecture et écriture) */
         pthread_mutex_lock(&(listeFichier.mutexListeFichierLecture));
@@ -1129,11 +1127,9 @@ void traitementMessagePositif(char* buff)
             /* tant que le fichier pointé n'est pas celui recherché, on avance dans la liste */
             tempFichier = tempFichier->fichierSuivant;
         }
-        printf("recherche du fichier dans la liste  OK\n");
         /* si le pointeur est égal à NULL, alors le fichier n'existe pas encore */
         if (tempFichier == NULL)
         {
-            printf("création du fichier \n");
             /* allocation de la structure */
             fichierAAjouter = malloc(sizeof(Fichier));
             fichierAAjouter->nomFichier = malloc(100* sizeof(char));
@@ -1151,7 +1147,6 @@ void traitementMessagePositif(char* buff)
         /** libération des mutex (écriture et lecture) */
         pthread_mutex_unlock(&(listeFichier.mutexListeFichierLecture));
         pthread_mutex_unlock(&(listeFichier.mutexListeFichierEcriture));
-printf("fin traitement fichier\n");
         /* ajout du bloc du fichier dans la liste d'attente */
         /** verrou mutex liste d'attente (écriture) */
         pthread_mutex_lock(&(listeAttenteTelechargement.mutexListeAttenteClient));
@@ -1161,7 +1156,7 @@ printf("fin traitement fichier\n");
         if (listeAttenteTelechargement.dernierTelechargement == NULL)
         {
             /* cas où il n'y a pas encore de bloc en liste d'attente */
-            listeAttenteTelechargement.dernierTelechargement = blocAAjouter;
+            listeAttenteTelechargement.premierTelechargement = blocAAjouter;
         }
         else
         {
@@ -1174,7 +1169,6 @@ printf("fin traitement fichier\n");
         pthread_mutex_unlock(&(listeAttenteTelechargement.mutexListeAttenteClient));
 
     }
-    printf("fin fonction traitement message positif");
 }
 
 /**
@@ -1228,8 +1222,6 @@ void threadRecuperationBloc()
     /* variables */
     Telechargement* telechargementATraiter;     /* pointeur sur le téléchargement à récupérer */
 
-    printf("\ndébut thread téléchargement bloc\n");
-
     /** verrou mutex liste d'attente (écriture) */
     pthread_mutex_lock(&(listeAttenteTelechargement.mutexListeAttenteClient));
     /* récupération du premier élément en liste d'attente */
@@ -1263,8 +1255,6 @@ void threadRecuperationBloc()
     /** libération du mutex liste d'attente (écriture) */
     pthread_mutex_unlock(&(listeAttenteTelechargement.mutexListeAttenteClient));
     nbThreadClientLance--;
-
-        printf("\nfin thread téléchargement bloc\n");
 
 }
 
@@ -1306,11 +1296,11 @@ void telechargementBloc(Telechargement* telechargementATraiter)
                autre - message non destiné au client */
             switch (code)
             {
-            case 11:
+            case 61:
                 /* reception du bloc */
                 traitementMessageReceptionBloc(socketDialogue, buff);
                 break;
-            case 12:
+            case 62:
                 /* bloc introuvable, nouvelle demande à l'annuaire */
                 finDialogue = traitementMessageBlocIntrouvable(telechargementATraiter);
                 break;
