@@ -199,11 +199,11 @@ void traiteDemandeBlocClient(Socket s, char* mess);
 
 
 /**
-* @note traitement d'un message de type arret d'échange client.
-* @param s : la socket sur laquelle le message d'arret client a été émis.
-* @param mess : le message d'arret client a traiter.
+* @note traitement d'un message de type fin de communication.
+* @param s : la socket sur laquelle le message dde fin de communication a été émis.
+* @param mess : le message de fin de communication a traiter.
 */
-void traiteArretClient(Socket s, char* mess);
+void traiteFinCommunication( Socket s, char* mess );
 
 
 /**
