@@ -16,7 +16,7 @@
 #define TAILLE_BUFF_SM      TAILLE_BUFF/10      /* Taille de buffer small */
 #define TAILLE_BUFF_VSM     TAILLE_BUFF/20      /* Taille de buffer very small */
 
-#define TAILLE_BLOC 65536                       /* Taille maximal d'un bloc de fichier */
+#define TAILLE_BLOC 200                         /* Taille maximal d'un bloc de fichier */
 
 /*********************
 * Variables globales *
@@ -571,6 +571,7 @@ void dialogueClient(Socket socketDialogue)
     int finDialogue;        /* variable indiquant si on doit sortir de la boucle de discution
                                 0- on continue a écouter
                                 1- on sort de la boucle */
+    printf("dialogue client sur socket %d\n", socketDialogue);
 
     /* initialisation des variables */
     buff = malloc(TAILLE_BUFF * sizeof(char));
@@ -691,6 +692,8 @@ void traitementMessageBloc(Socket socketDialogue, char* buff)
     {
         /* problème de lecture dans le message reçu */
         printf("Réception du message inconnu suivant : %s\n", buff);
+        free(clientAAjouter->nomFichier);
+        free(clientAAjouter);
     }
 }
 
@@ -929,6 +932,8 @@ void envoiMessage(Client* client)
         ecritureSocket(client->socketClient, message, TAILLE_BUFF);
     }
     /* libération de l'espace mémoire */
+    free(cheminFichier);
+    free(strTailleLu);
     free(buff);
     free(message);
 }
@@ -1113,16 +1118,16 @@ void traitementMessagePositif(char* buff)
     unsigned int i;                 /* compteur pour incrémenter une boucle */
     unsigned int tempIdServeur;     /* entier pour récupérer l'IDServeur */
 
+    /* allocation de la structure telechargement */
+    blocAAjouter = malloc(sizeof(Telechargement));
+    blocAAjouter->nomFichier = malloc(TAILLE_BUFF_LAR * sizeof(char));
+    blocAAjouter->adresseServeur = malloc(TAILLE_BUFF_MED * sizeof(char));
+    blocAAjouter->telechargementSuivant = NULL;
+
     /* récupération des champs du message */
     if (sscanf(buff, "%d %u %s %u %u %u %s %d", &code, &(blocAAjouter->idFichier), blocAAjouter->nomFichier, &nbTotalBloc,
                &(blocAAjouter->numeroBloc), &tempIdServeur, blocAAjouter->adresseServeur, &(blocAAjouter->numPortServeur)) == 8)
     {
-        /* allocation de la structure telechargement */
-        blocAAjouter = malloc(sizeof(Telechargement));
-        blocAAjouter->nomFichier = malloc(TAILLE_BUFF_LAR * sizeof(char));
-        blocAAjouter->adresseServeur = malloc(TAILLE_BUFF_MED * sizeof(char));
-        blocAAjouter->telechargementSuivant = NULL;
-
         /* recherche si le fichier est déja dans la liste des fichiers */
         /** verrou des mutex sur la liste des fichiers (lecture et écriture) */
         pthread_mutex_lock(&(listeFichier.mutexListeFichierLecture));
@@ -1161,7 +1166,7 @@ void traitementMessagePositif(char* buff)
             if (tempFichier->idFichier != blocAAjouter->idFichier)
             {
                 /* cas où le fichier recherché n'est pas le premier, test sur le fichier suivant */
-                while ((tempFichier->fichierSuivant != NULL) && (tempFichier->fichierSuivant->idFichier, blocAAjouter->idFichier))
+                while ((tempFichier->fichierSuivant != NULL) && (tempFichier->fichierSuivant->idFichier == blocAAjouter->idFichier))
                 {
                     /* tant que le fichier suivant pointé n'est pas celui recherché, on avance dans la liste */
                     tempFichier = tempFichier->fichierSuivant;
@@ -1219,6 +1224,13 @@ void traitementMessagePositif(char* buff)
         /** libération du mutex liste d'attente (écriture) */
         pthread_mutex_unlock(&(listeAttenteTelechargement.mutexListeAttenteClient));
     }
+    else
+    {
+        /* cas où on a pas réussit a récupérer les infos du message */
+        free(blocAAjouter->adresseServeur);
+        free(blocAAjouter->nomFichier);
+        free(blocAAjouter);
+    }
 }
 
 /**
@@ -1258,6 +1270,7 @@ void threadTelechargement()
         if ((nbThreadClientLance < NBTHREAD) && (listeAttenteTelechargement.premierTelechargement != NULL))
         {
             /* incrémentation du nombre de thread et création du thread */
+            printf("lancement threadrécuperationbloc\n");
             nbThreadClientLance++;
             pthread_create(&variableThread, NULL, (void*(*)(void*))threadRecuperationBloc, NULL);
         }
@@ -1305,7 +1318,6 @@ void threadRecuperationBloc()
     /** libération du mutex liste d'attente (écriture) */
     pthread_mutex_unlock(&(listeAttenteTelechargement.mutexListeAttenteClient));
     nbThreadClientLance--;
-
 }
 
 /**
@@ -1325,6 +1337,7 @@ void telechargementBloc(Telechargement* telechargementATraiter)
     /* initialisation */
     message = malloc(TAILLE_BUFF * sizeof(char));
     buff = malloc(TAILLE_BUFF * sizeof(char));
+    finDialogue = 0;
     do
     {
         /* création d'une socket */
@@ -1341,14 +1354,15 @@ void telechargementBloc(Telechargement* telechargementATraiter)
         if (sscanf(buff, "%d", &code) == 1)
         {
             /* analyse du code :
-               11 - reception du bloc
-               12 - bloc introuvable
+               61 - reception du bloc
+               62 - bloc introuvable
                autre - message non destiné au client */
             switch (code)
             {
             case 61:
                 /* reception du bloc */
                 traitementMessageReceptionBloc(socketDialogue, buff);
+                finDialogue = 1;
                 break;
             case 62:
                 /* bloc introuvable, nouvelle demande à l'annuaire */
@@ -1367,6 +1381,9 @@ void telechargementBloc(Telechargement* telechargementATraiter)
             perror("Le message suivant non reconnu a été reçu : ");
             perror(message);
         }
+        /* signale au serveur que le client se déconnecte */
+        creationMessage(42, NULL, message);
+        ecritureSocket(socketDialogue, message, TAILLE_BUFF);
         /* fermeture de la socket */
         clotureSocket(socketDialogue);
         /* boucle tant que la fin du dialogue n'est pas demandé */
@@ -1374,9 +1391,6 @@ void telechargementBloc(Telechargement* telechargementATraiter)
     while ((!finDialogue) && (!finThreadClient));
 
     /* libération de l'espace mémoire */
-    free(telechargementATraiter->adresseServeur);
-    free(telechargementATraiter->nomFichier);
-    free(telechargementATraiter);
     free(message);
     free(buff);
 }
@@ -1430,7 +1444,7 @@ void traitementMessageReceptionBloc(Socket socketDialogue, char* buff)
     else
     {
         /* récupération du chemin du fichier */
-        strcpy(cheminFichier, "reception\\");
+        strcpy(cheminFichier, "reception/");
         strcat(cheminFichier, nomFichier);
         /** blocage du mutex en écriture sur le fichier */
         pthread_mutex_lock(&(tempFichier->mutexFichierEcriture));
@@ -1562,7 +1576,7 @@ void finalisationFichier(Fichier* pointeurFichier)
     if (compteur == (pointeurFichier->nbBlocs))
     {
         /* récupération du chemin du fichier */
-        strcpy(cheminFichier, "reception\\");
+        strcpy(cheminFichier, "reception/");
         strcat(cheminFichier, pointeurFichier->nomFichier);
         /* création du fichier destination */
         fichierDestination = fopen(cheminFichier, "w");

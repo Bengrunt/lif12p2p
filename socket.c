@@ -182,7 +182,10 @@ void ecouteSocket( Socket s, char* buff, int taille_buff )
     {
         perror( "erreur à la réception" );
     }
-    printf("numero socket : %d\nmessage reçu : %s\n", s, buff);
+    else
+    {
+        printf("numero socket : %d\nmessage reçu : %s\n", s, buff);
+    }
 }
 
 /**
@@ -217,9 +220,10 @@ int ecritureSocket( Socket s, char* buff, int taille_buff )
 void clotureSocket( Socket s )
 {
     /* Fermeture de la connexion */
+    printf("fermeture socket %d\n", s);
     if ( close( s ) < 0 )
     {
-        perror( "Problème à la fermeture du socket d'attente" );
+        perror( "Problème à la fermeture de la socket" );
     }
     #if defined (WIN32)
         /* Ceci est du code spécifique à windows */
