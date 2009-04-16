@@ -6,16 +6,17 @@
  * @version 09/04/2009
  */
 
-
-
-/******   bug ligne 1377 : erreur fichier n'est pas dans la liste   */
-
-
 #include "client_serveur.h"
 
-#define NBTHREAD 10
-#define TAILLE_BUFF 200
-#define TAILLE_BLOC 65536
+#define NBTHREAD 10                             /* nombre de thread de téléchargement / envoi simultané */
+
+#define TAILLE_BUFF         200                 /* Taille de buffer standard */
+#define TAILLE_BUFF_LAR     TAILLE_BUFF/2       /* Taille de buffer large */
+#define TAILLE_BUFF_MED     TAILLE_BUFF/5       /* Taille de buffer medium */
+#define TAILLE_BUFF_SM      TAILLE_BUFF/10      /* Taille de buffer small */
+#define TAILLE_BUFF_VSM     TAILLE_BUFF/20      /* Taille de buffer very small */
+
+#define TAILLE_BLOC 65536                       /* Taille maximal d'un bloc de fichier */
 
 /*********************
 * Variables globales *
@@ -55,12 +56,12 @@ int main()
     finThreadClient = 0;
     finThreadServeur = 0;
     arretApplication = 0;
-    resultat = malloc(2* sizeof(char));
-    adresseAnnuaire = malloc(100* sizeof(char));
-    message = malloc(TAILLE_BUFF* sizeof(char));
-    buff = malloc(TAILLE_BUFF* sizeof(char));
-    tempNomServeur = malloc(100* sizeof(char));
-    adresseServeur = malloc(100* sizeof(char));
+    resultat = malloc(2 * sizeof(char));
+    adresseAnnuaire = malloc(TAILLE_BUFF_MED * sizeof(char));
+    message = malloc(TAILLE_BUFF * sizeof(char));
+    buff = malloc(TAILLE_BUFF * sizeof(char));
+    tempNomServeur = malloc(TAILLE_BUFF_MED * sizeof(char));
+    adresseServeur = malloc(TAILLE_BUFF_MED * sizeof(char));
     idServeur = 0;
 
     /* création des dossiers source et destination :
@@ -185,7 +186,7 @@ int creationMessage(int code, void* structure, char* message)
     char* tempChaine;           /* chaine de caractère temporaire pour passer les entiers en chaine */
 
     /* initialisation */
-    tempChaine = malloc(100* sizeof(char));
+    tempChaine = malloc(TAILLE_BUFF_VSM * sizeof(char));
 
     switch (code)
     {
@@ -449,11 +450,11 @@ void signalisationFichierAnnuaire(char* nomFichier)
     char* cheminFichier;    /* chemin d'acces au fichier */
 
     /* initialisation */
-    message = malloc(TAILLE_BUFF* sizeof(char));
-    buff = malloc(TAILLE_BUFF* sizeof(char));
-    lectureFichier = malloc((TAILLE_BLOC)* sizeof(char));
-    nomFich = malloc(100* sizeof(char));
-    cheminFichier = malloc(100* sizeof(char));
+    message = malloc(TAILLE_BUFF * sizeof(char));
+    buff = malloc(TAILLE_BUFF * sizeof(char));
+    lectureFichier = malloc(TAILLE_BLOC * sizeof(char));
+    nomFich = malloc(TAILLE_BUFF_LAR * sizeof(char));
+    cheminFichier = malloc(TAILLE_BUFF_LAR * sizeof(char));
     nbBloc = 0;
 
     /* demande d'un IDFichier */
@@ -629,7 +630,7 @@ void dialogueClient(Socket socketDialogue)
         char* message;          /* chaine de caractère pour créer le message à envoyer */
 
         /* initialisation */
-        message = malloc(TAILLE_BUFF* sizeof(char));
+        message = malloc(TAILLE_BUFF * sizeof(char));
         /* création du message */
         creationMessage(63, NULL, message);
         /* envoi du message */
@@ -656,7 +657,7 @@ void traitementMessageBloc(Socket socketDialogue, char* buff)
 
     /* initialisation des variables */
     clientAAjouter = malloc(sizeof(Client));
-    clientAAjouter->nomFichier = malloc(100 * sizeof(char));
+    clientAAjouter->nomFichier = malloc(TAILLE_BUFF_LAR * sizeof(char));
 
     /* récupération du nom du fichier, et du numéro de bloc à partir du message reçu */
     if (sscanf(buff, "%d %u %s %d", &code, &(clientAAjouter->idFichier),
@@ -774,7 +775,7 @@ void traitementMessageErreur(Socket socketDialogue)
     /* variables */
     char* message;  /* chaine de caractère contenant le message à envoyer */
     /* initialisation */
-    message = malloc(TAILLE_BUFF* sizeof(char));
+    message = malloc(TAILLE_BUFF * sizeof(char));
     /* création du message */
     strcpy(message, "71 mauvais destinataire");
     /* envoi du message d'erreur */
@@ -866,7 +867,7 @@ void signalisationChargeServeur(int valeur)
     char* message;          /* chaine de caractère pour le message à envoyer */
 
     /* initialisation des variables */
-    message = malloc(TAILLE_BUFF* sizeof(char));
+    message = malloc(TAILLE_BUFF * sizeof(char));
     /* création de la chaine à envoyer */
     creationMessage(53, (void*) &valeur, message);
     /* envoi du message */
@@ -892,8 +893,8 @@ void envoiMessage(Client* client)
     /* initialisation */
     buff = malloc(TAILLE_BLOC * sizeof(char));
     message = malloc(TAILLE_BUFF* sizeof(char));
-    cheminFichier = malloc(100* sizeof(char));
-    strTailleLu = malloc(10* sizeof(char));
+    cheminFichier = malloc(TAILLE_BUFF_LAR * sizeof(char));
+    strTailleLu = malloc(TAILLE_BUFF_VSM * sizeof(char));
 
     /* récupéation du chemin du fichier */
     strcpy(cheminFichier, "partage/");
@@ -942,7 +943,7 @@ void arretServeur()
     Client* tempClient;     /* pointeur temporaire pour supprimer la liste des clients */
 
     /* iniitalisation des variables */
-    message = malloc(TAILLE_BUFF* sizeof(char));
+    message = malloc(TAILLE_BUFF * sizeof(char));
 
     /* création du message à envoyer à l'annuaire */
     creationMessage(52, NULL, message);
@@ -1046,8 +1047,8 @@ void demandeFichier(char* nomFichier)
 
     /* initialisation */
     finDialogue = 0;
-    message = malloc(TAILLE_BUFF* sizeof(char));
-    messageEnvoi = malloc(TAILLE_BUFF* sizeof(char));
+    message = malloc(TAILLE_BUFF * sizeof(char));
+    messageEnvoi = malloc(TAILLE_BUFF * sizeof(char));
     /* demande à l'annuaire */
     creationMessage(31, (void*) nomFichier, messageEnvoi);
     ecritureSocket(socketAnnuaire, messageEnvoi, TAILLE_BUFF);
@@ -1109,46 +1110,90 @@ void traitementMessagePositif(char* buff)
     Fichier* fichierAAjouter;       /* structure Fichier à rajouter à la fin de la liste (si besoin) */
     unsigned int nbTotalBloc;       /* entier stockant le nombre total de bloc du fichier */
     Fichier* tempFichier;           /* structure Fichier temporaire pour la recherche */
-    unsigned int i;                          /* compteur pour incrémenter une boucle */
+    unsigned int i;                 /* compteur pour incrémenter une boucle */
     unsigned int tempIdServeur;     /* entier pour récupérer l'IDServeur */
-
-    /* initialisation des variables */
-    blocAAjouter = malloc(sizeof(Telechargement));
-    blocAAjouter->nomFichier = malloc(100* sizeof(char));
-    blocAAjouter->adresseServeur = malloc(100* sizeof(char));
-    blocAAjouter->telechargementSuivant = NULL;
 
     /* récupération des champs du message */
     if (sscanf(buff, "%d %u %s %u %u %u %s %d", &code, &(blocAAjouter->idFichier), blocAAjouter->nomFichier, &nbTotalBloc,
                &(blocAAjouter->numeroBloc), &tempIdServeur, blocAAjouter->adresseServeur, &(blocAAjouter->numPortServeur)) == 8)
     {
+        /* allocation de la structure telechargement */
+        blocAAjouter = malloc(sizeof(Telechargement));
+        blocAAjouter->nomFichier = malloc(TAILLE_BUFF_LAR * sizeof(char));
+        blocAAjouter->adresseServeur = malloc(TAILLE_BUFF_MED * sizeof(char));
+        blocAAjouter->telechargementSuivant = NULL;
+
         /* recherche si le fichier est déja dans la liste des fichiers */
         /** verrou des mutex sur la liste des fichiers (lecture et écriture) */
         pthread_mutex_lock(&(listeFichier.mutexListeFichierLecture));
         pthread_mutex_lock(&(listeFichier.mutexListeFichierEcriture));
-        /* initialisation en début de liste */
-        tempFichier = listeFichier.listeFichiers;
-        while ((tempFichier != NULL) && (strcmp(tempFichier->nomFichier, blocAAjouter->nomFichier) != 0))
+
+        /* cas où il n'y a aucun fichier dans la liste */
+        if (listeFichier.nbFichiers == 0)
         {
-            /* tant que le fichier pointé n'est pas celui recherché, on avance dans la liste */
-            tempFichier = tempFichier->fichierSuivant;
-        }
-        /* si le pointeur est égal à NULL, alors le fichier n'existe pas encore */
-        if (tempFichier == NULL)
-        {
-            /* allocation de la structure */
+            /* allocation de la structure fichier */
             fichierAAjouter = malloc(sizeof(Fichier));
-            fichierAAjouter->nomFichier = malloc(100* sizeof(char));
-            fichierAAjouter->statutBlocs = malloc(nbTotalBloc* sizeof(int));
-            pthread_mutex_init(&(fichierAAjouter->mutexFichierEcriture), NULL);
+            fichierAAjouter->nomFichier = malloc(TAILLE_BUFF_LAR * sizeof(char));
+            fichierAAjouter->statutBlocs = malloc(nbTotalBloc * sizeof(int));
+
             /* initialisation des champs */
+            pthread_mutex_init(&(fichierAAjouter->mutexFichierEcriture), NULL);
+            fichierAAjouter->longueurDernierBloc = 0;
+            fichierAAjouter->tailleFichier = 0;
+            fichierAAjouter->nbBlocs = nbTotalBloc;
+            fichierAAjouter->idFichier = blocAAjouter->idFichier;
+            strcpy(fichierAAjouter->nomFichier, blocAAjouter->nomFichier);
             for (i=0; i<nbTotalBloc; i++)
             {
                 /* initialisation des status à 0 */
                 fichierAAjouter->statutBlocs[i] = 0;
             }
-            fichierAAjouter->nbBlocs = nbTotalBloc;
-            strcpy(fichierAAjouter->nomFichier, blocAAjouter->nomFichier);
+            fichierAAjouter->fichierSuivant = NULL;
+            /* ajout du fichier dans la liste */
+            listeFichier.listeFichiers = fichierAAjouter;
+            listeFichier.nbFichiers++;
+        }
+        else
+        {
+            /* initialisation en début de liste */
+            tempFichier = listeFichier.listeFichiers;
+            /* parcours de la liste à la recherche du fichier */
+            if (tempFichier->idFichier != blocAAjouter->idFichier)
+            {
+                /* cas où le fichier recherché n'est pas le premier, test sur le fichier suivant */
+                while ((tempFichier->fichierSuivant != NULL) && (tempFichier->fichierSuivant->idFichier, blocAAjouter->idFichier))
+                {
+                    /* tant que le fichier suivant pointé n'est pas celui recherché, on avance dans la liste */
+                    tempFichier = tempFichier->fichierSuivant;
+                }
+                /* si le pointeur suivant est égal à NULL, alors le fichier n'existe pas encore */
+                if (tempFichier->fichierSuivant == NULL)
+                {
+                    /* allocation de la structure fichier */
+                    fichierAAjouter = malloc(sizeof(Fichier));
+                    fichierAAjouter->nomFichier = malloc(TAILLE_BUFF_LAR * sizeof(char));
+                    fichierAAjouter->statutBlocs = malloc(nbTotalBloc* sizeof(int));
+
+                    /* initialisation des champs */
+                    pthread_mutex_init(&(fichierAAjouter->mutexFichierEcriture), NULL);
+                    fichierAAjouter->longueurDernierBloc = 0;
+                    fichierAAjouter->tailleFichier = 0;
+                    fichierAAjouter->nbBlocs = nbTotalBloc;
+                    fichierAAjouter->idFichier = blocAAjouter->idFichier;
+                    strcpy(fichierAAjouter->nomFichier, blocAAjouter->nomFichier);
+                    for (i=0; i<nbTotalBloc; i++)
+                    {
+                        /* initialisation des status à 0 */
+                        fichierAAjouter->statutBlocs[i] = 0;
+                    }
+                    fichierAAjouter->fichierSuivant = NULL;
+
+                    /* ajout du fichier à la suite de la liste des fichiers */
+                    tempFichier->fichierSuivant = fichierAAjouter;
+                    listeFichier.nbFichiers++;
+                }
+            }
+            /* si le fichier existe déja, on ne fait rien de plus */
         }
         /** libération des mutex (écriture et lecture) */
         pthread_mutex_unlock(&(listeFichier.mutexListeFichierLecture));
@@ -1173,7 +1218,6 @@ void traitementMessagePositif(char* buff)
         listeAttenteTelechargement.dernierTelechargement = blocAAjouter;
         /** libération du mutex liste d'attente (écriture) */
         pthread_mutex_unlock(&(listeAttenteTelechargement.mutexListeAttenteClient));
-
     }
 }
 
@@ -1188,7 +1232,7 @@ void traitementMessageNegatif(char* buff)
     char* nomFichier;   /* chaine de caractère correspondant au fichier demandé */
 
     /* initialisation */
-    nomFichier = malloc(40* sizeof(char));
+    nomFichier = malloc(TAILLE_BUFF_LAR * sizeof(char));
 
     /* affichage de l'échec de la recherche du fichier */
     if (sscanf(buff, "%d %s", &code, nomFichier) == 2)
@@ -1279,8 +1323,8 @@ void telechargementBloc(Telechargement* telechargementATraiter)
     printf("\ndébut fonction téélchargement bloc\n");
 
     /* initialisation */
-    message = malloc(TAILLE_BUFF* sizeof(char));
-    buff = malloc(TAILLE_BUFF* sizeof(char));
+    message = malloc(TAILLE_BUFF * sizeof(char));
+    buff = malloc(TAILLE_BUFF * sizeof(char));
     do
     {
         /* création d'une socket */
@@ -1347,29 +1391,25 @@ void traitementMessageReceptionBloc(Socket socketDialogue, char* buff)
     /* variables */
     FILE* fichierAEcrire;   /* fichier de destination pour le bloc */
     int code;               /* entier correspondant au code du message */
-    unsigned int idFichier;          /* entier pour l'IDFichier */
+    unsigned int idFichier; /* entier pour l'IDFichier */
     char* nomFichier;       /* chaine de caractère récupérant le nom du fichier */
-    unsigned int numeroBloc;         /* entier corerspondant au numéro du bloc reçu */
+    unsigned int numeroBloc;/* entier corerspondant au numéro du bloc reçu */
     char* contenuBloc;      /* chaine de caractère avec le contenu du bloc */
     int tailleLu;           /* taille du bloc attendu dans le message suivant */
     Fichier* tempFichier;   /* pointeur pour parcourir la liste des fichiers */
-    char* cheminFichier;    /*  */
-
-printf("Debut reception message \n");
-
-
+    char* cheminFichier;    /* chaine de caractère vers le fichier (avec le répertoire) */
 
     /* initialisation */
-    nomFichier = malloc(TAILLE_BUFF* sizeof(char));
-    contenuBloc = malloc(TAILLE_BLOC* sizeof(char));
-    cheminFichier = malloc(100* sizeof(char));
+    nomFichier = malloc(TAILLE_BUFF_LAR * sizeof(char));
+    contenuBloc = malloc(TAILLE_BLOC * sizeof(char));
+    cheminFichier = malloc(TAILLE_BUFF_LAR * sizeof(char));
 
     /* récupération de la partie de fichier */
     sscanf(buff, "%d %u %s %u %d", &code, &idFichier, nomFichier, &numeroBloc, &tailleLu);
     ecouteSocket(socketDialogue, contenuBloc, tailleLu);
     /* modification du nom de fichier en fichier ".temp" */
     strcat(nomFichier, ".temp");
-printf("reception message \n");
+
     /** blocage du mutex en écriture sur la liste de fichier */
     pthread_mutex_lock(&(listeFichier.mutexListeFichierLecture));
     /* initialisation */
@@ -1418,6 +1458,8 @@ printf("reception message \n");
         finalisationFichier(tempFichier);
     }
     /* libération de l'espace mémoire */
+    free(contenuBloc);
+    free(cheminFichier);
     free(nomFichier);
 }
 
@@ -1453,8 +1495,8 @@ int traitementMessageBlocIntrouvable(Telechargement* telechargementATraiter)
         {
             /* initialisation */
             donneeRecu = malloc(sizeof(Telechargement));
-            donneeRecu->adresseServeur = malloc(100* sizeof(char));
-            donneeRecu->nomFichier = malloc(100* sizeof(char));
+            donneeRecu->adresseServeur = malloc(TAILLE_BUFF_MED * sizeof(char));
+            donneeRecu->nomFichier = malloc(TAILLE_BUFF_LAR * sizeof(char));
             /* comparaison des données du serveur avec l'ancien */
             if (sscanf(buff, "%d %u %s %u %u %u %s %d", &code, &(donneeRecu->idFichier), donneeRecu->nomFichier, &nbTotalBloc,
                        &(donneeRecu->numeroBloc), &tempIdServeur, donneeRecu->adresseServeur, &(donneeRecu->numPortServeur)) == 8)
@@ -1492,20 +1534,20 @@ int traitementMessageBlocIntrouvable(Telechargement* telechargementATraiter)
 void finalisationFichier(Fichier* pointeurFichier)
 {
     /* variables */
-    unsigned int compteur;               /* entier pour parcourir les blocs */
+    unsigned int compteur;      /* entier pour parcourir les blocs */
     FILE* fichierDestination;   /* fichier de destination pour la recopie */
     FILE* fichierSource;        /* fichier source pour la recopie */
     char* nomFichierTemp;       /* chaine de caractère pour le nom de fichier temporaire */
     char* contenuBloc;          /* chaine de caractère contenant le bloc lu */
     int tailleDernierBloc;      /* entier contanant la taille du dernier bloc du fichier */
     Fichier* tempFichier;       /* pointeur sur fichier poru le parcours de la liste */
-    char* cheminFichier;
+    char* cheminFichier;        /* chaine de caractère pour le nom de fichier (avec le dossier) */
 
     /* initialisation */
     compteur = 0;
-    nomFichierTemp = malloc(100* sizeof(char));
-    contenuBloc = malloc(TAILLE_BLOC* sizeof(char));
-    cheminFichier = malloc(100* sizeof(char));
+    nomFichierTemp = malloc(TAILLE_BUFF_LAR * sizeof(char));
+    contenuBloc = malloc(TAILLE_BLOC * sizeof(char));
+    cheminFichier = malloc(TAILLE_BUFF_LAR * sizeof(char));
 
     /* parcours du tableau de statut */
     while (compteur < pointeurFichier->nbBlocs)
@@ -1547,8 +1589,8 @@ void finalisationFichier(Fichier* pointeurFichier)
 
         /* suppression de la liste des fichiers */
         /** verrou mutex sur la liste de fichier (lecture et ecriture) */
-        pthread_mutex_lock(&(listeFichier.mutexListeFichierEcriture));
         pthread_mutex_lock(&(listeFichier.mutexListeFichierLecture));
+        pthread_mutex_lock(&(listeFichier.mutexListeFichierEcriture));
         /* initialisation du pointeur */
         tempFichier = listeFichier.listeFichiers;
         /* test si le fichier recherché est le premier */
@@ -1579,6 +1621,7 @@ void finalisationFichier(Fichier* pointeurFichier)
         free(pointeurFichier);
     }
     /* libération de l'espace mémoire */
+    free(cheminFichier);
     free(nomFichierTemp);
     free(contenuBloc);
 }
