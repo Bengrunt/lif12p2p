@@ -1162,8 +1162,12 @@ void traitementMessagePositif(char* buff)
             /* ajout du fichier dans la liste */
             listeFichier.listeFichiers = fichierAAjouter;
             listeFichier.nbFichiers++;
-            /* allocation de l'espace disque pour le fichier */
+            /* initialisation pour la création du fichier */
+            strcpy(cheminFichier, "reception/");
+            strcat(cheminFichier, blocAAjouter->nomFichier);
+            strcat(cheminFichier, ".temp");
             carac = '0';
+            /* allocation de l'espace disque pour le fichier */
             fichierACreer = fopen(cheminFichier, "w");
             for (compteur = 0; compteur < (nbTotalBloc * TAILLE_BLOC); compteur++)
             {
@@ -1209,8 +1213,12 @@ void traitementMessagePositif(char* buff)
                     /* ajout du fichier à la suite de la liste des fichiers */
                     tempFichier->fichierSuivant = fichierAAjouter;
                     listeFichier.nbFichiers++;
-                    /* allocation de l'espace disque pour le fichier */
+                    /* initialisation pour la création du fichier */
+                    strcpy(cheminFichier, "reception/");
+                    strcat(cheminFichier, blocAAjouter->nomFichier);
+                    strcat(cheminFichier, ".temp");
                     carac = '0';
+                    /* allocation de l'espace disque pour le fichier */
                     fichierACreer = fopen(cheminFichier, "w");
                     for (compteur = 0; compteur < (nbTotalBloc * TAILLE_BLOC); compteur++)
                     {
