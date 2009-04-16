@@ -1117,12 +1117,17 @@ void traitementMessagePositif(char* buff)
     Fichier* tempFichier;           /* structure Fichier temporaire pour la recherche */
     unsigned int i;                 /* compteur pour incrémenter une boucle */
     unsigned int tempIdServeur;     /* entier pour récupérer l'IDServeur */
+    FILE* fichierACreer;            /* descripteur de fichier pour réserver l'espace disque necessaire */
+    unsigned int compteur;
+    char* cheminFichier;
+    char carac;
 
     /* allocation de la structure telechargement */
     blocAAjouter = malloc(sizeof(Telechargement));
     blocAAjouter->nomFichier = malloc(TAILLE_BUFF_LAR * sizeof(char));
     blocAAjouter->adresseServeur = malloc(TAILLE_BUFF_MED * sizeof(char));
     blocAAjouter->telechargementSuivant = NULL;
+    cheminFichier = malloc(TAILLE_BUFF_LAR * sizeof(char));
 
     /* récupération des champs du message */
     if (sscanf(buff, "%d %u %s %u %u %u %s %d", &code, &(blocAAjouter->idFichier), blocAAjouter->nomFichier, &nbTotalBloc,
@@ -1157,6 +1162,14 @@ void traitementMessagePositif(char* buff)
             /* ajout du fichier dans la liste */
             listeFichier.listeFichiers = fichierAAjouter;
             listeFichier.nbFichiers++;
+            /* allocation de l'espace disque pour le fichier */
+            carac = '0';
+            fichierACreer = fopen(cheminFichier, "w");
+            for (compteur = 0; compteur < (nbTotalBloc * TAILLE_BLOC); compteur++)
+            {
+                fwrite((void*) &carac, sizeof(char), 1, fichierACreer);
+            }
+            fclose(fichierACreer);
         }
         else
         {
@@ -1196,6 +1209,14 @@ void traitementMessagePositif(char* buff)
                     /* ajout du fichier à la suite de la liste des fichiers */
                     tempFichier->fichierSuivant = fichierAAjouter;
                     listeFichier.nbFichiers++;
+                    /* allocation de l'espace disque pour le fichier */
+                    carac = '0';
+                    fichierACreer = fopen(cheminFichier, "w");
+                    for (compteur = 0; compteur < (nbTotalBloc * TAILLE_BLOC); compteur++)
+                    {
+                        fwrite((void*) &carac, sizeof(char), 1, fichierACreer);
+                    }
+                    fclose(fichierACreer);
                 }
             }
             /* si le fichier existe déja, on ne fait rien de plus */
