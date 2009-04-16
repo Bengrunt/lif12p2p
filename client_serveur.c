@@ -6,6 +6,11 @@
  * @version 09/04/2009
  */
 
+/******  ligne 1430+ changement de stockage des blocs reçu : un fichier temporaire par bloc
+        -> changement à la création du fichier
+        -> changement à la finalisation
+*/
+
 #include "client_serveur.h"
 
 #define NBTHREAD 10                             /* nombre de thread de téléchargement / envoi simultané */
@@ -16,7 +21,7 @@
 #define TAILLE_BUFF_SM      TAILLE_BUFF/10      /* Taille de buffer small */
 #define TAILLE_BUFF_VSM     TAILLE_BUFF/20      /* Taille de buffer very small */
 
-#define TAILLE_BLOC 200                         /* Taille maximal d'un bloc de fichier */
+#define TAILLE_BLOC 2000                        /* Taille maximal d'un bloc de fichier */
 
 /*********************
 * Variables globales *
