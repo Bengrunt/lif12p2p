@@ -194,6 +194,9 @@ int traiteMessage( Socket arg )
                         traiteArretServeur( arg, buff );
                         fin_thread = 1;
                         break;
+                    case 53: /* Gestion charge */
+
+                        break;
                     case 54: /* Demande IDServeur */
                         traiteDemandeIdServeur( arg, buff );
                         break;
