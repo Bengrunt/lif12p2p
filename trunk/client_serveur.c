@@ -14,8 +14,6 @@
 #include "client_serveur.h"
 
 #define NBTHREAD 10                             /* nombre de thread de téléchargement / envoi simultané */
-<<<<<<< .mine
-=======
 
 #define TAILLE_BUFF         200                 /* Taille de buffer standard */
 #define TAILLE_BUFF_LAR     TAILLE_BUFF/2       /* Taille de buffer large */
@@ -24,15 +22,6 @@
 #define TAILLE_BUFF_VSM     TAILLE_BUFF/20      /* Taille de buffer very small */
 
 #define TAILLE_BLOC 2000                        /* Taille maximal d'un bloc de fichier */
->>>>>>> .r75
-
-#define TAILLE_BUFF         200                /* Taille de buffer standard */
-#define TAILLE_BUFF_LAR     TAILLE_BUFF/2       /* Taille de buffer large */
-#define TAILLE_BUFF_MED     TAILLE_BUFF/5       /* Taille de buffer medium */
-#define TAILLE_BUFF_SM      TAILLE_BUFF/10      /* Taille de buffer small */
-#define TAILLE_BUFF_VSM     TAILLE_BUFF/20      /* Taille de buffer very small */
-
-#define TAILLE_BLOC 2000                         /* Taille maximal d'un bloc de fichier */
 
 /*********************
 * Variables globales *
@@ -1140,10 +1129,6 @@ void traitementMessagePositif(char* buff)
     blocAAjouter->nomFichier = malloc(TAILLE_BUFF_LAR * sizeof(char));
     blocAAjouter->adresseServeur = malloc(TAILLE_BUFF_MED * sizeof(char));
     blocAAjouter->telechargementSuivant = NULL;
-<<<<<<< .mine
-=======
-    cheminFichier = malloc(TAILLE_BUFF_LAR * sizeof(char));
->>>>>>> .r76
 
     /* récupération des champs du message */
     if (sscanf(buff, "%d %u %s %u %u %u %s %d", &code, &(blocAAjouter->idFichier), blocAAjouter->nomFichier, &nbTotalBloc,
@@ -1153,7 +1138,6 @@ void traitementMessagePositif(char* buff)
         /** verrou des mutex sur la liste des fichiers (lecture et écriture) */
         pthread_mutex_lock(&(listeFichier.mutexListeFichierLecture));
         pthread_mutex_lock(&(listeFichier.mutexListeFichierEcriture));
-<<<<<<< .mine
 
             printf("%d", listeFichier.nbFichiers);
         /* cas où il n'y a aucun fichier dans la liste */
@@ -1177,54 +1161,10 @@ void traitementMessagePositif(char* buff)
             fichierAAjouter->fichierSuivant = NULL;
             /* ajout du fichier dans la liste */
             listeFichier.listeFichiers = fichierAAjouter;
-=======
-
-        /* cas où il n'y a aucun fichier dans la liste */
-        if (listeFichier.nbFichiers == 0)
-        {
-            /* allocation de la structure fichier */
-            fichierAAjouter = malloc(sizeof(Fichier));
-            fichierAAjouter->nomFichier = malloc(TAILLE_BUFF_LAR * sizeof(char));
-            fichierAAjouter->statutBlocs = malloc(nbTotalBloc * sizeof(int));
-
-            /* initialisation des champs */
-            pthread_mutex_init(&(fichierAAjouter->mutexFichierEcriture), NULL);
-            fichierAAjouter->longueurDernierBloc = 0;
-            fichierAAjouter->tailleFichier = 0;
-            fichierAAjouter->nbBlocs = nbTotalBloc;
-            fichierAAjouter->idFichier = blocAAjouter->idFichier;
-            strcpy(fichierAAjouter->nomFichier, blocAAjouter->nomFichier);
-            for (i=0; i<nbTotalBloc; i++)
-            {
-                /* initialisation des status à 0 */
-                fichierAAjouter->statutBlocs[i] = 0;
-            }
-            fichierAAjouter->fichierSuivant = NULL;
-            /* ajout du fichier dans la liste */
-            listeFichier.listeFichiers = fichierAAjouter;
->>>>>>> .r76
             listeFichier.nbFichiers++;
-<<<<<<< .mine
         }
         else
         {
-=======
-            /* initialisation pour la création du fichier */
-            strcpy(cheminFichier, "reception/");
-            strcat(cheminFichier, blocAAjouter->nomFichier);
-            strcat(cheminFichier, ".temp");
-            carac = '0';
-            /* allocation de l'espace disque pour le fichier */
-            fichierACreer = fopen(cheminFichier, "w");
-            for (compteur = 0; compteur < (nbTotalBloc * TAILLE_BLOC); compteur++)
-            {
-                fwrite((void*) &carac, sizeof(char), 1, fichierACreer);
-            }
-            fclose(fichierACreer);
-        }
-        else
-        {
->>>>>>> .r76
             /* initialisation en début de liste */
             tempFichier = listeFichier.listeFichiers;
             /* parcours de la liste à la recherche du fichier */
@@ -1245,19 +1185,10 @@ void traitementMessagePositif(char* buff)
                     fichierAAjouter->statutBlocs = malloc(nbTotalBloc* sizeof(int));
 
                     /* initialisation des champs */
-<<<<<<< .mine
                     pthread_mutex_init(&(fichierAAjouter->mutexFichierEcriture), NULL);
                     fichierAAjouter->nbBlocs = nbTotalBloc;
                     fichierAAjouter->idFichier = blocAAjouter->idFichier;
                     strcpy(fichierAAjouter->nomFichier, blocAAjouter->nomFichier);
-=======
-                    pthread_mutex_init(&(fichierAAjouter->mutexFichierEcriture), NULL);
-                    fichierAAjouter->longueurDernierBloc = 0;
-                    fichierAAjouter->tailleFichier = 0;
-                    fichierAAjouter->nbBlocs = nbTotalBloc;
-                    fichierAAjouter->idFichier = blocAAjouter->idFichier;
-                    strcpy(fichierAAjouter->nomFichier, blocAAjouter->nomFichier);
->>>>>>> .r76
                     for (i=0; i<nbTotalBloc; i++)
                     {
                         /* initialisation des status à 0 */
@@ -1497,13 +1428,9 @@ void traitementMessageReceptionBloc(Socket socketDialogue, char* buff)
     ecouteSocket(socketDialogue, contenuBloc, tailleLu);
     /* modification du nom de fichier en fichier ".temp" */
     strcat(nomFichier, ".temp");
-<<<<<<< .mine
     sprintf(strNumBloc, "%d", numeroBloc);
     strcat(nomFichier, strNumBloc);
 
-=======
-
->>>>>>> .r76
     /** blocage du mutex en écriture sur la liste de fichier */
     pthread_mutex_lock(&(listeFichier.mutexListeFichierLecture));
     /* initialisation */
