@@ -634,7 +634,7 @@ void traiteBlocDisponibleServeur( Socket s, char* mess )
 
     /* On parcoure le tableau des fichiers pour trouver celui auquel on doit ajouter une nouvelle reference de serveur ayant un de ses blocs */
     i = 0;
-    while ( fichiers->tabFichiers[i]->idFichier != var_idFichier && i < fichiers->capaTabFichiers ) /* Tant qu'on a pas trouvé le fichier */
+    while (i < fichiers->capaTabFichiers && fichiers->tabFichiers[i]->idFichier != var_idFichier) /* Tant qu'on a pas trouvé le fichier */
     {
         i++;
     }
@@ -1001,13 +1001,16 @@ void traiteDemandeIdFichier( Socket s, char* mess )
     {
         tempTabFichiers = fichiers->tabFichiers;
         fichiers->tabFichiers = malloc( ( fichiers->capaTabFichiers + TABDYN_AUGM_VAL ) * sizeof( Fichier* ) );
-        fichiers->capaTabFichiers = fichiers->capaTabFichiers + TABDYN_AUGM_VAL;
 
         for( j = 0 ; j < fichiers->capaTabFichiers ; j++ )
         {
             fichiers->tabFichiers[j] = tempTabFichiers[j];
         }
-
+        fichiers->capaTabFichiers = fichiers->capaTabFichiers + TABDYN_AUGM_VAL;
+        for( j = j ; j < fichiers->capaTabFichiers ; j++ )
+        {
+            fichiers->tabFichiers[j] = NULL;
+        }
         free( tempTabFichiers );
     }
 
