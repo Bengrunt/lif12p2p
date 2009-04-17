@@ -1065,7 +1065,7 @@ void demandeFichier(char* nomFichier)
     while (!finDialogue)
     {
         ecouteSocket(socketAnnuaire, message, TAILLE_BUFF);
-
+printf("message reçu : %s\n", message);
         if (sscanf(message, "%d", &code) == 1)
         {
             /* analyse du code :
@@ -1589,7 +1589,7 @@ void finalisationFichier(Fichier* pointeurFichier)
             strcpy(cheminFichierTemp, nomFichierTemp);
             sprintf(strNumBloc, "%d", compteur);
             strcat(cheminFichierTemp, strNumBloc);
-
+printf("recopie du fichier %s \n", cheminFichierTemp);
             /* ouverture du fichier temporaire */
             fichierSource = fopen(cheminFichierTemp, "r");
 
