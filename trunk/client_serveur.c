@@ -21,7 +21,7 @@
 #define TAILLE_BUFF_SM      TAILLE_BUFF/10      /* Taille de buffer small */
 #define TAILLE_BUFF_VSM     TAILLE_BUFF/20      /* Taille de buffer very small */
 
-#define TAILLE_BLOC 2000                        /* Taille maximal d'un bloc de fichier */
+#define TAILLE_BLOC 65536                       /* Taille maximal d'un bloc de fichier */
 
 /*********************
 * Variables globales *
