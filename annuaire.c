@@ -173,7 +173,6 @@ int traiteMessage( Socket arg )
             }
             else
             {
-                printf( "Message reçu.\n" );
                 /* On lance l'action correspondant au type de message. */
                 switch ( type_message )
                 {
@@ -892,14 +891,21 @@ void traiteDemandeIdServeur( Socket s, char* mess )
     pthread_mutex_lock( &serveurs->verrou_bddserv_w );
 
     /* On référence le nouveau serveur dans la BDD des serveurs */
-    if ( serveurs->capaTabInfoServeurs <= serveurs->nbInfoServeurs ) /* Si il n y a pas assez de place dans la tableau dynamique, on l'agrandit */
+    if ( serveurs->capaTabInfoServeurs == serveurs->nbInfoServeurs ) /* Si il n y a pas assez de place dans la tableau dynamique, on l'agrandit */
     {
         tempTabInfoServeurs = serveurs->tabInfoServeurs;
         serveurs->tabInfoServeurs = malloc( ( TABDYN_AUGM_VAL + serveurs->capaTabInfoServeurs ) * sizeof( InfoServeurs* ) );
 
-        for ( i = 0 ; i < serveurs->nbInfoServeurs ; i-- )
+        for ( i = 0 ; i < serveurs->capaTabInfoServeurs ; i++ )
         {
             serveurs->tabInfoServeurs[i] = tempTabInfoServeurs[i];
+        }
+
+        serveurs->capaTabInfoServeurs += TABDYN_AUGM_VAL;
+
+        for ( i = i ; i < serveurs->capaTabInfoServeurs ; i++ )
+        {
+            serveurs->tabInfoServeurs[i] = NULL;
         }
 
         free( tempTabInfoServeurs );
@@ -916,10 +922,17 @@ void traiteDemandeIdServeur( Socket s, char* mess )
     }
 
     serveurs->tabInfoServeurs[j] = malloc( sizeof( InfoServeurs ) );
-    serveurs->tabInfoServeurs[j]->adresseServeur = var_adresseServeur;
+    serveurs->tabInfoServeurs[j]->adresseServeur = malloc( TAILLE_BUFF_LAR * sizeof( char ) );
+    strcpy( serveurs->tabInfoServeurs[j]->adresseServeur, var_adresseServeur );
     serveurs->tabInfoServeurs[j]->numPort = var_portServeur;
     serveurs->tabInfoServeurs[j]->idServeur = generateurIdServeur;
     serveurs->nbInfoServeurs++;
+
+    /* On dévérouille la BDD des fichiers en lecture et en écriture */
+    pthread_mutex_unlock( &fichiers->verrou_bddfich_r );
+    pthread_mutex_unlock( &fichiers->verrou_bddfich_w );
+    pthread_mutex_unlock( &serveurs->verrou_bddserv_r );
+    pthread_mutex_unlock( &serveurs->verrou_bddserv_w );
 
     /* On envoie un message au serveur pour lui donner son idServeur qui sera utilisé */
     /* Message de la forme : "21 adresseServeur portServeur idServeur" */
@@ -940,12 +953,6 @@ void traiteDemandeIdServeur( Socket s, char* mess )
     free( var_adresseServeur );
     free( str_portServeur );
     free( str_idServeur );
-
-    /* On dévérouille la BDD des fichiers en lecture et en écriture */
-    pthread_mutex_unlock( &fichiers->verrou_bddfich_r );
-    pthread_mutex_unlock( &fichiers->verrou_bddfich_w );
-    pthread_mutex_unlock( &serveurs->verrou_bddserv_r );
-    pthread_mutex_unlock( &serveurs->verrou_bddserv_w );
 }
 
 
@@ -1006,11 +1013,14 @@ void traiteDemandeIdFichier( Socket s, char* mess )
         {
             fichiers->tabFichiers[j] = tempTabFichiers[j];
         }
+
         fichiers->capaTabFichiers = fichiers->capaTabFichiers + TABDYN_AUGM_VAL;
+
         for( j = j ; j < fichiers->capaTabFichiers ; j++ )
         {
             fichiers->tabFichiers[j] = NULL;
         }
+
         free( tempTabFichiers );
     }
 
