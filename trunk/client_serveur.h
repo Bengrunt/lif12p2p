@@ -112,8 +112,6 @@ typedef struct FileAttenteTelechargements
 typedef struct Fichier
 {
     pthread_mutex_t mutexFichierEcriture;
-    int longueurDernierBloc;
-    int tailleFichier;
     unsigned int nbBlocs;
     unsigned int idFichier;
     char* nomFichier;
