@@ -458,7 +458,7 @@ void signalisationFichierAnnuaire(char* nomFichier)
     /* initialisation */
     message = malloc(TAILLE_BUFF * sizeof(char));
     buff = malloc(TAILLE_BUFF * sizeof(char));
-    lectureFichier = malloc(TAILLE_BLOC * sizeof(char));
+    lectureFichier = malloc(TAILLE_BLOC);
     nomFich = malloc(TAILLE_BUFF_LAR * sizeof(char));
     cheminFichier = malloc(TAILLE_BUFF_LAR * sizeof(char));
     nbBloc = 0;
@@ -484,7 +484,7 @@ void signalisationFichierAnnuaire(char* nomFichier)
         /* récupération du nombre de bloc */
         while (!feof(fichierADecouper))
         {
-            fread((void*)lectureFichier, sizeof(char), TAILLE_BLOC, fichierADecouper);
+            fread((void*)lectureFichier, 1, TAILLE_BLOC, fichierADecouper);
             nbBloc++;
         }
         /* libération de l'espace mémoire */
@@ -900,7 +900,7 @@ void envoiMessage(Client* client)
     char* cheminFichier;    /*  */
 
     /* initialisation */
-    buff = malloc(TAILLE_BLOC * sizeof(char));
+    buff = malloc(TAILLE_BLOC);
     message = malloc(TAILLE_BUFF* sizeof(char));
     cheminFichier = malloc(TAILLE_BUFF_LAR * sizeof(char));
     strTailleLu = malloc(TAILLE_BUFF_VSM * sizeof(char));
@@ -913,7 +913,7 @@ void envoiMessage(Client* client)
     {/* le fichier a été trouvé */
         /* récupération de la chaine appropriée */
         fseek(fichierALire, (client->numeroBloc) * TAILLE_BLOC, SEEK_SET);
-        tailleLu = fread((void*) buff, sizeof(char), TAILLE_BLOC, fichierALire);
+        tailleLu = fread((void*) buff, 1, TAILLE_BLOC, fichierALire);
         if (tailleLu < 0)
         {
             printf("Erreur de lecture du fichier!!! \n");
@@ -1419,7 +1419,7 @@ void traitementMessageReceptionBloc(Socket socketDialogue, char* buff)
 
     /* initialisation */
     nomFichier = malloc(TAILLE_BUFF_LAR * sizeof(char));
-    contenuBloc = malloc(TAILLE_BLOC * sizeof(char));
+    contenuBloc = malloc(TAILLE_BLOC);
     cheminFichier = malloc(TAILLE_BUFF_LAR * sizeof(char));
     strNumBloc = malloc(TAILLE_BUFF_VSM * sizeof(char));
 
@@ -1556,7 +1556,7 @@ void finalisationFichier(Fichier* pointeurFichier)
     /* initialisation */
     compteur = 0;
     nomFichierTemp = malloc(TAILLE_BUFF_LAR * sizeof(char));
-    contenuBloc = malloc(TAILLE_BLOC * sizeof(char));
+    contenuBloc = malloc(TAILLE_BLOC);
     cheminFichier = malloc(TAILLE_BUFF_LAR * sizeof(char));
     strNumBloc = malloc(TAILLE_BUFF_VSM * sizeof(char));
     cheminFichierTemp = malloc(TAILLE_BUFF_LAR * sizeof(char));
@@ -1594,8 +1594,8 @@ void finalisationFichier(Fichier* pointeurFichier)
             /* ouverture du fichier temporaire */
             fichierSource = fopen(cheminFichierTemp, "r");
 
-            nbLu = fread(contenuBloc, sizeof(char), TAILLE_BLOC, fichierSource);
-            fwrite(contenuBloc, sizeof(char), nbLu, fichierDestination);
+            nbLu = fread(contenuBloc, 1, TAILLE_BLOC, fichierSource);
+            fwrite(contenuBloc, 1, nbLu, fichierDestination);
             /* fermeture des fichiers */
             fclose(fichierSource);
         }
@@ -1629,6 +1629,8 @@ void finalisationFichier(Fichier* pointeurFichier)
         /** liberation mutex sur la liste de fichier (lecture et ecriture) */
         pthread_mutex_unlock(&(listeFichier.mutexListeFichierEcriture));
         pthread_mutex_unlock(&(listeFichier.mutexListeFichierLecture));
+        /* signalisation qu'un fichier est arrivé */
+        printf("Le fichier %s est arrivé.\n", pointeurFichier->nomFichier);
 
         /* libération de l'espace mémoire */
         free(pointeurFichier->nomFichier);
