@@ -457,7 +457,7 @@ void signalisationFichierAnnuaire(char* nomFichier)
     /* initialisation */
     message = malloc(TAILLE_BUFF * sizeof(char));
     buff = malloc(TAILLE_BUFF * sizeof(char));
-    lectureFichier = malloc(TAILLE_BLOC);
+    lectureFichier = malloc(TAILLE_BLOC + 10);
     nomFich = malloc(TAILLE_BUFF_LAR * sizeof(char));
     cheminFichier = malloc(TAILLE_BUFF_LAR * sizeof(char));
     nbBloc = 0;
@@ -898,7 +898,7 @@ void envoiMessage(Client* client)
     char* cheminFichier;    /*  */
 
     /* initialisation */
-    buff = malloc(TAILLE_BLOC);
+    buff = malloc(TAILLE_BLOC + 10);
     message = malloc(TAILLE_BUFF* sizeof(char));
     cheminFichier = malloc(TAILLE_BUFF_LAR * sizeof(char));
     strTailleLu = malloc(TAILLE_BUFF_VSM * sizeof(char));
@@ -1413,7 +1413,7 @@ void traitementMessageReceptionBloc(Socket socketDialogue, char* buff)
 
     /* initialisation */
     nomFichier = malloc(TAILLE_BUFF_LAR * sizeof(char));
-    contenuBloc = malloc(TAILLE_BLOC);
+    contenuBloc = malloc(TAILLE_BLOC + 10);
     cheminFichier = malloc(TAILLE_BUFF_LAR * sizeof(char));
     strNumBloc = malloc(TAILLE_BUFF_VSM * sizeof(char));
 
@@ -1550,7 +1550,7 @@ void finalisationFichier(Fichier* pointeurFichier)
     /* initialisation */
     compteur = 0;
     nomFichierTemp = malloc(TAILLE_BUFF_LAR * sizeof(char));
-    contenuBloc = malloc(TAILLE_BLOC);
+    contenuBloc = malloc(TAILLE_BLOC + 10);
     cheminFichier = malloc(TAILLE_BUFF_LAR * sizeof(char));
     strNumBloc = malloc(TAILLE_BUFF_VSM * sizeof(char));
     cheminFichierTemp = malloc(TAILLE_BUFF_LAR * sizeof(char));
