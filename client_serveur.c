@@ -122,7 +122,6 @@ int main()
     /* ecoute de la réponse de l'annuaire */
     ecouteSocket(socketAnnuaire, buff, TAILLE_BUFF);
     /* analyse de la réponse de l'annuaire */
-    printf("plop\n");
     if (sscanf(buff, "%d %s %d %u", &tempCode, tempNomServeur, &tempPortServ, &idServeur) < 4)
     {
         /* le message reçu ne comporte pas assez de champ */
@@ -472,7 +471,6 @@ void signalisationFichierAnnuaire(char* nomFichier)
     /* récupération du chemin du fichier */
     strcpy(cheminFichier, "partage/");
     strcat(cheminFichier, nomFichier);
-    printf("%s", cheminFichier);
     /* ouverture du fichier */
     if ((fichierADecouper = fopen(cheminFichier, "r")) == NULL)
     {
@@ -518,6 +516,7 @@ void signalisationFichierAnnuaire(char* nomFichier)
     free(buff);
     free(nomFich);
     free(lectureFichier);
+    free(cheminFichier);
 }
 
 /**
@@ -577,7 +576,6 @@ void dialogueClient(Socket socketDialogue)
     int finDialogue;        /* variable indiquant si on doit sortir de la boucle de discution
                                 0- on continue a écouter
                                 1- on sort de la boucle */
-    printf("dialogue client sur socket %d\n", socketDialogue);
 
     /* initialisation des variables */
     buff = malloc(TAILLE_BUFF * sizeof(char));
@@ -1063,7 +1061,6 @@ void demandeFichier(char* nomFichier)
     /* demande à l'annuaire */
     creationMessage(31, (void*) nomFichier, messageEnvoi);
     ecritureSocket(socketAnnuaire, messageEnvoi, TAILLE_BUFF);
-    printf("le message suivant a ete envoye a l'annuaire : %s \n", messageEnvoi);
     /* traitement de la réponse de l'annuaire */
     while (!finDialogue)
     {
@@ -1139,7 +1136,6 @@ void traitementMessagePositif(char* buff)
         pthread_mutex_lock(&(listeFichier.mutexListeFichierLecture));
         pthread_mutex_lock(&(listeFichier.mutexListeFichierEcriture));
 
-            printf("%d", listeFichier.nbFichiers);
         /* cas où il n'y a aucun fichier dans la liste */
         if (listeFichier.nbFichiers == 0)
         {
@@ -1333,8 +1329,6 @@ void telechargementBloc(Telechargement* telechargementATraiter)
     char* buff;             /* chaine de caractère récupérant la réponse du serveur */
     int code;               /* entier correspondant au code du message reçu */
     int finDialogue;        /* booléen indiquant l'arret du dialogue */
-
-    printf("\ndébut fonction téélchargement bloc\n");
 
     /* initialisation */
     message = malloc(TAILLE_BUFF * sizeof(char));
@@ -1561,6 +1555,9 @@ void finalisationFichier(Fichier* pointeurFichier)
     strNumBloc = malloc(TAILLE_BUFF_VSM * sizeof(char));
     cheminFichierTemp = malloc(TAILLE_BUFF_LAR * sizeof(char));
 
+    /**  blocage du mutex en écriture sur la liste de fichier */
+    pthread_mutex_lock(&(listeFichier.mutexListeFichierLecture));
+
     /* parcours du tableau de statut */
     while (compteur < pointeurFichier->nbBlocs)
     {
@@ -1570,6 +1567,8 @@ void finalisationFichier(Fichier* pointeurFichier)
         }
         compteur++;
     }
+    /** libération du mutex en écriture sur la liste de fichier */
+    pthread_mutex_unlock(&(listeFichier.mutexListeFichierLecture));
     /* test sur les conditions de sorties */
     if (compteur == (pointeurFichier->nbBlocs))
     {
@@ -1639,6 +1638,7 @@ void finalisationFichier(Fichier* pointeurFichier)
         free(pointeurFichier);
     }
     /* libération de l'espace mémoire */
+    free(cheminFichierTemp);
     free(cheminFichier);
     free(nomFichierTemp);
     free(contenuBloc);
