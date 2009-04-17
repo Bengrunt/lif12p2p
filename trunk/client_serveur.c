@@ -14,6 +14,8 @@
 #include "client_serveur.h"
 
 #define NBTHREAD 10                             /* nombre de thread de téléchargement / envoi simultané */
+<<<<<<< .mine
+=======
 
 #define TAILLE_BUFF         200                 /* Taille de buffer standard */
 #define TAILLE_BUFF_LAR     TAILLE_BUFF/2       /* Taille de buffer large */
@@ -22,6 +24,15 @@
 #define TAILLE_BUFF_VSM     TAILLE_BUFF/20      /* Taille de buffer very small */
 
 #define TAILLE_BLOC 2000                        /* Taille maximal d'un bloc de fichier */
+>>>>>>> .r75
+
+#define TAILLE_BUFF         200                /* Taille de buffer standard */
+#define TAILLE_BUFF_LAR     TAILLE_BUFF/2       /* Taille de buffer large */
+#define TAILLE_BUFF_MED     TAILLE_BUFF/5       /* Taille de buffer medium */
+#define TAILLE_BUFF_SM      TAILLE_BUFF/10      /* Taille de buffer small */
+#define TAILLE_BUFF_VSM     TAILLE_BUFF/20      /* Taille de buffer very small */
+
+#define TAILLE_BLOC 2000                         /* Taille maximal d'un bloc de fichier */
 
 /*********************
 * Variables globales *
