@@ -1,4 +1,4 @@
-
+all : client_serveur.exe annuaire.exe
 
 client_serveur.exe: socket.o client_serveur.o
 	gcc -o client_serveur.exe socket.o client_serveur.o -lpthread

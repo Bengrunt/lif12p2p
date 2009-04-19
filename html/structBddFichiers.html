@@ -1,0 +1,71 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<title>lif12p2p: Référence de la structure BddFichiers</title>
+<link href="doxygen.css" rel="stylesheet" type="text/css">
+<link href="tabs.css" rel="stylesheet" type="text/css">
+</head><body>
+<!-- Généré par Doxygen 1.5.6 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="index.html"><span>Page&nbsp;principale</span></a></li>
+      <li class="current"><a href="annotated.html"><span>Structures&nbsp;de&nbsp;données</span></a></li>
+      <li><a href="files.html"><span>Fichiers</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="annotated.html"><span>Structures&nbsp;de&nbsp;données</span></a></li>
+    </ul>
+  </div>
+</div>
+<div class="contents">
+<h1>Référence de la structure BddFichiers</h1><!-- doxytag: class="BddFichiers" -->Structure simulant une base de données sous forme d'un tableau dynamique des fichiers référencés par l'annuaire.  
+<a href="#_details">Plus de détails...</a>
+<p>
+<code>#include &lt;<a class="el" href="annuaire_8h-source.html">annuaire.h</a>&gt;</code>
+<p>
+<table border="0" cellpadding="0" cellspacing="0">
+<tr><td></td></tr>
+<tr><td colspan="2"><br><h2>Champs de données</h2></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="1d8d7865cf37da874e8ebe8da50140be"></a><!-- doxytag: member="BddFichiers::nbFichiers" ref="1d8d7865cf37da874e8ebe8da50140be" args="" -->
+unsigned int&nbsp;</td><td class="memItemRight" valign="bottom"><b>nbFichiers</b></td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="25a603e4c95ae3322f30e62fc898456a"></a><!-- doxytag: member="BddFichiers::capaTabFichiers" ref="25a603e4c95ae3322f30e62fc898456a" args="" -->
+unsigned int&nbsp;</td><td class="memItemRight" valign="bottom"><b>capaTabFichiers</b></td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="0780f8f34eef14c26ed0f55bb032348c"></a><!-- doxytag: member="BddFichiers::tabFichiers" ref="0780f8f34eef14c26ed0f55bb032348c" args="" -->
+<a class="el" href="structFichier.html">Fichier</a> **&nbsp;</td><td class="memItemRight" valign="bottom"><b>tabFichiers</b></td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="3e97c00bd2738724770e198a6d8f359e"></a><!-- doxytag: member="BddFichiers::verrou_bddfich_w" ref="3e97c00bd2738724770e198a6d8f359e" args="" -->
+pthread_mutex_t&nbsp;</td><td class="memItemRight" valign="bottom"><b>verrou_bddfich_w</b></td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="2a72108473f3308ab9e5613e48846585"></a><!-- doxytag: member="BddFichiers::verrou_bddfich_r" ref="2a72108473f3308ab9e5613e48846585" args="" -->
+pthread_mutex_t&nbsp;</td><td class="memItemRight" valign="bottom"><b>verrou_bddfich_r</b></td></tr>
+
+</table>
+<hr><a name="_details"></a><h2>Description détaillée</h2>
+Structure simulant une base de données sous forme d'un tableau dynamique des fichiers référencés par l'annuaire. 
+<p>
+<dl compact><dt><b>Paramètres:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>nbFichiers</em>&nbsp;</td><td>Nombre de fichiers référencés. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>capaTabFichiers</em>&nbsp;</td><td>Capacité maximum de tabFichiers. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>tabFichiers</em>&nbsp;</td><td>Tableau dynamique de pointeurs sur structures <a class="el" href="structFichier.html" title="Structure stockant les informations sur les fichiers.">Fichier</a>. </td></tr>
+  </table>
+</dl>
+<dl class="warning" compact><dt><b>Avertissement:</b></dt><dd>tabFichiers n'est pas forcément rempli de manière contigüe et encore moins de manière triée. Les éléments sont insérés et supprimés de façon à minimiser la taille du tableau. </dd></dl>
+<dl compact><dt><b>Paramètres:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>verrou_bddfich_w</em>&nbsp;</td><td>Mutex de la <a class="el" href="structBddFichiers.html" title="Structure simulant une base de données sous forme d&#39;un tableau dynamique des...">BddFichiers</a> en écriture. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>verrou_bddfich_r</em>&nbsp;</td><td>Mutex de la <a class="el" href="structBddFichiers.html" title="Structure simulant une base de données sous forme d&#39;un tableau dynamique des...">BddFichiers</a> en lecture. </td></tr>
+  </table>
+</dl>
+<hr>La documentation de cette structure a été générée à partir du fichier suivant :<ul>
+<li><a class="el" href="annuaire_8h-source.html">annuaire.h</a></ul>
+</div>
+<hr size="1"><address style="text-align: right;"><small>Généré le Sun Apr 19 23:09:00 2009 pour lif12p2p par&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.6 </small></address>
+</body>
+</html>

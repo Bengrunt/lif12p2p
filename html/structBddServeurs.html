@@ -1,0 +1,71 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<title>lif12p2p: Référence de la structure BddServeurs</title>
+<link href="doxygen.css" rel="stylesheet" type="text/css">
+<link href="tabs.css" rel="stylesheet" type="text/css">
+</head><body>
+<!-- Généré par Doxygen 1.5.6 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="index.html"><span>Page&nbsp;principale</span></a></li>
+      <li class="current"><a href="annotated.html"><span>Structures&nbsp;de&nbsp;données</span></a></li>
+      <li><a href="files.html"><span>Fichiers</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="annotated.html"><span>Structures&nbsp;de&nbsp;données</span></a></li>
+    </ul>
+  </div>
+</div>
+<div class="contents">
+<h1>Référence de la structure BddServeurs</h1><!-- doxytag: class="BddServeurs" -->Structure simulant une base de données sous forme d'un tableau dynamique des serveurs référencés par l'annuaire.  
+<a href="#_details">Plus de détails...</a>
+<p>
+<code>#include &lt;<a class="el" href="annuaire_8h-source.html">annuaire.h</a>&gt;</code>
+<p>
+<table border="0" cellpadding="0" cellspacing="0">
+<tr><td></td></tr>
+<tr><td colspan="2"><br><h2>Champs de données</h2></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="49894fe0644233cedcf823d214a96979"></a><!-- doxytag: member="BddServeurs::nbInfoServeurs" ref="49894fe0644233cedcf823d214a96979" args="" -->
+unsigned int&nbsp;</td><td class="memItemRight" valign="bottom"><b>nbInfoServeurs</b></td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="9bd85dbe33d618093a4563d6a8b2d70f"></a><!-- doxytag: member="BddServeurs::capaTabInfoServeurs" ref="9bd85dbe33d618093a4563d6a8b2d70f" args="" -->
+unsigned int&nbsp;</td><td class="memItemRight" valign="bottom"><b>capaTabInfoServeurs</b></td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="9938b322d302cb4c7d5283f26e2c47a1"></a><!-- doxytag: member="BddServeurs::tabInfoServeurs" ref="9938b322d302cb4c7d5283f26e2c47a1" args="" -->
+<a class="el" href="structInfoServeurs.html">InfoServeurs</a> **&nbsp;</td><td class="memItemRight" valign="bottom"><b>tabInfoServeurs</b></td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="8982b8908d715e28c163912361600e23"></a><!-- doxytag: member="BddServeurs::verrou_bddserv_w" ref="8982b8908d715e28c163912361600e23" args="" -->
+pthread_mutex_t&nbsp;</td><td class="memItemRight" valign="bottom"><b>verrou_bddserv_w</b></td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="dc6b4b8f29e92c234e68106d7232e788"></a><!-- doxytag: member="BddServeurs::verrou_bddserv_r" ref="dc6b4b8f29e92c234e68106d7232e788" args="" -->
+pthread_mutex_t&nbsp;</td><td class="memItemRight" valign="bottom"><b>verrou_bddserv_r</b></td></tr>
+
+</table>
+<hr><a name="_details"></a><h2>Description détaillée</h2>
+Structure simulant une base de données sous forme d'un tableau dynamique des serveurs référencés par l'annuaire. 
+<p>
+<dl compact><dt><b>Paramètres:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>nbServeurs</em>&nbsp;</td><td>Nombre de serveurs référencés dans le tableau. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>capaTabServeurs</em>&nbsp;</td><td>Capacité maximum de tabServeurs. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>tabInfoServeurs</em>&nbsp;</td><td>Tableau de pointeurs sur structures <a class="el" href="structInfoServeurs.html" title="Structure stockant les informations sur les serveurs.">InfoServeurs</a>. </td></tr>
+  </table>
+</dl>
+<dl class="warning" compact><dt><b>Avertissement:</b></dt><dd>tabInfoServeurs n'est pas forcément rempli de manière contigüe et encore moins de manière triée. Les éléments sont insérés et supprimés de façon à minimiser la taille du tableau. </dd></dl>
+<dl compact><dt><b>Paramètres:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>verrou_bddserv_w</em>&nbsp;</td><td>: mutex de la <a class="el" href="structBddServeurs.html" title="Structure simulant une base de données sous forme d&#39;un tableau dynamique des...">BddServeurs</a> en écriture. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>verrou_bddserv_r</em>&nbsp;</td><td>: mutex de la <a class="el" href="structBddServeurs.html" title="Structure simulant une base de données sous forme d&#39;un tableau dynamique des...">BddServeurs</a> en lecture. </td></tr>
+  </table>
+</dl>
+<hr>La documentation de cette structure a été générée à partir du fichier suivant :<ul>
+<li><a class="el" href="annuaire_8h-source.html">annuaire.h</a></ul>
+</div>
+<hr size="1"><address style="text-align: right;"><small>Généré le Sun Apr 19 23:09:00 2009 pour lif12p2p par&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.6 </small></address>
+</body>
+</html>

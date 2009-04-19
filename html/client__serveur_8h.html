@@ -1,0 +1,949 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<title>lif12p2p: R√©f√©rence du fichier client_serveur.h</title>
+<link href="doxygen.css" rel="stylesheet" type="text/css">
+<link href="tabs.css" rel="stylesheet" type="text/css">
+</head><body>
+<!-- G√©n√©r√© par Doxygen 1.5.6 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="index.html"><span>Page&nbsp;principale</span></a></li>
+      <li><a href="annotated.html"><span>Structures&nbsp;de&nbsp;donn√©es</span></a></li>
+      <li class="current"><a href="files.html"><span>Fichiers</span></a></li>
+    </ul>
+  </div>
+</div>
+<div class="contents">
+<h1>R√©f√©rence du fichier client_serveur.h</h1><code>#include &quot;socket.h&quot;</code><br>
+<code>#include &quot;sys/stat.h&quot;</code><br>
+
+<p>
+<a href="client__serveur_8h-source.html">Aller au code source de ce fichier.</a><table border="0" cellpadding="0" cellspacing="0">
+<tr><td></td></tr>
+<tr><td colspan="2"><br><h2>Structures de donn√©es</h2></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">struct &nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="structClient.html">Client</a></td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top">struct &nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="structFileAttenteClients.html">FileAttenteClients</a></td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top">struct &nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="structStructureDisponibiliteBloc.html">StructureDisponibiliteBloc</a></td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top">struct &nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="structTelechargement.html">Telechargement</a></td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top">struct &nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="structFileAttenteTelechargements.html">FileAttenteTelechargements</a></td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top">struct &nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="structFichier.html">Fichier</a></td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Structure stockant les informations sur les fichiers.  <a href="structFichier.html#_details">Plus de d√©tails...</a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">struct &nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="structListeFichiers.html">ListeFichiers</a></td></tr>
+
+<tr><td colspan="2"><br><h2>Fonctions</h2></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">int&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="client__serveur_8h.html#deee8dd04a19ee6c341cc8f104195389">creationMessage</a> (int code, void *structure, char *message)</td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="client__serveur_8h.html#0e2541fc9c41c78867c576471934d974">threadLectureClavier</a> ()</td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="client__serveur_8h.html#4d520e53d0c49d3b3d58a97ed6787e63">lireLigne</a> (char *message)</td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="client__serveur_8h.html#deb2f155effc0ce62e5601a64e0ae286">applicationServeur</a> ()</td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="client__serveur_8h.html#8d2214037457bdb1d0a4b891c5acaf6d">signalisationFichierAnnuaire</a> (char *nomFichier)</td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="client__serveur_8h.html#3e76bb8632f71ff1e5af0e3239e36335">threadDialogueClient</a> ()</td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="client__serveur_8h.html#213868a39a444241ae0772856cdad583">initialisationListeAttenteClient</a> ()</td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="client__serveur_8h.html#04bf56a44a87e8be407fa831b6fda329">dialogueClient</a> (Socket socketDialogue)</td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="client__serveur_8h.html#ce7da1fc032b73964f4e4859e42aa423">traitementMessageBloc</a> (Socket socketDialogue, char *buff)</td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="client__serveur_8h.html#1f606c07ee5601a17372c566fc791682">traitementMessageArret</a> (Socket socketDialogue)</td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="client__serveur_8h.html#087452dc43456c4d431c5cdc17f77c8d">traitementMessageErreur</a> (Socket socketDialogue)</td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="client__serveur_8h.html#17a52683a8f90f9c98c98a039bd89196">threadEmmission</a> ()</td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="client__serveur_8h.html#6dfcd7b3481605ade75da7d6918c2162">threadEnvoiMessage</a> ()</td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="client__serveur_8h.html#930ed8157bb930b954aab428e5e3792f">signalisationChargeServeur</a> (int valeur)</td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="client__serveur_8h.html#a2bff4e18c624efa035c834b83cf333b">envoiMessage</a> (<a class="el" href="structClient.html">Client</a> *client)</td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="client__serveur_8h.html#d6716b8b32c485352880e0ef8dd194a6">arretServeur</a> ()</td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="client__serveur_8h.html#87890621fffa1435c71a81f4ab1606ae">applicationClient</a> ()</td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="client__serveur_8h.html#c46903711f315015558b0d63b101139c">initialisationListeAttenteTelechargement</a> ()</td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="client__serveur_8h.html#71bf8494f3b42c7cd232a1e5ac77aed7">demandeFichier</a> (char *nomFichier)</td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="client__serveur_8h.html#0b18450d059e88d6e5f7acd776409eae">traitementMessagePositif</a> (char *buff)</td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="client__serveur_8h.html#f6b52c2b0dd535581555d03dd1a77355">traitementMessageNegatif</a> (char *buff)</td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="client__serveur_8h.html#6707a56a419f09039dbf2e5e0b0004cc">threadTelechargement</a> ()</td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="client__serveur_8h.html#67adc217aae72aae2c03870718ff13c1">threadRecuperationBloc</a> ()</td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="client__serveur_8h.html#94723d94227484645e2e5a737b33a9dd">telechargementBloc</a> (<a class="el" href="structTelechargement.html">Telechargement</a> *telechargementATraiter)</td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="client__serveur_8h.html#29c8aee08467b606ece3f1bb024970dd">traitementMessageReceptionBloc</a> (Socket socketDialogue, char *buff)</td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top">int&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="client__serveur_8h.html#a1076efe0ecd3abea82ce0001ad125de">traitementMessageBlocIntrouvable</a> (<a class="el" href="structTelechargement.html">Telechargement</a> *telechargementATraiter)</td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="client__serveur_8h.html#a011e997f26e3368442ff1b0629b6fce">finalisationFichier</a> (<a class="el" href="structFichier.html">Fichier</a> *pointeurFichier)</td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="client__serveur_8h.html#fa92230e1c4670210e5d7b13c14cf2da">arretClient</a> ()</td></tr>
+
+</table>
+<hr><a name="_details"></a><h2>Description d√©taill√©e</h2>
+lif12p2p <dl class="author" compact><dt><b>Auteur:</b></dt><dd>RÈmi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON </dd></dl>
+<dl class="since" compact><dt><b>Depuis:</b></dt><dd>16/03/2009 </dd></dl>
+<dl class="version" compact><dt><b>Version:</b></dt><dd>09/04/2009 </dd></dl>
+<hr><h2>Documentation des fonctions</h2>
+<a class="anchor" name="87890621fffa1435c71a81f4ab1606ae"></a><!-- doxytag: member="client_serveur.h::applicationClient" ref="87890621fffa1435c71a81f4ab1606ae" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void applicationClient           </td>
+          <td>(</td>
+          <td class="paramname">          </td>
+          <td>&nbsp;)&nbsp;</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Application cotÈ client <dl class="note" compact><dt><b>Note:</b></dt><dd>Application cotÈ serveur gÈrant le tÈlÈchargement des fichiers.<p>
+Application cot√© serveur g√©rant le t√©l√©chargement des fichiers. </dd></dl>
+
+<p>
+s√©paration en 2 thread : - 1 pour faire des demandes de fichier √† l'annuaire<ul>
+<li>1 pour t√©l√©charger les parties en liste d'attente </li></ul>
+
+</div>
+</div><p>
+<a class="anchor" name="deb2f155effc0ce62e5601a64e0ae286"></a><!-- doxytag: member="client_serveur.h::applicationServeur" ref="deb2f155effc0ce62e5601a64e0ae286" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void applicationServeur           </td>
+          <td>(</td>
+          <td class="paramname">          </td>
+          <td>&nbsp;)&nbsp;</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Application cotÈ serveur <dl class="note" compact><dt><b>Note:</b></dt><dd>Application cotÈ serveur gÈrant l'emmission des fichiers.<p>
+Application cot√© serveur g√©rant l'emmission des fichiers. </dd></dl>
+
+<p>
+arr√™t du serveur 
+</div>
+</div><p>
+<a class="anchor" name="fa92230e1c4670210e5d7b13c14cf2da"></a><!-- doxytag: member="client_serveur.h::arretClient" ref="fa92230e1c4670210e5d7b13c14cf2da" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void arretClient           </td>
+          <td>(</td>
+          <td class="paramname">          </td>
+          <td>&nbsp;)&nbsp;</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>procÈdure qui signale l'arret du client ‡ l'annuaire, et l'arrete<p>
+proc√©dure qui signale l'arret du client √† l'annuaire, et l'arrete </dd></dl>
+
+<p>
+vidage de la liste d'attente<p>
+vidage de la liste des fichiers 
+</div>
+</div><p>
+<a class="anchor" name="d6716b8b32c485352880e0ef8dd194a6"></a><!-- doxytag: member="client_serveur.h::arretServeur" ref="d6716b8b32c485352880e0ef8dd194a6" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void arretServeur           </td>
+          <td>(</td>
+          <td class="paramname">          </td>
+          <td>&nbsp;)&nbsp;</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>procÈdure qui signale l'arret du serveur a l'annuaire, et l'arrete<p>
+proc√©dure qui signale l'arret du serveur a l'annuaire, et l'arrete </dd></dl>
+
+</div>
+</div><p>
+<a class="anchor" name="deee8dd04a19ee6c341cc8f104195389"></a><!-- doxytag: member="client_serveur.h::creationMessage" ref="deee8dd04a19ee6c341cc8f104195389" args="(int code, void *structure, char *message)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int creationMessage           </td>
+          <td>(</td>
+          <td class="paramtype">int&nbsp;</td>
+          <td class="paramname"> <em>code</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&nbsp;</td>
+          <td class="paramname"> <em>structure</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&nbsp;</td>
+          <td class="paramname"> <em>message</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+fonction et procÈdure communes <dl class="note" compact><dt><b>Note:</b></dt><dd>procÈdure crÈant le message appropriÈ en chaine de cartactËre </dd></dl>
+<dl compact><dt><b>Param√®tres:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>code</em>&nbsp;</td><td>: entier correspondant au code du message ‡ crÈer </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>structure</em>&nbsp;</td><td>: pointeur sur la structure avec les "bonnes" donnÈes </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>message</em>&nbsp;</td><td>: chaine de caractËre contenant le message crÈÈ </td></tr>
+  </table>
+</dl>
+<dl class="return" compact><dt><b>Renvoie:</b></dt><dd>retourne 0 si le message est bien crÈÈ, 1 sinon</dd></dl>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>proc√©dure cr√©ant le message appropri√© en chaine de cartact√®re </dd></dl>
+<dl compact><dt><b>Param√®tres:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>code</em>&nbsp;</td><td>: entier correspondant au code du message √† cr√©er </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>structure</em>&nbsp;</td><td>: pointeur sur la structure avec les "bonnes" donn√©es </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>message</em>&nbsp;</td><td>: chaine de caract√®re contenant le message cr√©√© </td></tr>
+  </table>
+</dl>
+<dl class="return" compact><dt><b>Renvoie:</b></dt><dd>retourne 0 si le message est bien cr√©√©, 1 sinon </dd></dl>
+
+</div>
+</div><p>
+<a class="anchor" name="71bf8494f3b42c7cd232a1e5ac77aed7"></a><!-- doxytag: member="client_serveur.h::demandeFichier" ref="71bf8494f3b42c7cd232a1e5ac77aed7" args="(char *nomFichier)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void demandeFichier           </td>
+          <td>(</td>
+          <td class="paramtype">char *&nbsp;</td>
+          <td class="paramname"> <em>nomFichier</em>          </td>
+          <td>&nbsp;)&nbsp;</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>met le fichier dans la liste des fichiers, et demande ‡ l'annuaire </dd></dl>
+<dl compact><dt><b>Param√®tres:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>nomFichier</em>&nbsp;</td><td>: nom du fichier ‡ tÈlÈcharger</td></tr>
+  </table>
+</dl>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>met le fichier dans la liste des fichiers, et demande √† l'annuaire </dd></dl>
+<dl compact><dt><b>Param√®tres:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>nomFichier</em>&nbsp;</td><td>: nom du fichier √† t√©l√©charger </td></tr>
+  </table>
+</dl>
+
+</div>
+</div><p>
+<a class="anchor" name="04bf56a44a87e8be407fa831b6fda329"></a><!-- doxytag: member="client_serveur.h::dialogueClient" ref="04bf56a44a87e8be407fa831b6fda329" args="(Socket socketDialogue)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void dialogueClient           </td>
+          <td>(</td>
+          <td class="paramtype">Socket&nbsp;</td>
+          <td class="paramname"> <em>socketDialogue</em>          </td>
+          <td>&nbsp;)&nbsp;</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>procÈdure dialoguant avec le client </dd></dl>
+<dl compact><dt><b>Param√®tres:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>socketDialogue</em>&nbsp;</td><td>: socket de dialogue avec le client</td></tr>
+  </table>
+</dl>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>proc√©dure dialoguant avec le client </dd></dl>
+<dl compact><dt><b>Param√®tres:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>socketDialogue</em>&nbsp;</td><td>: socket de dialogue avec le client </td></tr>
+  </table>
+</dl>
+
+<p>
+fermeture de la socket 
+</div>
+</div><p>
+<a class="anchor" name="a2bff4e18c624efa035c834b83cf333b"></a><!-- doxytag: member="client_serveur.h::envoiMessage" ref="a2bff4e18c624efa035c834b83cf333b" args="(Client *client)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void envoiMessage           </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structClient.html">Client</a> *&nbsp;</td>
+          <td class="paramname"> <em>client</em>          </td>
+          <td>&nbsp;)&nbsp;</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>cherche et envoie les donnÈes ‡ transmettre </dd></dl>
+<dl compact><dt><b>Param√®tres:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>client</em>&nbsp;</td><td>: pointeur sur la structure contenant les informations sur le bloc ‡ envoyer</td></tr>
+  </table>
+</dl>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>cherche et envoie les donn√©es √† transmettre </dd></dl>
+<dl compact><dt><b>Param√®tres:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>client</em>&nbsp;</td><td>: pointeur sur la structure contenant les informations sur le bloc √† envoyer </td></tr>
+  </table>
+</dl>
+
+</div>
+</div><p>
+<a class="anchor" name="a011e997f26e3368442ff1b0629b6fce"></a><!-- doxytag: member="client_serveur.h::finalisationFichier" ref="a011e997f26e3368442ff1b0629b6fce" args="(Fichier *pointeurFichier)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void finalisationFichier           </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structFichier.html">Fichier</a> *&nbsp;</td>
+          <td class="paramname"> <em>pointeurFichier</em>          </td>
+          <td>&nbsp;)&nbsp;</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>procÈdure qui test si le fichier est complet (et le finalise le cas ÈchÈant) </dd></dl>
+<dl compact><dt><b>Param√®tres:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>pointeurFichier</em>&nbsp;</td><td>: pointeur sur le fichier en cours de traitement</td></tr>
+  </table>
+</dl>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>proc√©dure qui test si le fichier est complet (et le finalise le cas √©ch√©ant) </dd></dl>
+<dl compact><dt><b>Param√®tres:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>pointeurFichier</em>&nbsp;</td><td>: pointeur sur le fichier en cours de traitement </td></tr>
+  </table>
+</dl>
+
+<p>
+blocage du mutex en √©criture sur la liste de fichier<p>
+lib√©ration du mutex en √©criture sur la liste de fichier<p>
+verrou mutex sur la liste de fichier (lecture et ecriture)<p>
+liberation mutex sur la liste de fichier (lecture et ecriture) 
+</div>
+</div><p>
+<a class="anchor" name="213868a39a444241ae0772856cdad583"></a><!-- doxytag: member="client_serveur.h::initialisationListeAttenteClient" ref="213868a39a444241ae0772856cdad583" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void initialisationListeAttenteClient           </td>
+          <td>(</td>
+          <td class="paramname">          </td>
+          <td>&nbsp;)&nbsp;</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>procÈdure d'initialisation de la liste d'attente des clients<p>
+proc√©dure d'initialisation de la liste d'attente des clients </dd></dl>
+
+</div>
+</div><p>
+<a class="anchor" name="c46903711f315015558b0d63b101139c"></a><!-- doxytag: member="client_serveur.h::initialisationListeAttenteTelechargement" ref="c46903711f315015558b0d63b101139c" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void initialisationListeAttenteTelechargement           </td>
+          <td>(</td>
+          <td class="paramname">          </td>
+          <td>&nbsp;)&nbsp;</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>procÈdure d'initialisation de la liste d'attente des telechargements<p>
+proc√©dure d'initialisation de la liste d'attente des telechargements </dd></dl>
+
+</div>
+</div><p>
+<a class="anchor" name="4d520e53d0c49d3b3d58a97ed6787e63"></a><!-- doxytag: member="client_serveur.h::lireLigne" ref="4d520e53d0c49d3b3d58a97ed6787e63" args="(char *message)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void lireLigne           </td>
+          <td>(</td>
+          <td class="paramtype">char *&nbsp;</td>
+          <td class="paramname"> <em>message</em>          </td>
+          <td>&nbsp;)&nbsp;</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>procÈdure qui rÈcupËre la ligne tapÈ au clavier (boucle s'il y a une ligne vide) </dd></dl>
+<dl compact><dt><b>Param√®tres:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>message</em>&nbsp;</td><td>: chaine de caractËre lu</td></tr>
+  </table>
+</dl>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>proc√©dure qui r√©cup√®re la ligne tap√© au clavier (boucle s'il y a une ligne vide) </dd></dl>
+<dl compact><dt><b>Param√®tres:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>message</em>&nbsp;</td><td>: chaine de caract√®re lu </td></tr>
+  </table>
+</dl>
+
+</div>
+</div><p>
+<a class="anchor" name="930ed8157bb930b954aab428e5e3792f"></a><!-- doxytag: member="client_serveur.h::signalisationChargeServeur" ref="930ed8157bb930b954aab428e5e3792f" args="(int valeur)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void signalisationChargeServeur           </td>
+          <td>(</td>
+          <td class="paramtype">int&nbsp;</td>
+          <td class="paramname"> <em>valeur</em>          </td>
+          <td>&nbsp;)&nbsp;</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>cherche et envoie les donnÈes ‡ transmettre </dd></dl>
+<dl compact><dt><b>Param√®tres:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>valeur</em>&nbsp;</td><td>: entier correspondant ‡ la charge : +/- 1</td></tr>
+  </table>
+</dl>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>cherche et envoie les donn√©es √† transmettre </dd></dl>
+<dl compact><dt><b>Param√®tres:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>valeur</em>&nbsp;</td><td>: entier correspondant √† la charge : +/- 1 </td></tr>
+  </table>
+</dl>
+
+</div>
+</div><p>
+<a class="anchor" name="8d2214037457bdb1d0a4b891c5acaf6d"></a><!-- doxytag: member="client_serveur.h::signalisationFichierAnnuaire" ref="8d2214037457bdb1d0a4b891c5acaf6d" args="(char *nomFichier)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void signalisationFichierAnnuaire           </td>
+          <td>(</td>
+          <td class="paramtype">char *&nbsp;</td>
+          <td class="paramname"> <em>nomFichier</em>          </td>
+          <td>&nbsp;)&nbsp;</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>fonction qui signale les fichiers disponibles ‡ l'annuaire </dd></dl>
+<dl compact><dt><b>Param√®tres:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>nomFichier</em>&nbsp;</td><td>: chaine de caractËre contenant le nom du fichier ‡ mettre sur le rÈseau</td></tr>
+  </table>
+</dl>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>fonction qui signale les fichiers disponibles √† l'annuaire </dd></dl>
+<dl compact><dt><b>Param√®tres:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>nomFichier</em>&nbsp;</td><td>: chaine de caract√®re contenant le nom du fichier √† mettre sur le r√©seau </td></tr>
+  </table>
+</dl>
+
+</div>
+</div><p>
+<a class="anchor" name="94723d94227484645e2e5a737b33a9dd"></a><!-- doxytag: member="client_serveur.h::telechargementBloc" ref="94723d94227484645e2e5a737b33a9dd" args="(Telechargement *telechargementATraiter)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void telechargementBloc           </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structTelechargement.html">Telechargement</a> *&nbsp;</td>
+          <td class="paramname"> <em>telechargementATraiter</em>          </td>
+          <td>&nbsp;)&nbsp;</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>procÈdure qui demande et tÈlÈcharge le bloc aupres du serveur </dd></dl>
+<dl compact><dt><b>Param√®tres:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>telechargementATraiter</em>&nbsp;</td><td>: pointeur sur le bloc ‡ tÈlÈcharger</td></tr>
+  </table>
+</dl>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>proc√©dure qui demande et t√©l√©charge le bloc aupres du serveur </dd></dl>
+<dl compact><dt><b>Param√®tres:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>telechargementATraiter</em>&nbsp;</td><td>: pointeur sur le bloc √† t√©l√©charger </td></tr>
+  </table>
+</dl>
+
+</div>
+</div><p>
+<a class="anchor" name="3e76bb8632f71ff1e5af0e3239e36335"></a><!-- doxytag: member="client_serveur.h::threadDialogueClient" ref="3e76bb8632f71ff1e5af0e3239e36335" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void threadDialogueClient           </td>
+          <td>(</td>
+          <td class="paramname">          </td>
+          <td>&nbsp;)&nbsp;</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>procÈdure ‡ exÈcuter dans un thread pour Ècouter les requËtes clientes<p>
+proc√©dure √† ex√©cuter dans un thread pour √©couter les requ√®tes clientes </dd></dl>
+
+</div>
+</div><p>
+<a class="anchor" name="17a52683a8f90f9c98c98a039bd89196"></a><!-- doxytag: member="client_serveur.h::threadEmmission" ref="17a52683a8f90f9c98c98a039bd89196" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void threadEmmission           </td>
+          <td>(</td>
+          <td class="paramname">          </td>
+          <td>&nbsp;)&nbsp;</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>procÈdure qui lance les threads d'emmission des blocs<p>
+proc√©dure qui lance les threads d'emmission des blocs </dd></dl>
+
+</div>
+</div><p>
+<a class="anchor" name="6dfcd7b3481605ade75da7d6918c2162"></a><!-- doxytag: member="client_serveur.h::threadEnvoiMessage" ref="6dfcd7b3481605ade75da7d6918c2162" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void threadEnvoiMessage           </td>
+          <td>(</td>
+          <td class="paramname">          </td>
+          <td>&nbsp;)&nbsp;</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>Fonction ‡ exÈcuter dans un thread pour envoyer des blocs la fonction boucle tant qu'il y a des blocs en liste d'attente<p>
+Fonction √† ex√©cuter dans un thread pour envoyer des blocs la fonction boucle tant qu'il y a des blocs en liste d'attente </dd></dl>
+
+</div>
+</div><p>
+<a class="anchor" name="0e2541fc9c41c78867c576471934d974"></a><!-- doxytag: member="client_serveur.h::threadLectureClavier" ref="0e2541fc9c41c78867c576471934d974" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void threadLectureClavier           </td>
+          <td>(</td>
+          <td class="paramname">          </td>
+          <td>&nbsp;)&nbsp;</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>procÈdure ‡ lancer dans un thread pour gÈrer toute la lecture clavier du programe<p>
+proc√©dure √† lancer dans un thread pour g√©rer toute la lecture clavier du programe </dd></dl>
+
+</div>
+</div><p>
+<a class="anchor" name="67adc217aae72aae2c03870718ff13c1"></a><!-- doxytag: member="client_serveur.h::threadRecuperationBloc" ref="67adc217aae72aae2c03870718ff13c1" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void threadRecuperationBloc           </td>
+          <td>(</td>
+          <td class="paramname">          </td>
+          <td>&nbsp;)&nbsp;</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>procÈdure ‡ exÈcuter dans un thread pour tÈlÈcharger un bloc la focntion boucle tant qu'il y a des blocs ‡ tÈlÈcharger<p>
+proc√©dure √† ex√©cuter dans un thread pour t√©l√©charger un bloc la focntion boucle tant qu'il y a des blocs √† t√©l√©charger </dd></dl>
+
+<p>
+verrou mutex liste d'attente (√©criture)<p>
+lib√©ration du mutex liste d'attente (√©criture)<p>
+verrou mutex liste d'attente (√©criture)<p>
+lib√©ration du mutex liste d'attente (√©criture) 
+</div>
+</div><p>
+<a class="anchor" name="6707a56a419f09039dbf2e5e0b0004cc"></a><!-- doxytag: member="client_serveur.h::threadTelechargement" ref="6707a56a419f09039dbf2e5e0b0004cc" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void threadTelechargement           </td>
+          <td>(</td>
+          <td class="paramname">          </td>
+          <td>&nbsp;)&nbsp;</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>procÈdure qui lance en boucle des threads pour tÈlÈchargerdes blocs<p>
+proc√©dure qui lance en boucle des threads pour t√©l√©chargerdes blocs </dd></dl>
+
+</div>
+</div><p>
+<a class="anchor" name="1f606c07ee5601a17372c566fc791682"></a><!-- doxytag: member="client_serveur.h::traitementMessageArret" ref="1f606c07ee5601a17372c566fc791682" args="(Socket socketDialogue)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void traitementMessageArret           </td>
+          <td>(</td>
+          <td class="paramtype">Socket&nbsp;</td>
+          <td class="paramname"> <em>socketDialogue</em>          </td>
+          <td>&nbsp;)&nbsp;</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>procÈdure qui analyse le message reÁu du client (demandant une dÈconnexion du client) </dd></dl>
+<dl compact><dt><b>Param√®tres:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>socketDialogue</em>&nbsp;</td><td>: socket de dialogue avec le client</td></tr>
+  </table>
+</dl>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>proc√©dure qui analyse le message re√ßu du client (demandant une d√©connexion du client) </dd></dl>
+<dl compact><dt><b>Param√®tres:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>socketDialogue</em>&nbsp;</td><td>: socket de dialogue avec le client </td></tr>
+  </table>
+</dl>
+
+<p>
+le client point√© par "tempClient" n'est pas √† supprimer, test sur son suivant 
+</div>
+</div><p>
+<a class="anchor" name="ce7da1fc032b73964f4e4859e42aa423"></a><!-- doxytag: member="client_serveur.h::traitementMessageBloc" ref="ce7da1fc032b73964f4e4859e42aa423" args="(Socket socketDialogue, char *buff)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void traitementMessageBloc           </td>
+          <td>(</td>
+          <td class="paramtype">Socket&nbsp;</td>
+          <td class="paramname"> <em>socketDialogue</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&nbsp;</td>
+          <td class="paramname"> <em>buff</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>procÈdure qui analyse le message reÁu du client (rempli la liste d'attente si besoin) </dd></dl>
+<dl compact><dt><b>Param√®tres:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>socketDialogue</em>&nbsp;</td><td>: socket de dialogue avec le client </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>buff</em>&nbsp;</td><td>: chaine de caractËre contenant le message reÁu du client</td></tr>
+  </table>
+</dl>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>proc√©dure qui analyse le message re√ßu du client (rempli la liste d'attente si besoin) </dd></dl>
+<dl compact><dt><b>Param√®tres:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>socketDialogue</em>&nbsp;</td><td>: socket de dialogue avec le client </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>buff</em>&nbsp;</td><td>: chaine de caract√®re contenant le message re√ßu du client </td></tr>
+  </table>
+</dl>
+
+</div>
+</div><p>
+<a class="anchor" name="a1076efe0ecd3abea82ce0001ad125de"></a><!-- doxytag: member="client_serveur.h::traitementMessageBlocIntrouvable" ref="a1076efe0ecd3abea82ce0001ad125de" args="(Telechargement *telechargementATraiter)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int traitementMessageBlocIntrouvable           </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structTelechargement.html">Telechargement</a> *&nbsp;</td>
+          <td class="paramname"> <em>telechargementATraiter</em>          </td>
+          <td>&nbsp;)&nbsp;</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>procÈdure qui analyse le fait de ne pas avoir trouvÈ le bloc </dd></dl>
+<dl compact><dt><b>Param√®tres:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>telechargementATraiter</em>&nbsp;</td><td>: pointeur sur le tÈlÈchargement en cours </td></tr>
+  </table>
+</dl>
+<dl class="return" compact><dt><b>Renvoie:</b></dt><dd>retourne 0 si l'annuaire a renvoyÈ un autre serveur pour rÈcupÈrer le bloc, 1 sinon</dd></dl>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>proc√©dure qui analyse le fait de ne pas avoir trouv√© le bloc </dd></dl>
+<dl compact><dt><b>Param√®tres:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>telechargementATraiter</em>&nbsp;</td><td>: pointeur sur le t√©l√©chargement en cours </td></tr>
+  </table>
+</dl>
+<dl class="return" compact><dt><b>Renvoie:</b></dt><dd>retourne 0 si l'annuaire a renvoy√© un autre serveur pour r√©cup√©rer le bloc, 1 sinon </dd></dl>
+
+</div>
+</div><p>
+<a class="anchor" name="087452dc43456c4d431c5cdc17f77c8d"></a><!-- doxytag: member="client_serveur.h::traitementMessageErreur" ref="087452dc43456c4d431c5cdc17f77c8d" args="(Socket socketDialogue)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void traitementMessageErreur           </td>
+          <td>(</td>
+          <td class="paramtype">Socket&nbsp;</td>
+          <td class="paramname"> <em>socketDialogue</em>          </td>
+          <td>&nbsp;)&nbsp;</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>procÈdure qui rÈpond au message d'erreur </dd></dl>
+<dl compact><dt><b>Param√®tres:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>socketDialogue</em>&nbsp;</td><td>: socket de dialogue avec le client</td></tr>
+  </table>
+</dl>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>proc√©dure qui r√©pond au message d'erreur </dd></dl>
+<dl compact><dt><b>Param√®tres:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>socketDialogue</em>&nbsp;</td><td>: socket de dialogue avec le client </td></tr>
+  </table>
+</dl>
+
+</div>
+</div><p>
+<a class="anchor" name="f6b52c2b0dd535581555d03dd1a77355"></a><!-- doxytag: member="client_serveur.h::traitementMessageNegatif" ref="f6b52c2b0dd535581555d03dd1a77355" args="(char *buff)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void traitementMessageNegatif           </td>
+          <td>(</td>
+          <td class="paramtype">char *&nbsp;</td>
+          <td class="paramname"> <em>buff</em>          </td>
+          <td>&nbsp;)&nbsp;</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>procÈdure qui analyse la rÈponse nÈgative de l'annuaire </dd></dl>
+<dl compact><dt><b>Param√®tres:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>buff</em>&nbsp;</td><td>: chaine de caractËre ‡ traiter</td></tr>
+  </table>
+</dl>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>proc√©dure qui analyse la r√©ponse n√©gative de l'annuaire </dd></dl>
+<dl compact><dt><b>Param√®tres:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>buff</em>&nbsp;</td><td>: chaine de caract√®re √† traiter </td></tr>
+  </table>
+</dl>
+
+</div>
+</div><p>
+<a class="anchor" name="0b18450d059e88d6e5f7acd776409eae"></a><!-- doxytag: member="client_serveur.h::traitementMessagePositif" ref="0b18450d059e88d6e5f7acd776409eae" args="(char *buff)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void traitementMessagePositif           </td>
+          <td>(</td>
+          <td class="paramtype">char *&nbsp;</td>
+          <td class="paramname"> <em>buff</em>          </td>
+          <td>&nbsp;)&nbsp;</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>procÈdure qui analyse la rÈponse positive de l'annuaire </dd></dl>
+<dl compact><dt><b>Param√®tres:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>buff</em>&nbsp;</td><td>: chaine de caractËre ‡ traiter </td></tr>
+  </table>
+</dl>
+<dl class="return" compact><dt><b>Renvoie:</b></dt><dd>la fonction retourne le nombre de bloc total du fichier</dd></dl>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>proc√©dure qui analyse la r√©ponse positive de l'annuaire </dd></dl>
+<dl compact><dt><b>Param√®tres:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>buff</em>&nbsp;</td><td>: chaine de caract√®re √† traiter </td></tr>
+  </table>
+</dl>
+
+<p>
+verrou des mutex sur la liste des fichiers (lecture et √©criture)<p>
+lib√©ration des mutex (√©criture et lecture)<p>
+verrou mutex liste d'attente (√©criture)<p>
+lib√©ration du mutex liste d'attente (√©criture) 
+</div>
+</div><p>
+<a class="anchor" name="29c8aee08467b606ece3f1bb024970dd"></a><!-- doxytag: member="client_serveur.h::traitementMessageReceptionBloc" ref="29c8aee08467b606ece3f1bb024970dd" args="(Socket socketDialogue, char *buff)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void traitementMessageReceptionBloc           </td>
+          <td>(</td>
+          <td class="paramtype">Socket&nbsp;</td>
+          <td class="paramname"> <em>socketDialogue</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&nbsp;</td>
+          <td class="paramname"> <em>buff</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>procÈdure qui analyse la reception d'un bloc </dd></dl>
+<dl compact><dt><b>Param√®tres:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>socketDialogue</em>&nbsp;</td><td>: socket sur laquelle le message est reÁu </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>buff</em>&nbsp;</td><td>: chaine de caractËre ‡ traiter</td></tr>
+  </table>
+</dl>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>proc√©dure qui analyse la reception d'un bloc </dd></dl>
+<dl compact><dt><b>Param√®tres:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>socketDialogue</em>&nbsp;</td><td>: socket sur laquelle le message est re√ßu </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>buff</em>&nbsp;</td><td>: chaine de caract√®re √† traiter </td></tr>
+  </table>
+</dl>
+
+<p>
+blocage du mutex en √©criture sur la liste de fichier<p>
+lib√©ration du mutex en √©criture sur la liste de fichier 
+</div>
+</div><p>
+</div>
+<hr size="1"><address style="text-align: right;"><small>G√©n√©r√© le Sun Apr 19 23:09:00 2009 pour lif12p2p par&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.6 </small></address>
+</body>
+</html>

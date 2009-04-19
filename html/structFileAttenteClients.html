@@ -1,0 +1,57 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<title>lif12p2p: Référence de la structure FileAttenteClients</title>
+<link href="doxygen.css" rel="stylesheet" type="text/css">
+<link href="tabs.css" rel="stylesheet" type="text/css">
+</head><body>
+<!-- Généré par Doxygen 1.5.6 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="index.html"><span>Page&nbsp;principale</span></a></li>
+      <li class="current"><a href="annotated.html"><span>Structures&nbsp;de&nbsp;données</span></a></li>
+      <li><a href="files.html"><span>Fichiers</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="annotated.html"><span>Structures&nbsp;de&nbsp;données</span></a></li>
+    </ul>
+  </div>
+</div>
+<div class="contents">
+<h1>Référence de la structure FileAttenteClients</h1><!-- doxytag: class="FileAttenteClients" --><code>#include &lt;<a class="el" href="client__serveur_8h-source.html">client_serveur.h</a>&gt;</code>
+<p>
+<table border="0" cellpadding="0" cellspacing="0">
+<tr><td></td></tr>
+<tr><td colspan="2"><br><h2>Champs de données</h2></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="8eb67aa56ea56ecafef634576ad5647f"></a><!-- doxytag: member="FileAttenteClients::nbClients" ref="8eb67aa56ea56ecafef634576ad5647f" args="" -->
+int&nbsp;</td><td class="memItemRight" valign="bottom"><b>nbClients</b></td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="f522e0b864ffcf5febb872def683cc05"></a><!-- doxytag: member="FileAttenteClients::mutexListeAttenteServeur" ref="f522e0b864ffcf5febb872def683cc05" args="" -->
+pthread_mutex_t&nbsp;</td><td class="memItemRight" valign="bottom"><b>mutexListeAttenteServeur</b></td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="8c4418b850164c4213e843538ea235a9"></a><!-- doxytag: member="FileAttenteClients::premierClient" ref="8c4418b850164c4213e843538ea235a9" args="" -->
+struct <a class="el" href="structClient.html">Client</a> *&nbsp;</td><td class="memItemRight" valign="bottom"><b>premierClient</b></td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="b7874aa9cdffaa6c09c731f3a12a41e0"></a><!-- doxytag: member="FileAttenteClients::dernierClient" ref="b7874aa9cdffaa6c09c731f3a12a41e0" args="" -->
+struct <a class="el" href="structClient.html">Client</a> *&nbsp;</td><td class="memItemRight" valign="bottom"><b>dernierClient</b></td></tr>
+
+</table>
+<hr><a name="_details"></a><h2>Description détaillée</h2>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>file d'attente des clients (FIFO). </dd></dl>
+<dl compact><dt><b>Paramètres:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>nbClient</em>&nbsp;</td><td>: nombre de clients en attentes. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>premierClient</em>&nbsp;</td><td>: pointeur sur structure <a class="el" href="structClient.html">Client</a> correspondant au premier client de la file. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>dernierClient</em>&nbsp;</td><td>: pointeur sur structure <a class="el" href="structClient.html">Client</a> correspondant au dernier client de la file. </td></tr>
+  </table>
+</dl>
+<hr>La documentation de cette structure a été générée à partir du fichier suivant :<ul>
+<li><a class="el" href="client__serveur_8h-source.html">client_serveur.h</a></ul>
+</div>
+<hr size="1"><address style="text-align: right;"><small>Généré le Sun Apr 19 23:09:00 2009 pour lif12p2p par&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.6 </small></address>
+</body>
+</html>
