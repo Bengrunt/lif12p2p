@@ -1,0 +1,79 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<title>lif12p2p: Référence de la structure Fichier</title>
+<link href="doxygen.css" rel="stylesheet" type="text/css">
+<link href="tabs.css" rel="stylesheet" type="text/css">
+</head><body>
+<!-- Généré par Doxygen 1.5.6 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="index.html"><span>Page&nbsp;principale</span></a></li>
+      <li class="current"><a href="annotated.html"><span>Structures&nbsp;de&nbsp;données</span></a></li>
+      <li><a href="files.html"><span>Fichiers</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="annotated.html"><span>Structures&nbsp;de&nbsp;données</span></a></li>
+    </ul>
+  </div>
+</div>
+<div class="contents">
+<h1>Référence de la structure Fichier</h1><!-- doxytag: class="Fichier" -->Structure stockant les informations sur les fichiers.  
+<a href="#_details">Plus de détails...</a>
+<p>
+<code>#include &lt;<a class="el" href="client__serveur_8h-source.html">client_serveur.h</a>&gt;</code>
+<p>
+<table border="0" cellpadding="0" cellspacing="0">
+<tr><td></td></tr>
+<tr><td colspan="2"><br><h2>Champs de données</h2></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="493e96383775ba49acda9cf566c1b95b"></a><!-- doxytag: member="Fichier::idFichier" ref="493e96383775ba49acda9cf566c1b95b" args="" -->
+unsigned int&nbsp;</td><td class="memItemRight" valign="bottom"><b>idFichier</b></td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="1bbd6cc41faaae96d4db8e29d4a61bc2"></a><!-- doxytag: member="Fichier::nomFichier" ref="1bbd6cc41faaae96d4db8e29d4a61bc2" args="" -->
+char *&nbsp;</td><td class="memItemRight" valign="bottom"><b>nomFichier</b></td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="086bf45aa4689988501c9571200fcfb7"></a><!-- doxytag: member="Fichier::nbBlocs" ref="086bf45aa4689988501c9571200fcfb7" args="" -->
+unsigned int&nbsp;</td><td class="memItemRight" valign="bottom"><b>nbBlocs</b></td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="5f88087449adbff7c390956fd078d335"></a><!-- doxytag: member="Fichier::tabBlocs" ref="5f88087449adbff7c390956fd078d335" args="" -->
+<a class="el" href="structBloc.html">Bloc</a> **&nbsp;</td><td class="memItemRight" valign="bottom"><b>tabBlocs</b></td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="364cc11192675a3708c2d329f9a527ec"></a><!-- doxytag: member="Fichier::mutexFichierEcriture" ref="364cc11192675a3708c2d329f9a527ec" args="" -->
+pthread_mutex_t&nbsp;</td><td class="memItemRight" valign="bottom"><b>mutexFichierEcriture</b></td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="e60e7a7308c6d12ab35daea476fa7af9"></a><!-- doxytag: member="Fichier::statutBlocs" ref="e60e7a7308c6d12ab35daea476fa7af9" args="" -->
+int *&nbsp;</td><td class="memItemRight" valign="bottom"><b>statutBlocs</b></td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="4ed5670f59b8d2bb9ecddd860ef58e38"></a><!-- doxytag: member="Fichier::fichierSuivant" ref="4ed5670f59b8d2bb9ecddd860ef58e38" args="" -->
+struct <a class="el" href="structFichier.html">Fichier</a> *&nbsp;</td><td class="memItemRight" valign="bottom"><b>fichierSuivant</b></td></tr>
+
+</table>
+<hr><a name="_details"></a><h2>Description détaillée</h2>
+Structure stockant les informations sur les fichiers. 
+<p>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>structure stockant les informations sur les fichiers en cours de traitement. </dd></dl>
+<dl compact><dt><b>Paramètres:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>nbBlocs</em>&nbsp;</td><td>: nombre de blocs du fichier. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>nomFichier</em>&nbsp;</td><td>: nom du fichier. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>statutBlocs</em>&nbsp;</td><td>: tableau des status du traitement des blocs: 0 - Pas trait� 1 - Trait� </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>fichierSuivant</em>&nbsp;</td><td>: pointeur sur le fichier suivant dans la liste. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>mutexFichierEcriture</em>&nbsp;</td><td>: mutex sur le fichier</td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>idFichier</em>&nbsp;</td><td>Identificateur de fichier. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>nomFichier</em>&nbsp;</td><td>Nom du fichier. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>nbBlocs</em>&nbsp;</td><td>Nombre de blocs du fichier. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>capaTabBlocs</em>&nbsp;</td><td>Capacité max de tabBlocs. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>tabBlocs</em>&nbsp;</td><td>Tableau de pointeurs sur structures <a class="el" href="structBloc.html" title="Structure stockant le tableau de pointeurs sur les serveurs possédant le bloc.">Bloc</a> contenant les informations sur chaque bloc. </td></tr>
+  </table>
+</dl>
+<dl class="warning" compact><dt><b>Avertissement:</b></dt><dd>tabBloc est particulier car il ne peut (et ne doit) pas être modifié entre le moment de sa création et le moment de sa destruction. De ce fait ce n'est pas un tableau dynamique. </dd></dl>
+<hr>La documentation de cette structure a été générée à partir des fichiers suivants :<ul>
+<li><a class="el" href="annuaire_8h-source.html">annuaire.h</a><li><a class="el" href="client__serveur_8h-source.html">client_serveur.h</a></ul>
+</div>
+<hr size="1"><address style="text-align: right;"><small>Généré le Sun Apr 19 23:09:00 2009 pour lif12p2p par&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.6 </small></address>
+</body>
+</html>

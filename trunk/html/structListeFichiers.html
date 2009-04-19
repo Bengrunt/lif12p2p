@@ -1,0 +1,57 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<title>lif12p2p: Référence de la structure ListeFichiers</title>
+<link href="doxygen.css" rel="stylesheet" type="text/css">
+<link href="tabs.css" rel="stylesheet" type="text/css">
+</head><body>
+<!-- Généré par Doxygen 1.5.6 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="index.html"><span>Page&nbsp;principale</span></a></li>
+      <li class="current"><a href="annotated.html"><span>Structures&nbsp;de&nbsp;données</span></a></li>
+      <li><a href="files.html"><span>Fichiers</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="annotated.html"><span>Structures&nbsp;de&nbsp;données</span></a></li>
+    </ul>
+  </div>
+</div>
+<div class="contents">
+<h1>Référence de la structure ListeFichiers</h1><!-- doxytag: class="ListeFichiers" --><code>#include &lt;<a class="el" href="client__serveur_8h-source.html">client_serveur.h</a>&gt;</code>
+<p>
+<table border="0" cellpadding="0" cellspacing="0">
+<tr><td></td></tr>
+<tr><td colspan="2"><br><h2>Champs de données</h2></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="71da8e6bd55cdef3dc524ba523a16846"></a><!-- doxytag: member="ListeFichiers::mutexListeFichierEcriture" ref="71da8e6bd55cdef3dc524ba523a16846" args="" -->
+pthread_mutex_t&nbsp;</td><td class="memItemRight" valign="bottom"><b>mutexListeFichierEcriture</b></td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="8b46aa686c6288041e8919cf2a6f3762"></a><!-- doxytag: member="ListeFichiers::mutexListeFichierLecture" ref="8b46aa686c6288041e8919cf2a6f3762" args="" -->
+pthread_mutex_t&nbsp;</td><td class="memItemRight" valign="bottom"><b>mutexListeFichierLecture</b></td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="f31cbad708354d6cda16fb9dad35cea5"></a><!-- doxytag: member="ListeFichiers::nbFichiers" ref="f31cbad708354d6cda16fb9dad35cea5" args="" -->
+int&nbsp;</td><td class="memItemRight" valign="bottom"><b>nbFichiers</b></td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="d1fba0c47f6e8929bde535010186f90a"></a><!-- doxytag: member="ListeFichiers::listeFichiers" ref="d1fba0c47f6e8929bde535010186f90a" args="" -->
+<a class="el" href="structFichier.html">Fichier</a> *&nbsp;</td><td class="memItemRight" valign="bottom"><b>listeFichiers</b></td></tr>
+
+</table>
+<hr><a name="_details"></a><h2>Description détaillée</h2>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>liste des fichiers en cours de t�l�chargement. </dd></dl>
+<dl compact><dt><b>Paramètres:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>nbFichiers</em>&nbsp;</td><td>: nombre de fichiers. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>listeFichiers</em>&nbsp;</td><td>: liste chain�e de fichiers. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>mutexListeFichierEcriture,mutexListeFichierLecture</em>&nbsp;</td><td>: mutex sur la liste des fichiers </td></tr>
+  </table>
+</dl>
+<hr>La documentation de cette structure a été générée à partir du fichier suivant :<ul>
+<li><a class="el" href="client__serveur_8h-source.html">client_serveur.h</a></ul>
+</div>
+<hr size="1"><address style="text-align: right;"><small>Généré le Sun Apr 19 23:09:00 2009 pour lif12p2p par&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.6 </small></address>
+</body>
+</html>

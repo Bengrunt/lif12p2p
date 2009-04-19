@@ -1,0 +1,160 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<title>lif12p2p:  Fichier source de client_serveur.h</title>
+<link href="doxygen.css" rel="stylesheet" type="text/css">
+<link href="tabs.css" rel="stylesheet" type="text/css">
+</head><body>
+<!-- Généré par Doxygen 1.5.6 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="index.html"><span>Page&nbsp;principale</span></a></li>
+      <li><a href="annotated.html"><span>Structures&nbsp;de&nbsp;données</span></a></li>
+      <li class="current"><a href="files.html"><span>Fichiers</span></a></li>
+    </ul>
+  </div>
+<h1>client_serveur.h</h1><a href="client__serveur_8h.html">Aller à la documentation de ce fichier.</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 
+<a name="l00009"></a>00009 <span class="preprocessor">#ifndef CLIENT_SERVEUR_H</span>
+<a name="l00010"></a>00010 <span class="preprocessor"></span><span class="preprocessor">#define CLIENT_SERVEUR_H</span>
+<a name="l00011"></a>00011 <span class="preprocessor"></span>
+<a name="l00012"></a>00012 <span class="preprocessor">#include "socket.h"</span>
+<a name="l00013"></a>00013 <span class="preprocessor">#include "sys/stat.h"</span>
+<a name="l00014"></a>00014 
+<a name="l00015"></a>00015 <span class="comment">/******************************************</span>
+<a name="l00016"></a>00016 <span class="comment">* Structures de donn�es</span>
+<a name="l00017"></a>00017 <span class="comment">******************************************/</span>
+<a name="l00018"></a>00018 
+<a name="l00030"></a><a class="code" href="structClient.html">00030</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structClient.html">Client</a>
+<a name="l00031"></a>00031 {
+<a name="l00032"></a>00032     Socket socketClient;
+<a name="l00033"></a>00033     <span class="keywordtype">int</span> numeroBloc;
+<a name="l00034"></a>00034     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> idFichier;
+<a name="l00035"></a>00035     <span class="keywordtype">char</span>* nomFichier;
+<a name="l00036"></a>00036     <span class="keyword">struct </span><a class="code" href="structClient.html">Client</a>* clientSuivant;
+<a name="l00037"></a>00037 }<a class="code" href="structClient.html">Client</a>;
+<a name="l00038"></a>00038 
+<a name="l00045"></a><a class="code" href="structFileAttenteClients.html">00045</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structFileAttenteClients.html">FileAttenteClients</a>
+<a name="l00046"></a>00046 {
+<a name="l00047"></a>00047     <span class="keywordtype">int</span> nbClients;
+<a name="l00048"></a>00048     pthread_mutex_t mutexListeAttenteServeur;
+<a name="l00049"></a>00049     <span class="keyword">struct </span><a class="code" href="structClient.html">Client</a>* premierClient;
+<a name="l00050"></a>00050     <span class="keyword">struct </span><a class="code" href="structClient.html">Client</a>* dernierClient;
+<a name="l00051"></a>00051 }<a class="code" href="structFileAttenteClients.html">FileAttenteClients</a>;
+<a name="l00052"></a>00052 
+<a name="l00060"></a><a class="code" href="structStructureDisponibiliteBloc.html">00060</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structStructureDisponibiliteBloc.html">StructureDisponibiliteBloc</a>
+<a name="l00061"></a>00061 {
+<a name="l00062"></a>00062     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> idFichier;
+<a name="l00063"></a>00063     <span class="keywordtype">char</span>* nomFichier;
+<a name="l00064"></a>00064     <span class="keywordtype">int</span> numTotalBloc;
+<a name="l00065"></a>00065     <span class="keywordtype">int</span> numeroBloc;
+<a name="l00066"></a>00066 }<a class="code" href="structStructureDisponibiliteBloc.html">StructureDisponibiliteBloc</a>;
+<a name="l00067"></a>00067 
+<a name="l00077"></a><a class="code" href="structTelechargement.html">00077</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structTelechargement.html">Telechargement</a>
+<a name="l00078"></a>00078 {
+<a name="l00079"></a>00079     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> numeroBloc;
+<a name="l00080"></a>00080     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> idFichier;
+<a name="l00081"></a>00081     <span class="keywordtype">char</span>* nomFichier;
+<a name="l00082"></a>00082     <span class="keywordtype">char</span>* adresseServeur;
+<a name="l00083"></a>00083     <span class="keywordtype">int</span> numPortServeur;
+<a name="l00084"></a>00084     <span class="keyword">struct </span><a class="code" href="structTelechargement.html">Telechargement</a>* telechargementSuivant;
+<a name="l00085"></a>00085 }<a class="code" href="structTelechargement.html">Telechargement</a>;
+<a name="l00086"></a>00086 
+<a name="l00094"></a><a class="code" href="structFileAttenteTelechargements.html">00094</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structFileAttenteTelechargements.html">FileAttenteTelechargements</a>
+<a name="l00095"></a>00095 {
+<a name="l00096"></a>00096     pthread_mutex_t mutexListeAttenteClient;
+<a name="l00097"></a>00097     <span class="keywordtype">int</span> nbTelechargements;
+<a name="l00098"></a>00098     <span class="keyword">struct </span><a class="code" href="structTelechargement.html">Telechargement</a>* premierTelechargement;
+<a name="l00099"></a>00099     <span class="keyword">struct </span><a class="code" href="structTelechargement.html">Telechargement</a>* dernierTelechargement;
+<a name="l00100"></a>00100 }<a class="code" href="structFileAttenteTelechargements.html">FileAttenteTelechargements</a>;
+<a name="l00101"></a>00101 
+<a name="l00112"></a>00112 <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structFichier.html" title="Structure stockant les informations sur les fichiers.">Fichier</a>
+<a name="l00113"></a>00113 {
+<a name="l00114"></a>00114     pthread_mutex_t mutexFichierEcriture;
+<a name="l00115"></a>00115     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> nbBlocs;
+<a name="l00116"></a>00116     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> idFichier;
+<a name="l00117"></a>00117     <span class="keywordtype">char</span>* nomFichier;
+<a name="l00118"></a>00118     <span class="keywordtype">int</span>* statutBlocs;
+<a name="l00119"></a>00119     <span class="keyword">struct </span><a class="code" href="structFichier.html" title="Structure stockant les informations sur les fichiers.">Fichier</a>* fichierSuivant;
+<a name="l00120"></a>00120 }<a class="code" href="structFichier.html" title="Structure stockant les informations sur les fichiers.">Fichier</a>;
+<a name="l00121"></a>00121 
+<a name="l00128"></a><a class="code" href="structListeFichiers.html">00128</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structListeFichiers.html">ListeFichiers</a>
+<a name="l00129"></a>00129 {
+<a name="l00130"></a>00130     pthread_mutex_t mutexListeFichierEcriture;
+<a name="l00131"></a>00131     pthread_mutex_t mutexListeFichierLecture;
+<a name="l00132"></a>00132     <span class="keywordtype">int</span> nbFichiers;
+<a name="l00133"></a>00133     <a class="code" href="structFichier.html" title="Structure stockant les informations sur les fichiers.">Fichier</a>* listeFichiers;
+<a name="l00134"></a>00134 }<a class="code" href="structListeFichiers.html">ListeFichiers</a>;
+<a name="l00135"></a>00135 
+<a name="l00136"></a>00136 
+<a name="l00137"></a>00137 
+<a name="l00138"></a>00138 <span class="comment">/***********************************</span>
+<a name="l00139"></a>00139 <span class="comment">* Fonctions et proc�dures</span>
+<a name="l00140"></a>00140 <span class="comment">***********************************/</span>
+<a name="l00152"></a>00152 <span class="keywordtype">int</span> <a class="code" href="client__serveur_8c.html#deee8dd04a19ee6c341cc8f104195389">creationMessage</a>(<span class="keywordtype">int</span> code, <span class="keywordtype">void</span>* structure, <span class="keywordtype">char</span>* message);
+<a name="l00153"></a>00153 
+<a name="l00157"></a>00157 <span class="keywordtype">void</span> <a class="code" href="client__serveur_8c.html#0e2541fc9c41c78867c576471934d974">threadLectureClavier</a>();
+<a name="l00158"></a>00158 
+<a name="l00163"></a>00163 <span class="keywordtype">void</span> <a class="code" href="client__serveur_8c.html#4d520e53d0c49d3b3d58a97ed6787e63">lireLigne</a>(<span class="keywordtype">char</span>* message);
+<a name="l00164"></a>00164 
+<a name="l00172"></a>00172 <span class="keywordtype">void</span> <a class="code" href="client__serveur_8c.html#deb2f155effc0ce62e5601a64e0ae286">applicationServeur</a>();
+<a name="l00173"></a>00173 
+<a name="l00178"></a>00178 <span class="keywordtype">void</span> <a class="code" href="client__serveur_8c.html#8d2214037457bdb1d0a4b891c5acaf6d">signalisationFichierAnnuaire</a>(<span class="keywordtype">char</span>* nomFichier);
+<a name="l00179"></a>00179 
+<a name="l00183"></a>00183 <span class="keywordtype">void</span> <a class="code" href="client__serveur_8c.html#3e76bb8632f71ff1e5af0e3239e36335">threadDialogueClient</a>();
+<a name="l00184"></a>00184 
+<a name="l00188"></a>00188 <span class="keywordtype">void</span> <a class="code" href="client__serveur_8c.html#213868a39a444241ae0772856cdad583">initialisationListeAttenteClient</a>();
+<a name="l00189"></a>00189 
+<a name="l00194"></a>00194 <span class="keywordtype">void</span> <a class="code" href="client__serveur_8c.html#04bf56a44a87e8be407fa831b6fda329">dialogueClient</a>(Socket socketDialogue);
+<a name="l00195"></a>00195 
+<a name="l00201"></a>00201 <span class="keywordtype">void</span> <a class="code" href="client__serveur_8c.html#ce7da1fc032b73964f4e4859e42aa423">traitementMessageBloc</a>(Socket socketDialogue, <span class="keywordtype">char</span>* buff);
+<a name="l00202"></a>00202 
+<a name="l00207"></a>00207 <span class="keywordtype">void</span> <a class="code" href="client__serveur_8c.html#1f606c07ee5601a17372c566fc791682">traitementMessageArret</a>(Socket socketDialogue);
+<a name="l00208"></a>00208 
+<a name="l00213"></a>00213 <span class="keywordtype">void</span> <a class="code" href="client__serveur_8c.html#087452dc43456c4d431c5cdc17f77c8d">traitementMessageErreur</a>(Socket socketDialogue);
+<a name="l00214"></a>00214 
+<a name="l00218"></a>00218 <span class="keywordtype">void</span> <a class="code" href="client__serveur_8c.html#17a52683a8f90f9c98c98a039bd89196">threadEmmission</a>();
+<a name="l00219"></a>00219 
+<a name="l00223"></a>00223 <span class="keywordtype">void</span> <a class="code" href="client__serveur_8c.html#6dfcd7b3481605ade75da7d6918c2162">threadEnvoiMessage</a>();
+<a name="l00224"></a>00224 
+<a name="l00229"></a>00229 <span class="keywordtype">void</span> <a class="code" href="client__serveur_8c.html#930ed8157bb930b954aab428e5e3792f">signalisationChargeServeur</a>(<span class="keywordtype">int</span> valeur);
+<a name="l00230"></a>00230 
+<a name="l00235"></a>00235 <span class="keywordtype">void</span> <a class="code" href="client__serveur_8c.html#a2bff4e18c624efa035c834b83cf333b">envoiMessage</a>(<a class="code" href="structClient.html">Client</a>* client);
+<a name="l00236"></a>00236 
+<a name="l00240"></a>00240 <span class="keywordtype">void</span> <a class="code" href="client__serveur_8c.html#d6716b8b32c485352880e0ef8dd194a6">arretServeur</a>();
+<a name="l00241"></a>00241 
+<a name="l00250"></a>00250 <span class="keywordtype">void</span> <a class="code" href="client__serveur_8c.html#87890621fffa1435c71a81f4ab1606ae">applicationClient</a>();
+<a name="l00251"></a>00251 
+<a name="l00255"></a>00255 <span class="keywordtype">void</span> <a class="code" href="client__serveur_8c.html#c46903711f315015558b0d63b101139c">initialisationListeAttenteTelechargement</a>();
+<a name="l00256"></a>00256 
+<a name="l00261"></a>00261 <span class="keywordtype">void</span> <a class="code" href="client__serveur_8c.html#71bf8494f3b42c7cd232a1e5ac77aed7">demandeFichier</a>(<span class="keywordtype">char</span>* nomFichier);
+<a name="l00262"></a>00262 
+<a name="l00268"></a>00268 <span class="keywordtype">void</span> <a class="code" href="client__serveur_8c.html#0b18450d059e88d6e5f7acd776409eae">traitementMessagePositif</a>(<span class="keywordtype">char</span>* buff);
+<a name="l00269"></a>00269 
+<a name="l00274"></a>00274 <span class="keywordtype">void</span> <a class="code" href="client__serveur_8c.html#f6b52c2b0dd535581555d03dd1a77355">traitementMessageNegatif</a>(<span class="keywordtype">char</span>* buff);
+<a name="l00275"></a>00275 
+<a name="l00279"></a>00279 <span class="keywordtype">void</span> <a class="code" href="client__serveur_8c.html#6707a56a419f09039dbf2e5e0b0004cc">threadTelechargement</a>();
+<a name="l00280"></a>00280 
+<a name="l00284"></a>00284 <span class="keywordtype">void</span> <a class="code" href="client__serveur_8c.html#67adc217aae72aae2c03870718ff13c1">threadRecuperationBloc</a>();
+<a name="l00285"></a>00285 
+<a name="l00290"></a>00290 <span class="keywordtype">void</span> <a class="code" href="client__serveur_8c.html#94723d94227484645e2e5a737b33a9dd">telechargementBloc</a>(<a class="code" href="structTelechargement.html">Telechargement</a>* telechargementATraiter);
+<a name="l00291"></a>00291 
+<a name="l00297"></a>00297 <span class="keywordtype">void</span> <a class="code" href="client__serveur_8c.html#29c8aee08467b606ece3f1bb024970dd">traitementMessageReceptionBloc</a>(Socket socketDialogue, <span class="keywordtype">char</span>* buff);
+<a name="l00298"></a>00298 
+<a name="l00304"></a>00304 <span class="keywordtype">int</span> <a class="code" href="client__serveur_8c.html#a1076efe0ecd3abea82ce0001ad125de">traitementMessageBlocIntrouvable</a>(<a class="code" href="structTelechargement.html">Telechargement</a>* telechargementATraiter);
+<a name="l00305"></a>00305 
+<a name="l00310"></a>00310 <span class="keywordtype">void</span> <a class="code" href="client__serveur_8c.html#a011e997f26e3368442ff1b0629b6fce">finalisationFichier</a>(<a class="code" href="structFichier.html" title="Structure stockant les informations sur les fichiers.">Fichier</a>* pointeurFichier);
+<a name="l00311"></a>00311 
+<a name="l00315"></a>00315 <span class="keywordtype">void</span> <a class="code" href="client__serveur_8c.html#fa92230e1c4670210e5d7b13c14cf2da">arretClient</a>();
+<a name="l00316"></a>00316 
+<a name="l00317"></a>00317 <span class="preprocessor">#endif</span>
+<a name="l00318"></a>00318 <span class="preprocessor"></span><span class="comment">/***************************</span>
+<a name="l00319"></a>00319 <span class="comment"> * Fin du fichier</span>
+<a name="l00320"></a>00320 <span class="comment"> **************************/</span>
+<a name="l00321"></a>00321 
+<a name="l00322"></a>00322 
+</pre></div></div>
+<hr size="1"><address style="text-align: right;"><small>Généré le Sun Apr 19 23:09:00 2009 pour lif12p2p par&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.6 </small></address>
+</body>
+</html>

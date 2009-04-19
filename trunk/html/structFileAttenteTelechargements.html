@@ -1,0 +1,58 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<title>lif12p2p: Référence de la structure FileAttenteTelechargements</title>
+<link href="doxygen.css" rel="stylesheet" type="text/css">
+<link href="tabs.css" rel="stylesheet" type="text/css">
+</head><body>
+<!-- Généré par Doxygen 1.5.6 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="index.html"><span>Page&nbsp;principale</span></a></li>
+      <li class="current"><a href="annotated.html"><span>Structures&nbsp;de&nbsp;données</span></a></li>
+      <li><a href="files.html"><span>Fichiers</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="annotated.html"><span>Structures&nbsp;de&nbsp;données</span></a></li>
+    </ul>
+  </div>
+</div>
+<div class="contents">
+<h1>Référence de la structure FileAttenteTelechargements</h1><!-- doxytag: class="FileAttenteTelechargements" --><code>#include &lt;<a class="el" href="client__serveur_8h-source.html">client_serveur.h</a>&gt;</code>
+<p>
+<table border="0" cellpadding="0" cellspacing="0">
+<tr><td></td></tr>
+<tr><td colspan="2"><br><h2>Champs de données</h2></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="d4c2eaa55b3b6aef8222067c031ce837"></a><!-- doxytag: member="FileAttenteTelechargements::mutexListeAttenteClient" ref="d4c2eaa55b3b6aef8222067c031ce837" args="" -->
+pthread_mutex_t&nbsp;</td><td class="memItemRight" valign="bottom"><b>mutexListeAttenteClient</b></td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="4ee9435c7f3c4d42d1f17a2003996ab0"></a><!-- doxytag: member="FileAttenteTelechargements::nbTelechargements" ref="4ee9435c7f3c4d42d1f17a2003996ab0" args="" -->
+int&nbsp;</td><td class="memItemRight" valign="bottom"><b>nbTelechargements</b></td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="cda9c7ad22e02004f45c0528241c43a9"></a><!-- doxytag: member="FileAttenteTelechargements::premierTelechargement" ref="cda9c7ad22e02004f45c0528241c43a9" args="" -->
+struct <a class="el" href="structTelechargement.html">Telechargement</a> *&nbsp;</td><td class="memItemRight" valign="bottom"><b>premierTelechargement</b></td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="f7f912cf43a2947c566eddf097a6aa36"></a><!-- doxytag: member="FileAttenteTelechargements::dernierTelechargement" ref="f7f912cf43a2947c566eddf097a6aa36" args="" -->
+struct <a class="el" href="structTelechargement.html">Telechargement</a> *&nbsp;</td><td class="memItemRight" valign="bottom"><b>dernierTelechargement</b></td></tr>
+
+</table>
+<hr><a name="_details"></a><h2>Description détaillée</h2>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>file d'attente des t�l�chargements (FIFO). </dd></dl>
+<dl compact><dt><b>Paramètres:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>nbTelechargements</em>&nbsp;</td><td>: nombre de t�l�chargements dans la file. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>premierTelechargement</em>&nbsp;</td><td>: pointeur sur structure <a class="el" href="structTelechargement.html">Telechargement</a> correspondant au premier t�l�chargement de la file. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>dernierTelechargement</em>&nbsp;</td><td>: pointeur sur structure <a class="el" href="structTelechargement.html">Telechargement</a> correspondant au dernier t�l�chargement de la file. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>mutexListeAttenteClient</em>&nbsp;</td><td>: mutex sur la file d'attente des t�l�chargements </td></tr>
+  </table>
+</dl>
+<hr>La documentation de cette structure a été générée à partir du fichier suivant :<ul>
+<li><a class="el" href="client__serveur_8h-source.html">client_serveur.h</a></ul>
+</div>
+<hr size="1"><address style="text-align: right;"><small>Généré le Sun Apr 19 23:09:00 2009 pour lif12p2p par&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.6 </small></address>
+</body>
+</html>
