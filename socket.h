@@ -1,18 +1,21 @@
-/*********************************************************************
- * @file socket.h
- * @project lif12p2p
- * @author Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
- * @since 19/03/2009
- * @version 11/04/2009
- ********************************************************************/
+/*********************************************************************************************
+ * \file socket.h
+ * \author Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
+ * \since 19/03/2009
+ * \version 11/04/2009
+ * \brief Projet créé dans le cadre de l'UE Lif12 de 3ème année de licence d'informatique.
+ *          Module de gestion des sockets. Basé sur les sources données par F. Rico.
+ ********************************************************************************************/
+
 
 #ifndef SOCKET_H
 #define SOCKET_H
 
 
 /****************************
-* Fichiers d'en-tête inclus
-****************************/
+ * Fichiers d'en-tête inclus
+ ****************************/
+
 
 #include "errno.h"
 #include "error.h"
@@ -24,7 +27,7 @@
 #include "pthread.h"
 #include "fcntl.h"
 
-/* Une partie nécessaire pour utiliser les sockets sous linux et windows */
+/* Une partie nécéssaire pour utiliser les sockets sous linux et windows */
 /* #if defined (WIN32)
     #include "winsock2.h"
 #elif defined (linux) */
@@ -37,78 +40,101 @@
 
 
 /************************
-* Definition des types.
-************************/
+ * Définition des types.
+ ************************/
 
+
+/**
+ * \typedef int Socket
+ */
 typedef int Socket;
+
+/**
+ * \typedef struct sockaddr_in SOCKADDR_IN
+ */
 typedef struct sockaddr_in SOCKADDR_IN;
+
+/**
+ * \typedef sockaddr SOCKADDR
+ */
 typedef struct sockaddr SOCKADDR;
 
 
 
 /************************************
-* Fonctions et procédures du module
-************************************/
-
-/**
-* @note procédure de création d'une socket.
-* @return la socket créée est retournée.
-*/
-Socket creationSocket();
+ * Fonctions et procédures du module
+ ************************************/
 
 
 /**
-* @note procédure de définition de nom d'une socket.
-* @param s : socket que l'on va lier à un numéro de port.
-* @param port : numéro de port auquel on va lier la socket s.
-*/
-void definitionNomSocket(Socket s, int port);
+ * \fn Socket creationSocket( )
+ * \brief Procédure de création d'une socket.
+ * \return La socket créée est retournée. -1 en cas d'erreur.
+ */
+Socket creationSocket( );
 
 
 /**
-* @note procédure d'acceptation d'une connexion.
-* @param s : socket sur laquelle on accepte la connexion.
-* @return renvoie la socket sur laquelle la connexion est acceptée.
-*/
-Socket acceptationConnexion(Socket s);
+ * \fn void definitionNomSocket( Socket s, int port )
+ * \brief Procédure de définition de nom de socket.
+ * \param [in] s Socket que l'on va lier à son numéro de port.
+ * \param [in] port Numéro de port auquel on va lier la socket.
+ */
+void definitionNomSocket( Socket s, int port );
 
 
 /**
-* @note procédure de demande de connexion à une socket.
-* @param la socket passée en parametre essai de se connecter à un serveur distant.
-* @param nomServeur : le nom du serveur.
-* @param port : le numero de port du serveur.
-* @return renvoie 0 si tout se passe bien, 1 sinon.
-*/
-int demandeConnexionSocket(Socket s, char* nomServeur, int port);
+ * \fn Socket acceptationConnexion( Socket s )
+ * \brief Fonction d'acceptation d'une connexion sur une socket.
+ * \param [in] s Socket sur laquelle on veut accepter la connexion.
+ * \return Renvoie la socket sur laquelle la connexion est acceptée, qui vaut -1 si l'acceptation de connexion échoue.
+ */
+Socket acceptationConnexion( Socket s );
 
 
 /**
-* @note procedure de capture de message sur une socket.
-* @param s : socket d'écoute.
-* @param buff : chaine de caractere stockant un message capturé.
-*/
-void ecouteSocket(Socket s, char* buff, int taille_buff);
+ * \fn int demandeConnexionSocket( Socket s, char* nomServeur, int port )
+ * \brief Fonction de demande de connexion sur une socket.
+ * \param [in] s La socket avec laquelle on essaie de se connecter à un serveur distant.
+ * \param [in] nomServeur Le nom du serveur (ou son adresse IP).
+ * \param [in] port Le numéro de port du serveur.
+ * \return Renvoie 0 si tout se passe bien, -1 en cas d'échec de la connexion.
+ */
+int demandeConnexionSocket( Socket s, char* nomServeur, int port );
 
 
 /**
-* @note fonction d'envoi de message sur une socket.
-* @param s : socket sur laquelle on envoie le message.
-* @param buff : message que l'on veut envoyer.
-* @return retourne 0 si tout se passe bien, 1 sinon.
-*/
-int ecritureSocket(Socket s, char* buff, int taille_buff);
+ * \fn void ecouteSocket( Socket s, char* buff, int taille_buff )
+ * \brief Fonction de capture de message entrant sur une socket.
+ * \param [in] s La socket sur laquelle on écoute les messages entrants.
+ * \param [out] buff La chaine de caractères stockant le message capturé.
+ * \param [in] taille_buff La taille de la chaine de caractères stockant le message capturé.
+ * \return Renvoie 0 si tout se passe bien, -1 en cas d'échec de capture du message.
+ */
+int ecouteSocket( Socket s, char* buff, int taille_buff );
 
 
 /**
-* @note procédure de fermeture d'une socket.
-* @param s : socket que l'on ferme.
-*/
+ * \fn int ecritureSocket( Socket s, char* buff, int taille_buff )
+ * \brief Fonction d'envoi de message sur une socket.
+ * \param [in] s La socket sur laquelle on envoie le message.
+ * \param [in] buff Le message que l'on veut envoyer.
+ * \param [in] taille_buff La taille de la chaine de caractères stockant le message à envoyer.
+ * \return Retourne 0 si tout se passe bien, -1 en cas d'échec d'envoi du message.
+ */
+int ecritureSocket( Socket s, char* buff, int taille_buff );
+
+
+/**
+ * \fn void clotureSocket( Socket s )
+ * \brief Procédure de fermeture d'une socket.
+ * \param [in] s La socket que l'on ferme.
+ */
 void clotureSocket(Socket s);
 
 
 #endif
 
 /*******************
-* Fin de fichier
-*******************/
+ * Fin de fichier
+ *******************/

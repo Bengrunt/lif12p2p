@@ -1,9 +1,9 @@
 /**********************************************************************
-* @file annuaire.c
-* @project lif12p2p
-* @author Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
-* @since 20/03/2009
-* @version 11/04/2009
+* \file annuaire.c
+* \project lif12p2p
+* \author Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
+* \since 20/03/2009
+* \version 11/04/2009
 **********************************************************************/
 
 /****************************
@@ -16,22 +16,77 @@
 * Variables Globales et constantes
 ***********************************/
 
-#define TAILLE_BUFF         200                 /* Taille de buffer standard */
-#define TAILLE_BUFF_LAR     TAILLE_BUFF/2       /* Taille de buffer large */
-#define TAILLE_BUFF_MED     TAILLE_BUFF/5       /* Taille de buffer medium */
-#define TAILLE_BUFF_SM      TAILLE_BUFF/10      /* Taille de buffer small */
-#define TAILLE_BUFF_VSM     TAILLE_BUFF/20      /* Taille de buffer very small */
+/**
+ * \def TAILLE_BUFF
+ * \brief Taille de buffer standard.
+ */
+#define TAILLE_BUFF         200
 
-#define TABDYN_AUGM_VAL     20                  /* Taux d'augmentation de la taille des tableaux dynamiques */
+/**
+ * \def TAILLE_BUFF_LAR
+ * \brief Taille de buffer large.
+ */
+#define TAILLE_BUFF_LAR     TAILLE_BUFF/2
 
-BddServeurs* serveurs;                          /* pointeur sur la liste des serveurs connus */
-BddFichiers* fichiers;                          /* pointeur sur la liste des fichiers connus */
+/**
+ * \def TAILLE_BUFF_MED
+ * \brief Taille de buffer medium.
+ */
+#define TAILLE_BUFF_MED     TAILLE_BUFF/5
 
-unsigned int generateurIdServeur;               /* compteur de génération des idServeur */
-unsigned int generateurIdFichier;               /* compteur de génération des idFichier */
+/**
+ * \def TAILLE_BUFF_SM
+ * \brief Taille de buffer small.
+ */
+#define TAILLE_BUFF_SM      TAILLE_BUFF/10
 
-unsigned int global_nbthreads;                  /* nombre de threads gérés par l'annuaire */
-int global_exit;                                /* booléen pour quitter le programme */
+/**
+ * \def TAILLE_BUFF_VSM
+ * \brief Taille de buffer very small.
+ */
+#define TAILLE_BUFF_VSM     TAILLE_BUFF/20
+
+/**
+ * \def TABDYN_AUGM_VAL
+ * \brief Taux d'augmentation de la taille des tableaux dynamiques.
+ */
+#define TABDYN_AUGM_VAL     20
+
+/**
+ * \var BddServeurs* serveurs
+ * \brief Pointeur sur la base de données référençant les serveurs connus.
+ */
+BddServeurs* serveurs;
+
+/**
+ * \var BddFichiers* fichiers
+ * \brief Pointeur sur la base de données référençant les fichiers connus.
+ */
+BddFichiers* fichiers;
+
+/**
+ * \var unsigned int generateurIdServeur
+ * \brief Compteur de génération des idServeur.
+ */
+unsigned int generateurIdServeur;
+
+/**
+ * \var unsigned int generateurIdFichier
+ * \brief Compteur de génération des idFichier.
+ */
+unsigned int generateurIdFichier;
+
+/**
+ * \var unsigned int global_nbthreads
+ * \brief Compteur du nombre de threads gérés par l'annuaire.
+ */
+unsigned int global_nbthreads;
+
+/**
+ * \var int global_exit
+ * \brief Booléen de sortie du programme.
+ */
+int global_exit;
 
 
 /************************************
@@ -39,20 +94,21 @@ int global_exit;                                /* booléen pour quitter le prog
 ************************************/
 
 /**
-* @note procédure d'initialisation de l'annuaire :  les listes de clients, de serveurs, de fichiers.
-* @brief modifie le contenu des variables globales serveurs et fichiers.
-* @return renvoie 0 si tout se passe bien, -1 sinon.
+* \fn int initialisationAnnuaire( )
+* \brief Fonction d'initialisation de l'annuaire.
+* \warning Modifie le contenu des variables globales serveurs et fichiers.
+* \return Renvoie 0 si tout se passe bien, -1 en cas de problème.
 */
 int initialisationAnnuaire( )
 {
     /* Variables */
     unsigned int i,j; /* Itérateurs */
 
-    /* Creation des bases de données de serveurs */
+    /* Creation des bases de données de serveurs et initialisation aux valeurs par défaut */
     serveurs = malloc( sizeof( BddServeurs ) );
     if ( serveurs == NULL )
     {
-        perror( "Echec de l'allocation en mémoire de la base de donnée des serveurs.\n" );
+        perror( "< ERREUR ANNUAIRE > Echec de l'allocation en mémoire de la base de donnée des serveurs.\n" );
         return -1;
     }
     serveurs->nbInfoServeurs = 0;
@@ -65,11 +121,11 @@ int initialisationAnnuaire( )
     pthread_mutex_init( &serveurs->verrou_bddserv_r, NULL );
     pthread_mutex_init( &serveurs->verrou_bddserv_w, NULL );
 
-    /* Creation des bases de données de fichiers */
+    /* Creation des bases de données de fichiers et initialisation aux valeurs par défaut */
     fichiers = malloc( sizeof( BddFichiers ) );
     if ( fichiers == NULL )
     {
-        perror( "Echec de l'allocation en mémoire de la base de donnée des fichiers.\n" );
+        perror( "< ERREUR ANNUAIRE > Echec de l'allocation en mémoire de la base de donnée des fichiers.\n" );
         return -1;
     }
     fichiers->nbFichiers = 0;
@@ -86,7 +142,7 @@ int initialisationAnnuaire( )
     generateurIdServeur = 0;
     generateurIdFichier = 0;
 
-    /* Initialisation des variables globales d'utilisation */
+    /* Initialisation des variables globales d'utilisation de l'annuaire */
     global_nbthreads = 0;
     global_exit = 0;
 
@@ -95,9 +151,10 @@ int initialisationAnnuaire( )
 
 
 /**
-* @note fonction d'initialisation de la socket d'écoute de l'annuaire.
-* @param portAnnuaire : numéro de port sur lequel on crée la socket d'écoute.
-* @return renvoie la socket créée.
+* \fn Socket initialiseSocketEcouteAnnuaire( int portAnnuaire )
+* \brief Fonction d'initialisation de la socket d'écoute de l'annuaire.
+* \param [in] portAnnuaire Numéro de port sur lequel on crée la socket d'écoute.
+* \return Renvoie la socket créée ou -1 en cas d'échec.
 */
 Socket initialiseSocketEcouteAnnuaire( int portAnnuaire )
 {
@@ -106,16 +163,23 @@ Socket initialiseSocketEcouteAnnuaire( int portAnnuaire )
 
     /* On la crée */
     socketEcouteAnnuaire = creationSocket( );
+    if ( socketEcouteAnnuaire < 0 )
+    {
+        perror( "< ERREUR ANNUAIRE > Problème lors de la création de la socket d'écoute de l'annuaire." );
+        return -1;
+    }
 
     /* On lie la socket au numero de port portAnnuaire */
     definitionNomSocket( socketEcouteAnnuaire, portAnnuaire );
 
+    printf( "La socket d'écoute de l'annuaire a été créée sur le port %d.\n", portAnnuaire );
     return socketEcouteAnnuaire;
 }
 
 
 /**
-* @note procedure de lecture du clavier.
+* \fn void lectureClavier( )
+* \brief Procedure de lecture des entrées clavier de l'utilisateur.
 */
 void lectureClavier(  )
 {
@@ -125,11 +189,16 @@ void lectureClavier(  )
     /* Allocation mémoire de la chaine de caractères */
     buff = malloc( TAILLE_BUFF * sizeof( char ) );
 
+    /* Boucle infinie de lecture clavier */
     do
     {
-        printf("Pour arrêter l'annuaire, tapez à tout moment \"quit\" dans le terminal.\n");
+        printf( "=======================================================================\n" );
+        printf( "Pour arrêter l'annuaire, tapez à tout moment \"quit\" dans le terminal.\n" );
+        printf( "=======================================================================\n" );
+
         scanf( "%s", buff );
-    }while( strcmp( buff, "quit" ) != 0 );
+
+    } while( strcmp( buff, "quit" ) != 0 );
 
     global_exit = 1;
 
@@ -139,41 +208,49 @@ void lectureClavier(  )
 }
 
 /**
-* @note fonction globale de traitement d'un message reçu.
-* @param arg : socket sur laquelle le message est arrivé.
-* @return renvoie 0 si tout se passe bien, -1 sinon.
+* \fn int traiteMessage( Socket arg )
+* \brief Fonction globale de traitement de message reçu.
+* \param [in] arg Socket sur laquelle le message est arrivé.
+* \return Renvoie 0 si tout se passe bien ou -1 en cas de problème.
 */
 int traiteMessage( Socket arg )
 {
-    /* variables */
+    /* Variables */
     char* buff; /* Message lu sur la socket */
 
-    int type_message; /* type de message */
-    int fin_thread; /* booléen qui détermine si le thread doit se finir ou pas */
+    int type_message; /* Type de message */
+    int fin_thread; /* Booleen qui décide de l'arret du thread */
 
     /* Initialisation des booléens */
-    fin_thread = 0; /* booleen qui décide de l'arret du thread */
+    fin_thread = 0;
 
-    /* Allocation mémoire des chaines de caracteres */
+    /* Allocation mémoire des chaines de caractères */
     buff = malloc( TAILLE_BUFF * sizeof( char ) );
 
-    /* boucle de traitement des messages */
+    /* Boucle de traitement des messages */
     while ( !fin_thread )
     {
-        /* on ecoute sur la socket arg */
+        /* On écoute sur la socket arg */
         ecouteSocket( arg, buff, TAILLE_BUFF );
 
         if ( strcmp( buff, "") != 0 ) /* Si on lit quelquechose sur la socket */
         {
 
-            /* on analyse le type du message reçu et on agit en conséquence */
-            if ( sscanf ( buff, "%d", &type_message ) != 1 )
+            /* On analyse le type du message reçu et on agit en conséquence */
+            if ( sscanf ( buff, "%d", &type_message ) != 1 ) /* Si il est corrompu on l'ignore */
             {
-                fprintf( stderr, "Message ignoré, impossible de l'analyser.\n Contenu du message: %s \n", buff );
+                fprintf( stderr, "< ERREUR ANNUAIRE > Message ignoré, impossible de l'analyser.\n Contenu du message: < %s > \n", buff );
+
+                /* Libération des chaines de caractères */
+                free( buff );
+
+                /* Fermeture de la socket arg */
+                clotureSocket( arg );
+
+                return -1;
             }
-            else
+            else /* Sinon on lance la procédure correspondant au type de message reçu. */
             {
-                /* On lance l'action correspondant au type de message. */
                 switch ( type_message )
                 {
                     case 31: /* Demande d'un fichier */
@@ -183,7 +260,7 @@ int traiteMessage( Socket arg )
                         traiteDemandeBlocClient( arg, buff );
                         break;
                     case 33: /* Fin de communication avec une entité */
-                        traiteFinCommunication( arg, buff );
+                        traiteFinCommunicationClient( arg, buff );
                         fin_thread = 1;
                         break;
                     case 51: /* Disponibilité d'un bloc */
@@ -192,9 +269,6 @@ int traiteMessage( Socket arg )
                     case 52: /* Arret d'un serveur */
                         traiteArretServeur( arg, buff );
                         fin_thread = 1;
-                        break;
-                    case 53: /* Gestion charge */
-
                         break;
                     case 54: /* Demande IDServeur */
                         traiteDemandeIdServeur( arg, buff );
@@ -205,8 +279,7 @@ int traiteMessage( Socket arg )
                     case 71: /* Indiquation que l'on a envoyé des messages au mauvais destinataire sur la socket donc fermeture */
                         fin_thread = 1;
                         break;
-                    default: /* Un message géré par le réseau a bien été reçu mais inadapté donc la connexion
-                                    doit être terminé car ce ne sont pas les bons interlocuteurs. */
+                    default: /* Un message géré par le réseau a bien été reçu mais inadapté donc la connexion doit être terminé car ce ne sont pas les bons interlocuteurs. */
                         traiteMessageErr( arg, buff );
                         fin_thread = 1;
                 }
@@ -228,9 +301,10 @@ int traiteMessage( Socket arg )
 
 
 /**
-* @note traitement d'un message de type demande de fichier d'un client.
-* @param s : la socket sur laquelle la demande de fichier client a été émise.
-* @param mess : la demande de fichier client a traiter.
+* \fn void traiteDemandeFichierClient( Socket s, char* mess )
+* \brief Procédure de traitement de message de type (31) "Demande de fichier d'un client".
+* \param [in] s La socket sur laquelle la demande de fichier client a été émise.
+* \param [in] mess Le message contenant la demande de fichier client à traiter.
 */
 void traiteDemandeFichierClient( Socket s, char* mess )
 {
@@ -405,9 +479,10 @@ void traiteDemandeFichierClient( Socket s, char* mess )
 
 
 /**
-* @note traitement d'un message de type demande de bloc d'un client.
-* @param s : la socket sur laquelle la demande de bloc client a été émise.
-* @param mess : la demande de bloc client a traiter.
+* \fn void traiteDemandeBlocClient( Socket s, char* mess )
+* \brief Procédure de traitement de message de type (32) "Demande de bloc d'un client".
+* \param [in] s La socket sur laquelle la demande de bloc client a été émise.
+* \param [in] mess Le message contenant la demande de bloc client à traiter.
 */
 void traiteDemandeBlocClient( Socket s, char* mess )
 {
@@ -580,11 +655,12 @@ void traiteDemandeBlocClient( Socket s, char* mess )
 
 
 /**
-* @note traitement d'un message de type fin de communication.
-* @param s : la socket sur laquelle le message dde fin de communication a été émis.
-* @param mess : le message de fin de communication a traiter.
+* \fn void traiteFinCommunicationClientClient( Socket s, char* mess )
+* \brief Procédure de traitement de message de type (34) "Fin de communication".
+* \param [in] s La socket sur laquelle le message de fin de communication client a été émis.
+* \param [in] mess Le message de fin de communication client à traiter.
 */
-void traiteFinCommunication( Socket s, char* mess )
+void traiteFinCommunicationClient( Socket s, char* mess )
 {
     /* On traite l'arret du serveur si il n'a pas déjà été fait */
     traiteArretServeur( s, mess );
@@ -595,9 +671,10 @@ void traiteFinCommunication( Socket s, char* mess )
 
 
 /**
-* @note traitement d'un message de type nouveau bloc disponible sur serveur.
-* @param s : la socket sur laquelle le message de nouveau bloc disponible sur serveur a été émis.
-* @param mess : le message de nouveau bloc disponible a traiter.
+* \fn void traiteBlocDisponibleServeur( Socket s, char* mess )
+* \brief Procédure de traitement de message de type (51) "Nouveau bloc disponible sur serveur".
+* \param [in] s La socket sur laquelle le message de nouveau bloc disponible sur serveur a été émis.
+* \param [in] mess Le message de nouveau bloc disponible serveur à traiter.
 */
 void traiteBlocDisponibleServeur( Socket s, char* mess )
 {
@@ -750,9 +827,10 @@ void traiteBlocDisponibleServeur( Socket s, char* mess )
 
 
 /**
-* @note traitement d'un message de type arrêt de serveur.
-* @param s : la socket sur laquelle le message d'arret de serveur a été emis.
-* @param mess : le message d'arret serveur a traiter.
+* \fn void traiteArretServeur( Socket s, char* mess )
+* \brief Procédure de traitement de message de type (52) "Arrêt de serveur".
+* \param [in] s La socket sur laquelle le message d'arrêt de serveur a été émis.
+* \param [in] mess Le message d'arrêt serveur à traiter.
 */
 void traiteArretServeur( Socket s, char* mess )
 {
@@ -852,10 +930,11 @@ void traiteArretServeur( Socket s, char* mess )
 
 
 /**
-* @note traitement d'un message de type demande d'ID serveur.
-* @param s : la socket sur laquelle le message de demande d'ID serveur a été émis.
-* @param mess  : le message de demande d'ID serveur à traiter.
-* @warning incrémente le generateur d'idServeur.
+* \fn void traiteDemandeIdServeur( Socket s, char* mess )
+* \brief Procédure de traitement de message de type (54) "Demande d'ID serveur".
+* \param [in] s La socket sur laquelle le message de demande d'ID serveur a été émis.
+* \param [in] mess Le message de demande d'ID serveur à traiter.
+* \warning Incrémente le compteur de génération d'idServeur.
 */
 void traiteDemandeIdServeur( Socket s, char* mess )
 {
@@ -957,10 +1036,11 @@ void traiteDemandeIdServeur( Socket s, char* mess )
 
 
 /**
-* @note traitement d'un message de type demande d'ID fichier.
-* @param s : la socket sur laquelle le message de demande d'ID fichier a été émis.
-* @param mess  : le message de demande d'ID fichier à traiter.
-* @warning incrémente le generateur d'idFichier.
+* \fn void traiteDemandeIdFichier( Socket s, char* mess )
+* \brief Procédure de traitement de message de type (55) "Demande d'ID fichier".
+* \param [in] s La socket sur laquelle le message de demande d'ID fichier a été émis.
+* \param [in] mess Le message de demande d'ID fichier à traiter.
+* \warning Incrémente le compteur de génération d'idFichier.
 */
 void traiteDemandeIdFichier( Socket s, char* mess )
 {
@@ -1055,9 +1135,10 @@ void traiteDemandeIdFichier( Socket s, char* mess )
 
 
 /**
-* @note traitement d'un message adressé au mauvais destinataire.
-* @param s : la socket sur laquelle le message inattendu a été émis.
-* @param mess : le message en question.
+* \fn void traiteMessageErr( Socket s, char* mess )
+* \brief Procédure de traitement de message adressé au mauvais destinataire.
+* \param [in] s La socket sur laquelle le message inattendu a été émis.
+* \param [in] mess Le message en question.
 */
 void traiteMessageErr( Socket s, char* mess )
 {
@@ -1070,8 +1151,9 @@ void traiteMessageErr( Socket s, char* mess )
 
 
 /**
-* @note procédure de fermeture de l'annuaire de façon propre.
-* @brief modifie le contenu des variables globales serveurs et fichiers.
+* \fn void fermetureAnnuaire( )
+* \brief Procédure de fermeture de l'annuaire.
+* \warning Modifie le contenu des variables globales serveurs et fichiers.
 */
 void fermetureAnnuaire( )
 {
