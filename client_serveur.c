@@ -80,7 +80,7 @@ int main()
         printf("Quel est le port de l'annuaire utilisé ?\n");
         scanf("%d", &portAnnuaire);
 
-        /** tentative de connexion à l'annuaire */
+        /* tentative de connexion à l'annuaire */
         /* création de la socket */
         socketAnnuaire = creationSocket();
         /* connexion à l'annuaire */
@@ -149,7 +149,7 @@ int main()
         }
     }
 
-/** envoi du message d'arret à l'annuaire */
+/* envoi du message d'arret à l'annuaire */
     /* création du message */
     if (creationMessage(33, NULL, message) == 1)
     {
@@ -416,7 +416,7 @@ void applicationServeur()
         }
     }
 
-    /** arrêt du serveur */
+    /* arrêt du serveur */
     /* arrêt de tous les threads lancés */
     while (1)
     {
@@ -621,8 +621,7 @@ void dialogueClient(Socket socketDialogue)
             }
         }
     }
-
-    /** fermeture de la socket */
+    /* fermeture de la socket */
     /* soit par ce que le serveur va s'arreter */
     if (finThreadServeur == 1)
     {   /* il faut alors envoyer un message à tous les clients */
@@ -667,7 +666,7 @@ void traitementMessageBloc(Socket socketDialogue, char* buff)
         clientAAjouter->socketClient = socketDialogue;
         clientAAjouter->clientSuivant = NULL;
 
-        /*******  bloquage du mutex pour éviter la lecture / écriture de la liste d'attente  *********/
+        /*  bloquage du mutex pour éviter la lecture / écriture de la liste d'attente  */
         pthread_mutex_lock(&(listeAttenteClient.mutexListeAttenteServeur));
         /* ajout en liste d'attente */
         if (listeAttenteClient.nbClients == 0)
@@ -684,7 +683,7 @@ void traitementMessageBloc(Socket socketDialogue, char* buff)
             listeAttenteClient.nbClients++;
             listeAttenteClient.dernierClient = clientAAjouter;
         }
-        /*******  libération du mutex  ********/
+        /*  libération du mutex  */
         pthread_mutex_unlock(&(listeAttenteClient.mutexListeAttenteServeur));
     }
     else
@@ -705,7 +704,7 @@ void traitementMessageArret(Socket socketDialogue)
     /* variables */
     Client* tempClient;         /* pointeur temporaire pour effectuer la suppression */
 
-    /*******  bloquage du mutex pour éviter la lecture / écriture de la liste d'attente  *********/
+    /*  bloquage du mutex pour éviter la lecture / écriture de la liste d'attente  */
     pthread_mutex_lock(&(listeAttenteClient.mutexListeAttenteServeur));
     /* initialisation du pointeur temporaire */
     tempClient = listeAttenteClient.premierClient;
@@ -728,7 +727,7 @@ void traitementMessageArret(Socket socketDialogue)
         /* reèinitialisation du pointeur temporaire pour le test suivant */
         tempClient = listeAttenteClient.premierClient;
     }
-    /** le client pointé par "tempClient" n'est pas à supprimer, test sur son suivant */
+    /* le client pointé par "tempClient" n'est pas à supprimer, test sur son suivant */
     /* parcours du reste de la liste d'attente s'il reste des clients en liste d'attente */
     if (tempClient != NULL)
     {
@@ -764,7 +763,7 @@ void traitementMessageArret(Socket socketDialogue)
         }
     }
     /* sortie de boucle car on est arrivé à la fin de la liste */
-    /*******  libération du mutex  ********/
+    /*  libération du mutex  */
     pthread_mutex_unlock(&(listeAttenteClient.mutexListeAttenteServeur));
 }
 
@@ -814,7 +813,7 @@ void threadEnvoiMessage()
     /* variables */
     Client* blocAEnvoyer;  /* pointeur de travail qui désignera le bloc à envoyer */
 
-    /*******  bloquage du mutex pour éviter la lecture / écriture de la liste d'attente  *********/
+    /*  bloquage du mutex pour éviter la lecture / écriture de la liste d'attente  */
     pthread_mutex_lock(&(listeAttenteClient.mutexListeAttenteServeur));
     /* sélection du prochain client en liste d'attente */
     blocAEnvoyer = listeAttenteClient.premierClient;
@@ -830,7 +829,7 @@ void threadEnvoiMessage()
             /* changement du pointeur sur le dernier client */
             listeAttenteClient.dernierClient = NULL;
         }
-        /*******  libération du mutex  ********/
+        /*  libération du mutex  */
         pthread_mutex_unlock(&(listeAttenteClient.mutexListeAttenteServeur));
 
         /* signalisation de la charge du serveur à l'annuaire */
@@ -845,7 +844,7 @@ void threadEnvoiMessage()
         free(blocAEnvoyer);
 
         /* re-affectation du pointeur temporaire */
-        /*******  bloquage du mutex pour éviter la lecture / écriture de la liste d'attente  *********/
+        /*  bloquage du mutex pour éviter la lecture / écriture de la liste d'attente  */
         pthread_mutex_lock(&(listeAttenteClient.mutexListeAttenteServeur));
         /* sélection du prochain client en liste d'attente */
         blocAEnvoyer = listeAttenteClient.premierClient;
@@ -853,7 +852,7 @@ void threadEnvoiMessage()
 
     /* soit le pointeur "blocAEnvoyer" vaut "NULL", il n'y a donc plus aucun client en liste d'attente
        soit l'arret du serveur a été demandé */
-    /*******  libération du mutex  ********/
+    /*  libération du mutex  */
     pthread_mutex_unlock(&(listeAttenteClient.mutexListeAttenteServeur));
     /* décrémentation du nombre de thread lancé */
     nbThreadServeurLance--;
@@ -984,7 +983,7 @@ void arretServeur()
 */
 void applicationClient()
 {
-    /** séparation en 2 thread : - 1 pour faire des demandes de fichier à l'annuaire
+    /* séparation en 2 thread : - 1 pour faire des demandes de fichier à l'annuaire
                                  - 1 pour télécharger les parties en liste d'attente
     */
     /* variables */
@@ -1127,7 +1126,7 @@ void traitementMessagePositif(char* buff)
                &(blocAAjouter->numeroBloc), &tempIdServeur, blocAAjouter->adresseServeur, &(blocAAjouter->numPortServeur)) == 8)
     {
         /* recherche si le fichier est déja dans la liste des fichiers */
-        /** verrou des mutex sur la liste des fichiers (lecture et écriture) */
+        /* verrou des mutex sur la liste des fichiers (lecture et écriture) */
         pthread_mutex_lock(&(listeFichier.mutexListeFichierLecture));
         pthread_mutex_lock(&(listeFichier.mutexListeFichierEcriture));
 
@@ -1194,11 +1193,11 @@ void traitementMessagePositif(char* buff)
             }
             /* si le fichier existe déja, on ne fait rien de plus */
         }
-        /** libération des mutex (écriture et lecture) */
+        /* libération des mutex (écriture et lecture) */
         pthread_mutex_unlock(&(listeFichier.mutexListeFichierLecture));
         pthread_mutex_unlock(&(listeFichier.mutexListeFichierEcriture));
         /* ajout du bloc du fichier dans la liste d'attente */
-        /** verrou mutex liste d'attente (écriture) */
+        /* verrou mutex liste d'attente (écriture) */
         pthread_mutex_lock(&(listeAttenteTelechargement.mutexListeAttenteClient));
         /* incrémentation du nombre de téléchargement */
         listeAttenteTelechargement.nbTelechargements++;
@@ -1215,7 +1214,7 @@ void traitementMessagePositif(char* buff)
         }
         /* affectation du nouveau dernier bloc */
         listeAttenteTelechargement.dernierTelechargement = blocAAjouter;
-        /** libération du mutex liste d'attente (écriture) */
+        /* libération du mutex liste d'attente (écriture) */
         pthread_mutex_unlock(&(listeAttenteTelechargement.mutexListeAttenteClient));
     }
     else
@@ -1278,7 +1277,7 @@ void threadRecuperationBloc()
     /* variables */
     Telechargement* telechargementATraiter;     /* pointeur sur le téléchargement à récupérer */
 
-    /** verrou mutex liste d'attente (écriture) */
+    /* verrou mutex liste d'attente (écriture) */
     pthread_mutex_lock(&(listeAttenteTelechargement.mutexListeAttenteClient));
     /* récupération du premier élément en liste d'attente */
     telechargementATraiter = listeAttenteTelechargement.premierTelechargement;
@@ -1293,7 +1292,7 @@ void threadRecuperationBloc()
         {
             listeAttenteTelechargement.dernierTelechargement = NULL;
         }
-        /** libération du mutex liste d'attente (écriture) */
+        /* libération du mutex liste d'attente (écriture) */
         pthread_mutex_unlock(&(listeAttenteTelechargement.mutexListeAttenteClient));
         /* téléchargement du bloc */
         telechargementBloc(telechargementATraiter);
@@ -1302,13 +1301,13 @@ void threadRecuperationBloc()
         free(telechargementATraiter->nomFichier);
         free(telechargementATraiter);
 
-        /** verrou mutex liste d'attente (écriture) */
+        /* verrou mutex liste d'attente (écriture) */
         pthread_mutex_lock(&(listeAttenteTelechargement.mutexListeAttenteClient));
         /* re-affectation du pointeur temporaire pour le prochain téléchargement */
         telechargementATraiter = listeAttenteTelechargement.premierTelechargement;
     }
 
-    /** libération du mutex liste d'attente (écriture) */
+    /* libération du mutex liste d'attente (écriture) */
     pthread_mutex_unlock(&(listeAttenteTelechargement.mutexListeAttenteClient));
     nbThreadClientLance--;
 }
@@ -1420,7 +1419,7 @@ void traitementMessageReceptionBloc(Socket socketDialogue, char* buff)
     sprintf(strNumBloc, "%d", numeroBloc);
     strcat(nomFichier, strNumBloc);
 
-    /** blocage du mutex en écriture sur la liste de fichier */
+    /* blocage du mutex en écriture sur la liste de fichier */
     pthread_mutex_lock(&(listeFichier.mutexListeFichierLecture));
     /* initialisation */
     tempFichier = listeFichier.listeFichiers;
@@ -1429,7 +1428,7 @@ void traitementMessageReceptionBloc(Socket socketDialogue, char* buff)
     {
         tempFichier = tempFichier->fichierSuivant;
     }
-    /** libération du mutex en écriture sur la liste de fichier */
+    /* libération du mutex en écriture sur la liste de fichier */
     pthread_mutex_unlock(&(listeFichier.mutexListeFichierLecture));
 
     if (tempFichier == NULL)
@@ -1550,7 +1549,7 @@ void finalisationFichier(Fichier* pointeurFichier)
     strNumBloc = malloc(TAILLE_BUFF_VSM * sizeof(char));
     cheminFichierTemp = malloc(TAILLE_BUFF_LAR * sizeof(char));
 
-    /**  blocage du mutex en écriture sur la liste de fichier */
+    /*  blocage du mutex en écriture sur la liste de fichier */
     pthread_mutex_lock(&(listeFichier.mutexListeFichierLecture));
 
     /* parcours du tableau de statut */
@@ -1562,7 +1561,7 @@ void finalisationFichier(Fichier* pointeurFichier)
         }
         compteur++;
     }
-    /** libération du mutex en écriture sur la liste de fichier */
+    /* libération du mutex en écriture sur la liste de fichier */
     pthread_mutex_unlock(&(listeFichier.mutexListeFichierLecture));
     /* test sur les conditions de sorties */
     if (compteur == (pointeurFichier->nbBlocs))
@@ -1597,7 +1596,7 @@ void finalisationFichier(Fichier* pointeurFichier)
         fclose(fichierDestination);
 
         /* suppression de la liste des fichiers */
-        /** verrou mutex sur la liste de fichier (lecture et ecriture) */
+        /* verrou mutex sur la liste de fichier (lecture et ecriture) */
         pthread_mutex_lock(&(listeFichier.mutexListeFichierLecture));
         pthread_mutex_lock(&(listeFichier.mutexListeFichierEcriture));
         /* initialisation du pointeur */
@@ -1620,7 +1619,7 @@ void finalisationFichier(Fichier* pointeurFichier)
             tempFichier->fichierSuivant = pointeurFichier->fichierSuivant;
         }
         listeFichier.nbFichiers--;
-        /** liberation mutex sur la liste de fichier (lecture et ecriture) */
+        /* liberation mutex sur la liste de fichier (lecture et ecriture) */
         pthread_mutex_unlock(&(listeFichier.mutexListeFichierEcriture));
         pthread_mutex_unlock(&(listeFichier.mutexListeFichierLecture));
         /* signalisation qu'un fichier est arrivé */
@@ -1648,7 +1647,7 @@ void arretClient()
     Telechargement* tempBloc;   /* pointeur temporaire pour supprimer la liste d'attente */
     Fichier* tempFichier;       /* pointeur temporaire pour supprimer la liste de fichiers */
 
-    /** vidage de la liste d'attente */
+    /* vidage de la liste d'attente */
     tempBloc = listeAttenteTelechargement.premierTelechargement;
     while (tempBloc != NULL)
     {
@@ -1664,7 +1663,7 @@ void arretClient()
     /* libération des mutex */
     pthread_mutex_destroy(&(listeAttenteTelechargement.mutexListeAttenteClient));
 
-    /** vidage de la liste des fichiers */
+    /* vidage de la liste des fichiers */
     tempFichier = listeFichier.listeFichiers;
     while (tempFichier != NULL)
     {
