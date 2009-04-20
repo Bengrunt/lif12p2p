@@ -1098,6 +1098,7 @@ void demandeFichier(char* nomFichier)
     }
     /* libération de l'espace mémoire */
     free(message);
+    free(messageEnvoi);
 }
 
 /**
@@ -1590,7 +1591,7 @@ void finalisationFichier(Fichier* pointeurFichier)
             fwrite(contenuBloc, 1, nbLu, fichierDestination);
             /* fermeture des fichiers */
             fclose(fichierSource);
-     /*       remove(cheminFichierTemp);*/
+            remove(cheminFichierTemp);
         }
         /* fermeture des fichiers */
         fclose(fichierDestination);
