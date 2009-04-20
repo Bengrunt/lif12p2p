@@ -140,10 +140,7 @@ Socket acceptationConnexion( Socket s )
     {
         printf( "Socket %d >> Connection de %s sur le port %d.\n", s, inet_ntoa( tadr.sin_addr ), htons( tadr.sin_port ) );
     }
-    else
-    {
-        perror( "< ERREUR SOCKET > Problème lors de l'accept( )");
-    }
+
     return t;
 }
 
