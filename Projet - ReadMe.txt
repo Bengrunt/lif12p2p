@@ -54,7 +54,7 @@ a) Format des messages qui transitent sur le réseau
 	-> du client vers l'annuaire
 		* Demande d'un fichier : 					31 nomDeFichier
 		* Demande d'un bloc : 					32 idFichier nomDeFichier numeroDeBloc
-		* Indication de fin de requête client :		33 adresseClient
+		* Indication de fin de requête client :		33 idServeur
 	-> du client vers le serveur
 		* Demande d'un bloc : 					41 idFichier nomDeFichier numeroDeBloc
 		* Déconnexion du client :					42 adresseClient
