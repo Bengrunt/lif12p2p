@@ -2,7 +2,7 @@
  * \file socket.c
  * \author Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
  * \since 19/03/2009
- * \version 19/04/2009
+ * \version 20/04/2009
  * \brief Projet créé dans le cadre de l'UE Lif12 de 3ème année de licence d'informatique.
  *          Module de gestion des sockets. Basé sur les sources données par F. Rico.
  ********************************************************************************************/
