@@ -168,7 +168,7 @@ int main()
     free(adresseAnnuaire);
     clotureSocket(socketAnnuaire);
 
-    printf("Applisation arrété\n");
+    printf("Application arrêtée\n");
     return 0;
 }
 
@@ -503,6 +503,7 @@ void signalisationFichierAnnuaire(char* nomFichier)
                 /* envoi des données à l'annuaire */
                 ecritureSocket(socketAnnuaire, message, TAILLE_BUFF);
             }
+            printf("Le fichier %s est sur le réseau.\n", nomFichier);
         }
     }
     /* libération de l'espace mémoire */
@@ -1059,7 +1060,6 @@ void demandeFichier(char* nomFichier)
     while (!finDialogue)
     {
         ecouteSocket(socketAnnuaire, message, TAILLE_BUFF);
-printf("message reçu : %s\n", message);
         if (sscanf(message, "%d", &code) == 1)
         {
             /* analyse du code :
