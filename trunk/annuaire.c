@@ -270,6 +270,9 @@ int traiteMessage( Socket arg )
                         traiteArretServeur( arg, buff );
                         fin_thread = 1;
                         break;
+                    case 53: /* Indication de charge serveur (PAS IMPLEMENTE) */
+                        /* traiteChargeServeur( arg, buff ); */
+                        break;
                     case 54: /* Demande IDServeur */
                         traiteDemandeIdServeur( arg, buff );
                         break;
@@ -656,7 +659,7 @@ void traiteDemandeBlocClient( Socket s, char* mess )
 
 /**
  * \fn void traiteFinCommunicationClientClient( Socket s, char* mess )
- * \brief Procédure de traitement de message de type (34) "Fin de communication".
+ * \brief Procédure de traitement de message de type (33) "Fin de communication".
  * \param [in] s La socket sur laquelle le message de fin de communication client a été émis.
  * \param [in] mess Le message de fin de communication client à traiter.
  */
