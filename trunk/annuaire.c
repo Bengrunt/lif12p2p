@@ -264,10 +264,10 @@ int traiteMessage( Socket arg )
                         fin_thread = 1;
                         break;
                     case 51: /* Disponibilité d'un bloc */
-                        traiteBlocDisponibleServeur( arg, buff );
+                        traiteBlocDisponibleServeur( buff );
                         break;
                     case 52: /* Arret d'un serveur */
-                        traiteArretServeur( arg, buff );
+                        traiteArretServeur( buff );
                         fin_thread = 1;
                         break;
                     case 53: /* Indication de charge serveur (PAS IMPLEMENTE) */
@@ -283,7 +283,7 @@ int traiteMessage( Socket arg )
                         fin_thread = 1;
                         break;
                     default: /* Un message géré par le réseau a bien été reçu mais inadapté donc la connexion doit être terminé car ce ne sont pas les bons interlocuteurs. */
-                        traiteMessageErr( arg, buff );
+                        traiteMessageErr( arg );
                         fin_thread = 1;
                 }
             }
@@ -618,7 +618,7 @@ void traiteDemandeBlocClient( Socket s, char* mess )
         free( buff );
     }
 
-    /******** Le fichier n'est pas dans la BDD des fichiers, on envoie une réponse défavorable au client *********/
+    /* Le fichier n'est pas dans la BDD des fichiers, on envoie une réponse défavorable au client *********/
     if ( !fichTrouve )
     {
         /* On envoie un message de réponse défavorable au client */
@@ -666,7 +666,7 @@ void traiteDemandeBlocClient( Socket s, char* mess )
 void traiteFinCommunicationClient( Socket s, char* mess )
 {
     /* On traite l'arret du serveur si il n'a pas déjà été fait */
-    traiteArretServeur( s, mess );
+    traiteArretServeur( mess );
 
     /* Fermeture de la socket ouverte avec le client */
     clotureSocket(s);
@@ -679,7 +679,7 @@ void traiteFinCommunicationClient( Socket s, char* mess )
  * \param [in] s La socket sur laquelle le message de nouveau bloc disponible sur serveur a été émis.
  * \param [in] mess Le message de nouveau bloc disponible serveur à traiter.
  */
-void traiteBlocDisponibleServeur( Socket s, char* mess )
+void traiteBlocDisponibleServeur( char* mess )
 {
     /* Variables */
     int type_message; /* Type du message : ici 51 */
@@ -687,7 +687,7 @@ void traiteBlocDisponibleServeur( Socket s, char* mess )
     unsigned int var_nbBlocs; /*  nombre de blocs du fichier */
     unsigned int var_numBloc; /* numero de bloc */
     unsigned int var_idServeur; /* identificateur du serveur */
-    unsigned int i,j,k,l; /* Itérateurs */
+    unsigned int i,j,k,l,m; /* Itérateurs */
 
     int servTrouve; /* Booléen */
 
@@ -761,17 +761,22 @@ void traiteBlocDisponibleServeur( Socket s, char* mess )
             }
             else /* Cas où il y a déjà d'autres serveurs référencés */
             {
-                if ( fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->nbServeurs >= fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->capaTabServeurs ) /* Si tabServeurs est plein on l'agrandit */
+                if ( fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->nbServeurs == fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->capaTabServeurs ) /* Si tabServeurs est plein on l'agrandit */
                 {
                     tempTabServeurs = fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->tabServeurs;
                     fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->tabServeurs = malloc( ( TABDYN_AUGM_VAL + fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->capaTabServeurs ) * sizeof( Serveur* ) );
 
-                    for( l = 0; l < fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->capaTabServeurs ; l++ )
+                    for( l = 0 ; l < fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->capaTabServeurs ; l++ )
                     {
                         fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->tabServeurs[l] = tempTabServeurs[l];
                     }
 
-                    fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->capaTabServeurs = fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->capaTabServeurs + TABDYN_AUGM_VAL;
+                    fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->capaTabServeurs += TABDYN_AUGM_VAL;
+
+                    for( m = l ; m < fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->capaTabServeurs ; m++ )
+                    {
+                        fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->tabServeurs[m] = NULL;
+                    }
 
                     free( tempTabServeurs );
                 }
@@ -807,6 +812,7 @@ void traiteBlocDisponibleServeur( Socket s, char* mess )
             fichiers->tabFichiers[i]->tabBlocs[j]->nbServeurs = 0;
             fichiers->tabFichiers[i]->tabBlocs[j]->capaTabServeurs = 1;
             fichiers->tabFichiers[i]->tabBlocs[j]->tabServeurs = malloc( fichiers->tabFichiers[i]->tabBlocs[j]->capaTabServeurs * sizeof( Serveur* ) );
+            fichiers->tabFichiers[i]->tabBlocs[j]->tabServeurs[0] = NULL;
         }
 
         for ( k = 0 ; k < serveurs->capaTabInfoServeurs ; k++ ) /* On cherche où est référencé ce serveur dans la BDD des serveurs */
@@ -816,6 +822,7 @@ void traiteBlocDisponibleServeur( Socket s, char* mess )
         }
 
         fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->tabServeurs[0] = malloc( sizeof( Serveur ) );
+        fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->tabServeurs[0]->infos = malloc( sizeof( InfoServeurs* ) );
         fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->tabServeurs[0]->infos = serveurs->tabInfoServeurs[k];
         fichiers->tabFichiers[i]->tabBlocs[var_numBloc]->nbServeurs++;
 
@@ -835,7 +842,7 @@ void traiteBlocDisponibleServeur( Socket s, char* mess )
  * \param [in] s La socket sur laquelle le message d'arrêt de serveur a été émis.
  * \param [in] mess Le message d'arrêt serveur à traiter.
  */
-void traiteArretServeur( Socket s, char* mess )
+void traiteArretServeur( char* mess )
 {
     /* Variables */
     int type_message; /* type du message reçu : ici 52 */
@@ -885,6 +892,7 @@ void traiteArretServeur( Socket s, char* mess )
                 {
                     free( fichiers->tabFichiers[i]->tabBlocs[j]->tabServeurs );
                     free( fichiers->tabFichiers[i]->tabBlocs[j] );
+                    fichiers->tabFichiers[i]->tabBlocs[j] = NULL;
                 }
             }
 
@@ -902,6 +910,7 @@ void traiteArretServeur( Socket s, char* mess )
                 free( fichiers->tabFichiers[i]->tabBlocs );
                 free( fichiers->tabFichiers[i]->nomFichier );
                 free( fichiers->tabFichiers[i] );
+                fichiers->tabFichiers[i] = NULL;
                 fichiers->nbFichiers--;
             }
         }
@@ -916,6 +925,7 @@ void traiteArretServeur( Socket s, char* mess )
             {
                 free( serveurs->tabInfoServeurs[i]->adresseServeur );
                 free( serveurs->tabInfoServeurs[i] );
+                serveurs->tabInfoServeurs[i] = NULL;
                 serveurs->nbInfoServeurs--;
                 break;
             }
@@ -927,8 +937,6 @@ void traiteArretServeur( Socket s, char* mess )
     pthread_mutex_unlock( &fichiers->verrou_bddfich_w );
     pthread_mutex_unlock( &serveurs->verrou_bddserv_r );
     pthread_mutex_unlock( &serveurs->verrou_bddserv_w );
-
-
 }
 
 
@@ -1097,7 +1105,7 @@ void traiteDemandeIdFichier( Socket s, char* mess )
             fichiers->tabFichiers[j] = tempTabFichiers[j];
         }
 
-        fichiers->capaTabFichiers = fichiers->capaTabFichiers + TABDYN_AUGM_VAL;
+        fichiers->capaTabFichiers += TABDYN_AUGM_VAL;
 
         for( j = j ; j < fichiers->capaTabFichiers ; j++ )
         {
@@ -1143,7 +1151,7 @@ void traiteDemandeIdFichier( Socket s, char* mess )
  * \param [in] s La socket sur laquelle le message inattendu a été émis.
  * \param [in] mess Le message en question.
  */
-void traiteMessageErr( Socket s, char* mess )
+void traiteMessageErr( Socket s )
 {
     /* Envoi d'un message d'avertissement */
     ecritureSocket( s, "71 mauvais destinataire", TAILLE_BUFF );
@@ -1164,7 +1172,7 @@ void fermetureAnnuaire( )
     unsigned int i,j,k; /* Itérateurs */
 
     /* Destruction des listes de serveurs */
-    for ( i = serveurs->nbInfoServeurs ; i > 0 ; i-- )
+    for ( i = 0 ; i < serveurs->nbInfoServeurs ; i++ )
     {
         free( serveurs->tabInfoServeurs[i]->adresseServeur );
         free( serveurs->tabInfoServeurs[i] );
@@ -1177,17 +1185,18 @@ void fermetureAnnuaire( )
     free( serveurs );
 
     /* Destruction des listes de fichiers */
-    for ( i = 0 ; i < fichiers->capaTabFichiers ; i++ )
+    for ( i = 0 ; i < fichiers->capaTabFichiers ; i++ ) /* Pour chaque fichier */
     {
-        if ( fichiers->tabFichiers[i] != NULL )
+        if ( fichiers->tabFichiers[i] != NULL ) /* Si il y a un fichier référencé */
         {
-            for ( j = 0 ; i < fichiers->tabFichiers[i]->nbBlocs ; i++ )
+            for ( j = 0 ; j < fichiers->tabFichiers[i]->nbBlocs ; j++ ) /* Pour chaque bloc */
             {
-                for ( k = 0 ; k < fichiers->tabFichiers[i]->tabBlocs[j]->capaTabServeurs ; k++ )
+                for ( k = 0 ; k < fichiers->tabFichiers[i]->tabBlocs[j]->capaTabServeurs ; k++ ) /* Pour chaque case de tabServeurs */
                 {
-                    if ( fichiers->tabFichiers[i]->tabBlocs[j]->tabServeurs[k] != NULL )
+                    if ( fichiers->tabFichiers[i]->tabBlocs[j]->tabServeurs[k] != NULL ) /* Si il y a un serveur on le libère */
                     {
                         free( fichiers->tabFichiers[i]->tabBlocs[j]->tabServeurs[k]->infos );
+                        free( fichiers->tabFichiers[i]->tabBlocs[j]->tabServeurs[k] );
                     }
                 }
 

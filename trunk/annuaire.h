@@ -210,7 +210,7 @@ void traiteFinCommunicationClient( Socket s, char* mess );
  * \param [in] s La socket sur laquelle le message de nouveau bloc disponible sur serveur a été émis.
  * \param [in] mess Le message de nouveau bloc disponible serveur à traiter.
  */
-void traiteBlocDisponibleServeur( Socket s, char* mess );
+void traiteBlocDisponibleServeur( char* mess );
 
 
 /**
@@ -219,7 +219,7 @@ void traiteBlocDisponibleServeur( Socket s, char* mess );
  * \param [in] s La socket sur laquelle le message d'arrêt de serveur a été émis.
  * \param [in] mess Le message d'arrêt serveur à traiter.
  */
-void traiteArretServeur( Socket s, char* mess );
+void traiteArretServeur( char* mess );
 
 
 /**
@@ -248,7 +248,7 @@ void traiteDemandeIdFichier( Socket s, char* mess );
  * \param [in] s La socket sur laquelle le message inattendu a été émis.
  * \param [in] mess Le message en question.
  */
-void traiteMessageErr( Socket s, char* mess );
+void traiteMessageErr( Socket s );
 
 
 /**
