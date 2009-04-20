@@ -214,6 +214,11 @@ int ecritureSocket( Socket s, char* buff, int taille_buff )
 {
     int sock_err; /* Une variable pour stocker les erreurs */
 
+    if ( taille_buff == 200 )
+    {
+        printf( ">>>>> Contenu du send: %s \n", buff);
+    }
+
     sock_err = send( s, ( void* ) buff, taille_buff, MSG_NOSIGNAL );
             /* s la socket sur laquelle on ecrit */
             /* buff le message écrit */
