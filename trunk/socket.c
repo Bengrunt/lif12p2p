@@ -67,7 +67,7 @@ Socket creationSocket( )
         perror( "< ERREUR SOCKET > Problème à la creation de la socket" );
         exit( 1 );
     }
-    printf ( "Socket %d >> La socket %d est maintenant ouverte en mode TCP/IP.\n", s, s );
+/*    printf ( "Socket %d >> La socket %d est maintenant ouverte en mode TCP/IP.\n", s, s ); */
 
     return s;
 }
@@ -178,8 +178,8 @@ int demandeConnexionSocket( Socket s, char* nomServeur, int port )
         perror( "< ERREUR SOCKET > Problème lors du connect( )" );
         return -1;
     }
-    printf( "Socket %d >> Connection à %s sur le port %d.\n", s, inet_ntoa( sin.sin_addr ), htons( sin.sin_port ) );
-    printf( "Socket %d >> Envoi de données sur la socket %d.\n ", s, s );
+/*    printf( "Socket %d >> Connection à %s sur le port %d.\n", s, inet_ntoa( sin.sin_addr ), htons( sin.sin_port ) );
+    printf( "Socket %d >> Envoi de données sur la socket %d.\n ", s, s ); */
     return 0;
 }
 
@@ -193,12 +193,16 @@ int demandeConnexionSocket( Socket s, char* nomServeur, int port )
  */
 int ecouteSocket( Socket s, char* buff, int taille_buff )
 {
-    if( recv( s, buff, taille_buff, 0 ) < 0 )
+    int res;
+    res = 0;
+    while (res != taille_buff)
     {
-        perror( "< ERREUR SOCKET > Problème lors du recv( )" );
-        return -1;
+        if( (res = res + recv( s, &(buff[res]), (taille_buff - res), 0 )) < 0 )
+        {
+            perror( "< ERREUR SOCKET > Problème lors du recv( )" );
+            return -1;
+        }
     }
-
     return 0;
 }
 
@@ -213,11 +217,6 @@ int ecouteSocket( Socket s, char* buff, int taille_buff )
 int ecritureSocket( Socket s, char* buff, int taille_buff )
 {
     int sock_err; /* Une variable pour stocker les erreurs */
-
-    if ( taille_buff == 200 )
-    {
-        printf( ">>>>> Contenu du send: %s \n", buff);
-    }
 
     sock_err = send( s, ( void* ) buff, taille_buff, MSG_NOSIGNAL );
             /* s la socket sur laquelle on ecrit */

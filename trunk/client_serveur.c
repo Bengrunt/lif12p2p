@@ -2,7 +2,7 @@
  * \file client_serveur.c
  * \author Rémi AUDUON, Thibault BONNET-JACQUEMET, Benjamin GUILLON
  * \since 20/03/2009
- * \version 09/04/2009
+ * \version 20/04/2009
  */
 
 #include "client_serveur.h"
@@ -23,16 +23,16 @@
 
 FileAttenteTelechargements listeAttenteTelechargement;  /* liste d'attente des téléchargements du coté client */
 FileAttenteClients listeAttenteClient;                  /* liste d'attente des clients du coté serveur */
+ListeFichiers listeFichier;                             /* liste des fichiers en cours de téléchargement du coté client */
 int finThreadServeur;                                   /* variable indiquant que l'arret du serveur est demandé */
 int finThreadClient;                                    /* variable indiquant que l'arret du client est demandé */
 Socket socketAnnuaire;                                  /* socket de dialogue avec l'annuaire */
 int portServeur;                                        /* entier contenant le port du serveur */
 char* adresseServeur;
+unsigned int idServeur;                                 /* entier contenantant l'IDServeur (coté serveur) */
 int nbThreadServeurLance;                               /* entier comptant le nombre de threads lancés coté serveur */
 int nbThreadClientLance;                                /* entier comptant le nombre de threads lancés coté client */
-ListeFichiers listeFichier;                             /* liste des fichiers en cours de téléchargement du coté client */
 int arretApplication;                                   /* indique le nombre de "partie" arrétée */
-unsigned int idServeur;                                 /* entier contenantant l'IDServeur (coté serveur) */
 
 /******************************
 * main et fonctions communes *
@@ -1583,7 +1583,6 @@ void finalisationFichier(Fichier* pointeurFichier)
             strcpy(cheminFichierTemp, nomFichierTemp);
             sprintf(strNumBloc, "%d", compteur);
             strcat(cheminFichierTemp, strNumBloc);
-printf("recopie du fichier %s \n", cheminFichierTemp);
             /* ouverture du fichier temporaire */
             fichierSource = fopen(cheminFichierTemp, "r");
 
@@ -1591,6 +1590,7 @@ printf("recopie du fichier %s \n", cheminFichierTemp);
             fwrite(contenuBloc, 1, nbLu, fichierDestination);
             /* fermeture des fichiers */
             fclose(fichierSource);
+     /*       remove(cheminFichierTemp);*/
         }
         /* fermeture des fichiers */
         fclose(fichierDestination);
